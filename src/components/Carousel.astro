@@ -1,0 +1,135 @@
+---
+/**
+ * Carrousel horizontal accessible : défilement natif avec aimantation
+ * (fonctionne au doigt, à la molette et sans JavaScript), flèches précédent /
+ * suivant désactivées aux extrémités, piste focalisable au clavier.
+ */
+interface Props {
+  label: string;
+  /** Largeur d'une diapositive, en valeur CSS. */
+  itemWidth?: string;
+  /** Classe du thème pour les flèches : clair sur fond sombre ou l'inverse. */
+  tone?: 'sombre' | 'clair';
+}
+const { label, itemWidth = 'clamp(16rem, 28vw, 24rem)', tone = 'sombre' } = Astro.props;
+---
+
+<div class:list={['carousel', `tone-${tone}`]} data-carousel style={`--item-w: ${itemWidth}`}>
+  <div class="controls" data-controls hidden>
+    <button type="button" class="arrow" data-prev aria-label="Éléments précédents">
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path d="M15 5 8 12l7 7" fill="none" stroke="currentColor" stroke-width="1.8"></path></svg>
+    </button>
+    <button type="button" class="arrow" data-next aria-label="Éléments suivants">
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path d="m9 5 7 7-7 7" fill="none" stroke="currentColor" stroke-width="1.8"></path></svg>
+    </button>
+  </div>
+  <div class="track" role="region" aria-label={label} tabindex="0" data-track>
+    <slot />
+  </div>
+</div>
+
+<script>
+  for (const root of document.querySelectorAll<HTMLElement>('[data-carousel]')) {
+    const track = root.querySelector<HTMLElement>('[data-track]');
+    const controls = root.querySelector<HTMLElement>('[data-controls]');
+    const prev = root.querySelector<HTMLButtonElement>('[data-prev]');
+    const next = root.querySelector<HTMLButtonElement>('[data-next]');
+    if (!track || !controls || !prev || !next) continue;
+
+    const step = () => {
+      const first = track.firstElementChild as HTMLElement | null;
+      const gap = parseFloat(getComputedStyle(track).columnGap) || 0;
+      return first ? first.getBoundingClientRect().width + gap : track.clientWidth * 0.8;
+    };
+    const smooth = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+
+    const update = () => {
+      const max = track.scrollWidth - track.clientWidth - 2;
+      controls.hidden = max <= 0;
+      prev.disabled = track.scrollLeft <= 2;
+      next.disabled = track.scrollLeft >= max;
+    };
+
+    prev.addEventListener('click', () => track.scrollBy({ left: -step(), behavior: smooth }));
+    next.addEventListener('click', () => track.scrollBy({ left: step(), behavior: smooth }));
+    track.addEventListener('scroll', update, { passive: true });
+    track.addEventListener('keydown', (e) => {
+      if (e.target !== track) return;
+      if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        track.scrollBy({ left: step(), behavior: smooth });
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        track.scrollBy({ left: -step(), behavior: smooth });
+      }
+    });
+    new ResizeObserver(update).observe(track);
+    update();
+  }
+</script>
+
+<style>
+  .carousel {
+    position: relative;
+  }
+  .controls {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+  }
+  .controls[hidden] {
+    display: none;
+  }
+  .arrow {
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    border: 1px solid currentColor;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    transition:
+      background-color 0.2s,
+      color 0.2s,
+      opacity 0.2s;
+  }
+  .tone-sombre .arrow:hover:not(:disabled) {
+    background: var(--c-or);
+    border-color: var(--c-or);
+    color: var(--c-noir);
+  }
+  .tone-clair .arrow:hover:not(:disabled) {
+    background: var(--c-encre);
+    color: var(--c-papier);
+  }
+  .arrow:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
+  .arrow:focus-visible {
+    outline: 2px solid var(--c-or);
+    outline-offset: 3px;
+  }
+  .track {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: var(--item-w);
+    gap: clamp(1rem, 0.5rem + 1vw, 1.5rem);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: 0;
+    padding-bottom: 1rem;
+    scrollbar-width: thin;
+    scrollbar-color: var(--c-or) transparent;
+  }
+  .track:focus-visible {
+    outline: 2px solid var(--c-or);
+    outline-offset: 4px;
+  }
+  .track > :global(*) {
+    scroll-snap-align: start;
+  }
+</style>
