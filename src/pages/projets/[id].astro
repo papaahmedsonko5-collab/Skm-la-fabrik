@@ -1,0 +1,205 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { Image } from 'astro:assets';
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Button from '@/components/Button.astro';
+import Gallery from '@/components/Gallery.astro';
+import ProjectCard from '@/components/ProjectCard.astro';
+import { sortProjects } from '@/lib/content';
+import { contactObjectForCategory } from '@/lib/contact';
+
+export const getStaticPaths = (async () => {
+  const projets = await getCollection('projets');
+  return projets.map((project) => ({ params: { id: project.id }, props: { project } }));
+}) satisfies GetStaticPaths;
+
+interface Props {
+  project: CollectionEntry<'projets'>;
+}
+
+const { project } = Astro.props;
+const { Content } = await render(project);
+const d = project.data;
+const related = sortProjects(await getCollection('projets', (p) => p.data.category === d.category && p.id !== project.id)).slice(0, 3);
+const objet = contactObjectForCategory(d.category);
+---
+
+<BaseLayout title={d.title} description={d.summary} image={d.cover?.src}>
+  <article>
+    <header class="wrap entete">
+      <nav aria-label="Fil d’Ariane" class="ariane">
+        <a href="/projets">Projets</a> <span aria-hidden="true">/</span> <span>{d.category}</span>
+      </nav>
+      <h1 class="titre titre-h1">{d.title}</h1>
+      <p class="chapeau resume">{d.summary}</p>
+    </header>
+
+    {
+      d.cover && (
+        <figure class="couverture">
+          <Image src={d.cover} alt={d.coverAlt ?? ''} widths={[640, 1000, 1400]} sizes="100vw" loading="eager" fetchpriority="high" />
+        </figure>
+      )
+    }
+
+    <div class="wrap corps">
+      <aside class="fiche" aria-label="Fiche du projet">
+        <dl>
+          <div><dt>Catégorie</dt><dd>{d.category}</dd></div>
+          <div><dt>Date</dt><dd>{d.period}</dd></div>
+          <div><dt>Lieu</dt><dd>{d.place}</dd></div>
+          {d.partners.length > 0 && <div><dt>Partenaires</dt><dd>{d.partners.join(', ')}</dd></div>}
+        </dl>
+        {d.relatedPage && <a class="lien-fleche" href={d.relatedPage}>Page dédiée <span aria-hidden="true">→</span></a>}
+      </aside>
+      <div class="prose">
+        <Content />
+      </div>
+    </div>
+
+    {
+      d.gallery.length > 0 && (
+        <section class="wrap galerie" aria-labelledby="t-galerie">
+          <h2 id="t-galerie" class="titre titre-h3">Galerie</h2>
+          <Gallery items={d.gallery} label={`Photos du projet ${d.title}`} />
+        </section>
+      )
+    }
+
+    {
+      d.videos.length > 0 && (
+        <section class="wrap galerie" aria-labelledby="t-videos">
+          <h2 id="t-videos" class="titre titre-h3">Vidéos</h2>
+          <ul class="videos">
+            {d.videos.map((v) => (
+              <li>
+                <a href={v.url} target="_blank" rel="noopener">{v.title}</a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    <section class="theme-papier collaborer">
+      <div class="wrap collaborer-inner">
+        <p class="titre titre-h3">Un projet similaire en tête&nbsp;?</p>
+        <Button href={`/contact?objet=${objet}`} style="--btn-bg: var(--c-encre); --btn-ink: var(--c-papier); --btn-bg-hover: var(--c-noir)">Parlons-en</Button>
+      </div>
+    </section>
+
+    {
+      related.length > 0 && (
+        <section class="wrap section" aria-labelledby="t-autres">
+          <h2 id="t-autres" class="surtitre autres">Dans la même catégorie</h2>
+          <ul class="grille">
+            {related.map((p) => (
+              <li>
+                <ProjectCard project={p} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+  </article>
+</BaseLayout>
+
+<style>
+  .entete {
+    padding-block: clamp(3rem, 2rem + 3vw, 5rem) 2.5rem;
+  }
+  .ariane {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--c-or);
+  }
+  .ariane a {
+    text-underline-offset: 0.25em;
+  }
+  .resume {
+    margin-top: 1.5rem;
+    color: var(--c-pierre-claire);
+  }
+  .couverture :global(img) {
+    width: 100%;
+    height: clamp(16rem, 45vw, 38rem);
+    object-fit: cover;
+  }
+  .corps {
+    display: grid;
+    grid-template-columns: minmax(0, 20rem) minmax(0, 1fr);
+    gap: 2.5rem 5rem;
+    padding-block: 4rem;
+    --accent: var(--c-or);
+  }
+  @media (max-width: 56rem) {
+    .corps {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  .fiche {
+    display: grid;
+    align-content: start;
+    gap: 1.5rem;
+  }
+  .fiche dl {
+    margin: 0;
+    border-top: 1px solid var(--c-anthracite-2);
+  }
+  .fiche dl > div {
+    padding: 0.85rem 0;
+    border-bottom: 1px solid var(--c-anthracite-2);
+  }
+  .fiche dt {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--c-or);
+  }
+  .fiche dd {
+    margin: 0.25rem 0 0;
+  }
+  .galerie {
+    padding-bottom: 4rem;
+  }
+  .galerie h2 {
+    margin-bottom: 1.5rem;
+  }
+  .videos {
+    display: grid;
+    gap: 0.5rem;
+    padding-left: 1.2rem;
+  }
+  .collaborer {
+    padding-block: 3.5rem;
+  }
+  .collaborer-inner {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.5rem;
+  }
+  .autres {
+    margin-bottom: 1.5rem;
+  }
+  .grille {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+    gap: 1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .grille li {
+    display: grid;
+  }
+</style>

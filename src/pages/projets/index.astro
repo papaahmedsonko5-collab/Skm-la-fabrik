@@ -1,0 +1,131 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import PageIntro from '@/components/PageIntro.astro';
+import ProjectCard from '@/components/ProjectCard.astro';
+import { projectCategories } from '@/content.config';
+import { sortProjects } from '@/lib/content';
+
+const projets = sortProjects(await getCollection('projets'));
+const counts = new Map(projectCategories.map((c) => [c, projets.filter((p) => p.data.category === c).length]));
+---
+
+<BaseLayout
+  title="Nos projets"
+  description="Festivals, événements, productions musicales, formations et initiatives communautaires : le portfolio des réalisations documentées de SKM La Fabrik et Sunu Kaddu."
+>
+  <PageIntro
+    eyebrow="Portfolio · Réalisations documentées"
+    title={'Nos <span class="accent">projets</span>'}
+    lead="Une sélection des projets portés par Sunu Kaddu et SKM La Fabrik depuis 2013, à Rufisque et au-delà."
+  >
+    <div class="filtres" role="group" aria-label="Filtrer par catégorie" data-filters hidden>
+      <button type="button" aria-pressed="true" data-filter="">Tous <span>({projets.length})</span></button>
+      {
+        projectCategories.map((c) => (
+          <button type="button" aria-pressed="false" data-filter={c}>
+            {c} <span>({counts.get(c)})</span>
+          </button>
+        ))
+      }
+    </div>
+  </PageIntro>
+
+  <section class="wrap liste" aria-label="Liste des projets">
+    <p class="sr-only" aria-live="polite" data-filter-status></p>
+    <ul class="grille" data-projects>
+      {
+        projets.map((p) => (
+          <li data-category={p.data.category}>
+            <ProjectCard project={p} headingLevel="h2" />
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</BaseLayout>
+
+<script>
+  const group = document.querySelector<HTMLElement>('[data-filters]');
+  const items = Array.from(document.querySelectorAll<HTMLElement>('[data-projects] > li'));
+  const status = document.querySelector<HTMLElement>('[data-filter-status]');
+
+  if (group) {
+    group.hidden = false;
+    const buttons = Array.from(group.querySelectorAll<HTMLButtonElement>('[data-filter]'));
+
+    const apply = (category: string, updateUrl: boolean) => {
+      let visible = 0;
+      for (const li of items) {
+        const show = category === '' || li.dataset['category'] === category;
+        li.hidden = !show;
+        if (show) visible++;
+      }
+      for (const b of buttons) b.setAttribute('aria-pressed', String((b.dataset['filter'] ?? '') === category));
+      if (status) status.textContent = `${visible} projet${visible > 1 ? 's' : ''} affiché${visible > 1 ? 's' : ''}`;
+      if (updateUrl) {
+        const url = new URL(window.location.href);
+        if (category) url.searchParams.set('categorie', category);
+        else url.searchParams.delete('categorie');
+        history.replaceState(null, '', url);
+      }
+    };
+
+    buttons.forEach((b) => b.addEventListener('click', () => apply(b.dataset['filter'] ?? '', true)));
+
+    const initial = new URLSearchParams(window.location.search).get('categorie') ?? '';
+    if (buttons.some((b) => b.dataset['filter'] === initial)) apply(initial, false);
+  }
+</script>
+
+<style>
+  .filtres {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 2.5rem;
+  }
+  .filtres[hidden] {
+    display: none;
+  }
+  .filtres button {
+    min-height: 2.75rem;
+    padding: 0 1.1rem;
+    border: 1px solid var(--c-ligne-sombre);
+    background: transparent;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+      background-color 0.2s,
+      border-color 0.2s;
+  }
+  .filtres button span {
+    opacity: 0.7;
+  }
+  .filtres button:hover {
+    border-color: var(--c-or);
+  }
+  .filtres button[aria-pressed='true'] {
+    background: var(--c-or);
+    border-color: var(--c-or);
+    color: var(--c-noir);
+  }
+  .liste {
+    padding-bottom: var(--section-y);
+  }
+  .grille {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+    gap: 1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .grille li[hidden] {
+    display: none;
+  }
+  .grille li {
+    display: grid;
+  }
+</style>
