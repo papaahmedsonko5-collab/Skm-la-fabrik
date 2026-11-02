@@ -52,6 +52,8 @@ export const site = {
     emailConfirmed: false,
     phone: null as string | null,
     whatsapp: { display: '+221 70 484 40 40', international: '221704844040' } as { display: string; international: string } | null,
+    /** Contact du Rio Fresco Fest, figurant sur les affiches et confirmé par la structure le 2 novembre 2026. */
+    rffPhone: { display: '+221 70 974 07 41', international: '221709740741' },
   },
   /** Comptes officiels communiqués par la structure le 2 novembre 2026. */
   social: [
@@ -60,6 +62,7 @@ export const site = {
     { network: 'Facebook', label: 'PPS the Writah', handle: 'PPSthewritahOfficiel', href: 'https://www.facebook.com/PPSthewritahOfficiel' as string | null },
     { network: 'Instagram', label: 'PPS the Writah', handle: '@pps_the_writah', href: 'https://www.instagram.com/pps_the_writah/' as string | null },
     { network: 'X (Twitter)', label: 'PPS the Writah', handle: '@PPSthewritah', href: 'https://twitter.com/PPSthewritah' as string | null },
+    { network: 'Facebook', label: 'Rio Fresco Fest', handle: 'riofrescofestrff', href: 'https://www.facebook.com/riofrescofestrff' as string | null },
     { network: 'Réseaux', label: 'SKM La Fabrik', handle: '@lafabrikskm', href: null as string | null },
   ],
 } as const;

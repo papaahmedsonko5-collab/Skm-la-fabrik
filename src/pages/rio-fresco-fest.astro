@@ -9,7 +9,7 @@ import VideoEmbed from '@/components/VideoEmbed.astro';
 import logoRff2025 from '@/assets/brand/logo-rff-2025.png';
 import logoRff from '@/assets/brand/logo-rio-fresco-fest.png';
 import { photos } from '@/data/photos';
-import { rff2026Stats, rffPartners } from '@/data/site';
+import { rff2026Stats, rffPartners, site } from '@/data/site';
 import { edition2025, horizon2027, piliers, rayonnement, rff } from '@/data/rff';
 import { eventJsonLd } from '@/lib/seo';
 
@@ -296,6 +296,10 @@ const jsonLd = eventJsonLd(
       <div class="hz-cta">
         <Button href={contactPartenaire} style="--btn-bg: var(--c-noir); --btn-ink: var(--c-papier); --btn-bg-hover: var(--c-nuit)">Proposer un partenariat</Button>
         <p>Dates et lieu de l’édition 2027 à annoncer. Le festival se tient chaque année en juin.</p>
+        <p>
+          Contact festival&nbsp;: <a href={`tel:+${site.contact.rffPhone.international}`}>{site.contact.rffPhone.display}</a> ·
+          <a href="https://www.facebook.com/riofrescofestrff" rel="noopener" target="_blank">Facebook Rio Fresco Fest</a>
+        </p>
       </div>
     </div>
   </section>
