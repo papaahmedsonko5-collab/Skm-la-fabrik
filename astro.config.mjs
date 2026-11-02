@@ -20,5 +20,5 @@ export default defineConfig({
       CONTACT_FROM_EMAIL: envField.string({ context: 'server', access: 'secret', optional: true }),
     },
   },
-  prefetch: { prefetchAll: false, defaultStrategy: 'hover' },
+  prefetch: { prefetchAll: true, defaultStrategy: 'hover' },
 });

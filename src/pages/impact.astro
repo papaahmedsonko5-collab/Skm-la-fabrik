@@ -42,7 +42,7 @@ const etapes = cycle.map((titre, i) => ({ titre, maillon: ecosysteme[i] }));
           <Image
             src={photos.communaute.src}
             alt={photos.communaute.alt}
-            widths={[480, 800, 987]}
+            widths={[480, 800, 987, 1280, 1600, 1920]}
             sizes="(min-width: 56rem) 45vw, 100vw"
             quality={85}
             loading="eager"
@@ -124,7 +124,7 @@ const etapes = cycle.map((titre, i) => ({ titre, maillon: ecosysteme[i] }));
             return (
               <li class:list={['action', { inverse: i % 2 === 1 }]} data-reveal>
                 <figure class="action-photo">
-                  <Image src={ph.src} alt={ph.alt} widths={[400, 700, 1000]} sizes="(min-width: 56rem) 48vw, 100vw" />
+                  <Image src={ph.src} alt={ph.alt} widths={[400, 700, 1000, 1280, 1600, 1920]} sizes="(min-width: 56rem) 48vw, 100vw" />
                   <span class="action-num titre" aria-hidden="true">
                     {pad(i + 1)}
                   </span>
@@ -297,13 +297,8 @@ const etapes = cycle.map((titre, i) => ({ titre, maillon: ecosysteme[i] }));
   }
   .hero-photo {
     position: relative;
-    margin: 0 1.25rem 1.25rem 0;
-  }
-  .hero-photo::before {
-    content: '';
-    position: absolute;
-    inset: 1.25rem -1.25rem -1.25rem 1.25rem;
-    background: var(--c-terracotta);
+    margin: 0;
+    border-bottom: 6px solid var(--c-terracotta);
   }
   .hero-photo :global(img) {
     position: relative;
@@ -496,7 +491,7 @@ const etapes = cycle.map((titre, i) => ({ titre, maillon: ecosysteme[i] }));
     color: var(--c-papier);
   }
   .role {
-    font-size: 0.75rem;
+    font-size: 0.8125rem;
     font-weight: 700;
     letter-spacing: 0.14em;
     text-transform: uppercase;
@@ -510,7 +505,7 @@ const etapes = cycle.map((titre, i) => ({ titre, maillon: ecosysteme[i] }));
     line-height: 1;
   }
   .maillon-texte {
-    font-size: 0.9375rem;
+    font-size: 1rem;
     line-height: 1.55;
     color: var(--c-encre-douce);
   }
@@ -617,7 +612,7 @@ const etapes = cycle.map((titre, i) => ({ titre, maillon: ecosysteme[i] }));
     padding: 0.35rem 0.6rem;
     background: var(--c-encre);
     color: var(--c-papier);
-    font-size: 0.75rem;
+    font-size: 0.8125rem;
     font-weight: 700;
     letter-spacing: 0.14em;
     text-transform: uppercase;
@@ -656,7 +651,7 @@ const etapes = cycle.map((titre, i) => ({ titre, maillon: ecosysteme[i] }));
   .odd thead th {
     padding-bottom: 0.9rem;
     text-align: left;
-    font-size: 0.75rem;
+    font-size: 0.8125rem;
     letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--c-encre-douce);
@@ -764,7 +759,7 @@ const etapes = cycle.map((titre, i) => ({ titre, maillon: ecosysteme[i] }));
   }
   .pourquoi dd {
     margin: 0;
-    font-size: 0.9375rem;
+    font-size: 1rem;
     line-height: 1.55;
     color: var(--c-encre-douce);
   }
@@ -795,7 +790,7 @@ const etapes = cycle.map((titre, i) => ({ titre, maillon: ecosysteme[i] }));
     width: 100%;
     min-width: 36rem;
     border-collapse: collapse;
-    font-size: 0.9375rem;
+    font-size: 1rem;
     background: #fff;
   }
   .tiers th,
@@ -827,7 +822,7 @@ const etapes = cycle.map((titre, i) => ({ titre, maillon: ecosysteme[i] }));
   }
   .note {
     margin-top: 1rem;
-    font-size: 0.875rem;
+    font-size: 0.9375rem;
     color: var(--c-encre-douce);
   }
 </style>

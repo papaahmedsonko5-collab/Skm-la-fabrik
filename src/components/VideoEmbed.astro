@@ -28,7 +28,7 @@ const watch = playlist
 ---
 
 <div class="video" data-video data-embed={embed} data-title={title}>
-  <Image src={poster} alt="" widths={[480, 800, 1200]} sizes="(min-width: 64rem) 60vw, 100vw" class="poster" />
+  <Image src={poster} alt="" widths={[480, 800, 1200, 1280, 1600, 1920]} sizes="(min-width: 64rem) 60vw, 100vw" class="poster" />
   <a class="play" href={watch} target="_blank" rel="noopener" data-play>
     <span class="icon" aria-hidden="true">
       <svg viewBox="0 0 24 24" width="28" height="28" focusable="false"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"></path></svg>
@@ -111,7 +111,7 @@ const watch = playlist
     left: 1.25rem;
     right: 1.25rem;
     bottom: 0.9rem;
-    font-size: 0.75rem;
+    font-size: 0.8125rem;
     color: var(--c-pierre-claire);
   }
 </style>

@@ -59,6 +59,13 @@ const structured = [organizationJsonLd(Astro.site), ...(jsonLd ? (Array.isArray(
       document.documentElement.classList.add('js');
     </script>
     <script type="application/ld+json" set:html={JSON.stringify(structured)} />
+    <script
+      type="speculationrules"
+      is:inline
+      set:html={JSON.stringify({
+        prerender: [{ where: { and: [{ href_matches: '/*' }, { not: { href_matches: '/api/*' } }] }, eagerness: 'moderate' }],
+      })}
+    />
   </head>
   <body>
     <a class="skip" href="#contenu">Aller au contenu</a>

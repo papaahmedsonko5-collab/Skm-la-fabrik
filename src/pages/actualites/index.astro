@@ -56,7 +56,7 @@ const mediatheque = [
                 <Image
                   src={une.data.cover}
                   alt={une.data.coverAlt}
-                  widths={[640, 1000, 1400, 1800]}
+                  widths={[640, 1000, 1280, 1400, 1600, 1800, 1920]}
                   sizes="(min-width: 80rem) 80rem, 100vw"
                   quality={85}
                   loading="eager"
@@ -94,7 +94,7 @@ const mediatheque = [
             {autres.map((n) => (
               <article class="carte">
                 <a href={`/actualites/${n.id}`}>
-                  <Image src={n.data.cover} alt={n.data.coverAlt} widths={[400, 640]} sizes="(min-width: 64rem) 30vw, 85vw" />
+                  <Image src={n.data.cover} alt={n.data.coverAlt} widths={[400, 640, 1280, 1600, 1920]} sizes="(min-width: 64rem) 30vw, 85vw" />
                   <p class="meta">
                     <span>{n.data.type}</span> {n.data.period}
                   </p>
@@ -206,7 +206,7 @@ const mediatheque = [
   }
 
   .meta {
-    font-size: 0.75rem;
+    font-size: 0.8125rem;
     font-weight: 700;
     letter-spacing: 0.14em;
     text-transform: uppercase;
@@ -217,7 +217,7 @@ const mediatheque = [
     color: var(--accent);
   }
 
-  /* À la une : grande photo cinématographique, carte papier qui la chevauche */
+  /* À la une : grande photo cinématographique, carte papier à côté */
   .journal {
     padding-block: clamp(2rem, 1rem + 3vw, 4rem) clamp(5rem, 3rem + 8vw, 9.5rem);
   }
@@ -228,7 +228,7 @@ const mediatheque = [
     text-decoration: none;
   }
   .une-photo {
-    grid-column: 1 / -1;
+    grid-column: 1 / 8;
     grid-row: 1;
     overflow: hidden;
   }
@@ -238,22 +238,20 @@ const mediatheque = [
     height: clamp(22rem, 62svh, 40rem);
     object-fit: cover;
     transition: transform 1s var(--ease);
-    -webkit-mask-image: linear-gradient(180deg, #000 55%, transparent 100%);
-    mask-image: linear-gradient(180deg, #000 55%, transparent 100%);
   }
   .une-lien:hover .une-photo :global(img) {
     transform: scale(1.02);
   }
   .une-carte {
-    grid-column: 6 / -1;
+    grid-column: 8 / -1;
     grid-row: 1;
-    align-self: end;
+    align-self: stretch;
+    align-content: center;
     position: relative;
     z-index: 1;
     display: grid;
     gap: 1.1rem;
     justify-items: start;
-    margin-bottom: -3rem;
     padding: clamp(1.75rem, 1rem + 2.4vw, 3.25rem);
     background: var(--c-papier);
     color: var(--c-encre);
@@ -275,8 +273,12 @@ const mediatheque = [
     text-underline-offset: 0.12em;
   }
   @media (max-width: 64rem) {
+    .une-photo {
+      grid-column: 1 / -1;
+    }
     .une-carte {
-      grid-column: 3 / -1;
+      grid-column: 1 / -1;
+      grid-row: 2;
     }
   }
   @media (max-width: 48rem) {
@@ -284,7 +286,6 @@ const mediatheque = [
       grid-template-columns: minmax(0, 1fr);
     }
     .une-photo {
-      margin-inline: calc(var(--gutter) * -1);
     }
     .une-photo :global(img) {
       height: clamp(16rem, 50svh, 24rem);
@@ -292,7 +293,7 @@ const mediatheque = [
     .une-carte {
       grid-column: 1;
       grid-row: 2;
-      margin: -4rem 0 0 0.75rem;
+      margin: 0;
     }
   }
 

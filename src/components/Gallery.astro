@@ -15,7 +15,7 @@ interface Props {
 }
 const { items, label } = Astro.props;
 
-const full = await Promise.all(items.map((it) => getImage({ src: it.src, width: 1600, format: 'webp' })));
+const full = await Promise.all(items.map((it) => getImage({ src: it.src, width: Math.min(1920, it.src.width), format: 'webp', quality: 88 })));
 ---
 
 <div class="gallery" data-gallery>
@@ -24,7 +24,7 @@ const full = await Promise.all(items.map((it) => getImage({ src: it.src, width: 
       items.map((it, i) => (
         <li class:list={{ large: it.large }}>
           <button type="button" data-open={i} data-full={full[i]?.src} data-alt={it.alt} aria-label={`Agrandir : ${it.alt}`}>
-            <Image src={it.src} alt="" widths={[360, 560, 900]} sizes="(min-width: 64rem) 25vw, 50vw" />
+            <Image src={it.src} alt="" widths={[360, 560, 900, 1280, 1600, 1920]} sizes="(min-width: 64rem) 50vw, 100vw" />
           </button>
         </li>
       ))
@@ -147,7 +147,7 @@ const full = await Promise.all(items.map((it) => getImage({ src: it.src, width: 
     object-fit: contain;
   }
   figcaption {
-    font-size: 0.9375rem;
+    font-size: 1rem;
     color: var(--c-pierre);
   }
   .controls {
@@ -167,13 +167,13 @@ const full = await Promise.all(items.map((it) => getImage({ src: it.src, width: 
   .controls .close {
     margin-left: auto;
     padding: 0 1rem;
-    font-size: 0.875rem;
+    font-size: 0.9375rem;
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
   }
   [data-lb-count] {
-    font-size: 0.875rem;
+    font-size: 0.9375rem;
     color: var(--c-pierre);
   }
 </style>

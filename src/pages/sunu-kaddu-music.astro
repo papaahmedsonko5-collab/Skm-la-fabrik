@@ -33,7 +33,7 @@ const loge = [photos.rff25Loge1, photos.rff25Loge2, photos.rff25Loge4, photos.rf
       <Image
         src={photos.rff25Loge3.src}
         alt={photos.rff25Loge3.alt}
-        widths={[480, 838]}
+        widths={[480, 838, 1280, 1600, 1920]}
         sizes="(min-width: 64rem) 46vw, 100vw"
         quality={85}
         loading="eager"
@@ -78,7 +78,7 @@ const loge = [photos.rff25Loge1, photos.rff25Loge2, photos.rff25Loge4, photos.rf
       </h2>
       <div class="vision-bas">
         <figure class="vision-photo" data-reveal>
-          <Image src={photos.studio.src} alt={photos.studio.alt} widths={[480, 800, 1280]} sizes="(min-width: 56rem) 52vw, 100vw" quality={85} />
+          <Image src={photos.studio.src} alt={photos.studio.alt} widths={[480, 800, 1280, 1600, 1920]} sizes="(min-width: 56rem) 52vw, 100vw" quality={85} />
         </figure>
         <div class="vision-carte" data-reveal>
           <Image src={logoSk} alt="Logo Sunu Kaddu" width={96} height={96} class="vision-logo" />
@@ -188,7 +188,7 @@ const loge = [photos.rff25Loge1, photos.rff25Loge2, photos.rff25Loge4, photos.rf
           {
             loge.map((ph) => (
               <figure class="loge-photo">
-                <Image src={ph.src} alt={ph.alt} widths={[320, 560]} sizes="(min-width: 64rem) 22vw, 60vw" />
+                <Image src={ph.src} alt={ph.alt} widths={[320, 560, 1280, 1600, 1920]} sizes="(min-width: 64rem) 22vw, 60vw" />
               </figure>
             ))
           }
@@ -312,11 +312,17 @@ const loge = [photos.rff25Loge1, photos.rff25Loge2, photos.rff25Loge4, photos.rf
   .hero-photo {
     position: absolute;
     z-index: -1;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    width: min(52%, 46rem);
+    top: calc(4.75rem + 2rem);
+    right: var(--gutter);
+    bottom: clamp(2.5rem, 2rem + 2vw, 4rem);
+    width: min(42%, 40rem);
     margin: 0;
+    overflow: hidden;
+  }
+  @media (min-width: 64.01rem) {
+    .hero-contenu {
+      padding-right: calc(min(42vw, 40rem) + 2.5rem);
+    }
   }
   .hero-photo :global(img) {
     display: block;
@@ -324,14 +330,6 @@ const loge = [photos.rff25Loge1, photos.rff25Loge2, photos.rff25Loge4, photos.rf
     height: 100%;
     object-fit: cover;
     object-position: 50% 20%;
-    -webkit-mask-image:
-      linear-gradient(90deg, transparent 0, #000 45%),
-      linear-gradient(180deg, #000 60%, transparent 100%);
-    -webkit-mask-composite: source-in;
-    mask-image:
-      linear-gradient(90deg, transparent 0, #000 45%),
-      linear-gradient(180deg, #000 60%, transparent 100%);
-    mask-composite: intersect;
   }
   .hero-contenu {
     display: grid;
@@ -420,25 +418,23 @@ const loge = [photos.rff25Loge1, photos.rff25Loge2, photos.rff25Loge4, photos.rf
   @media (max-width: 64rem) {
     .hero {
       min-height: 0;
-      padding-top: 0;
+      padding-top: 4.75rem;
     }
     .hero-photo {
       position: relative;
+      inset: auto;
       z-index: auto;
       grid-row: 1;
-      width: 100%;
+      width: auto;
+      margin-inline: var(--gutter);
       height: clamp(22rem, 62svh, 34rem);
     }
     .hero-photo :global(img) {
       object-position: 50% 25%;
-      -webkit-mask-image: linear-gradient(180deg, #000 45%, transparent 100%);
-      -webkit-mask-composite: source-over;
-      mask-image: linear-gradient(180deg, #000 45%, transparent 100%);
-      mask-composite: add;
     }
     .hero-contenu {
       grid-row: 2;
-      margin-top: -7rem;
+      margin-top: 2rem;
     }
   }
   @media (max-width: 40rem) {
@@ -475,7 +471,8 @@ const loge = [photos.rff25Loge1, photos.rff25Loge2, photos.rff25Loge4, photos.rf
   .vision-bas {
     display: grid;
     grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
-    align-items: end;
+    gap: clamp(1.25rem, 1rem + 1.5vw, 2rem);
+    align-items: stretch;
     margin-top: clamp(3rem, 2rem + 4vw, 6rem);
   }
   .vision-photo {
@@ -492,7 +489,8 @@ const loge = [photos.rff25Loge1, photos.rff25Loge2, photos.rff25Loge4, photos.rf
     display: grid;
     gap: 1.25rem;
     justify-items: start;
-    margin: 0 0 -2.5rem -5rem;
+    margin: 0;
+    align-self: stretch;
     padding: clamp(1.75rem, 1rem + 2vw, 3rem);
     background: var(--c-noir);
     color: var(--c-papier);
@@ -510,7 +508,7 @@ const loge = [photos.rff25Loge1, photos.rff25Loge2, photos.rff25Loge4, photos.rf
       grid-template-columns: minmax(0, 1fr);
     }
     .vision-carte {
-      margin: -3rem 1rem 0;
+      margin: 0;
     }
   }
 
@@ -624,7 +622,7 @@ const loge = [photos.rff25Loge1, photos.rff25Loge2, photos.rff25Loge4, photos.rf
   .n {
     font-variant-numeric: tabular-nums;
     font-weight: 700;
-    font-size: 0.8125rem;
+    font-size: 0.875rem;
     letter-spacing: 0.08em;
     color: var(--c-or);
   }
@@ -636,7 +634,7 @@ const loge = [photos.rff25Loge1, photos.rff25Loge2, photos.rff25Loge4, photos.rf
     font-size: clamp(1.0625rem, 1rem + 0.3vw, 1.25rem);
   }
   .k {
-    font-size: 0.8125rem;
+    font-size: 0.875rem;
     letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--c-pierre);
@@ -676,7 +674,7 @@ const loge = [photos.rff25Loge1, photos.rff25Loge2, photos.rff25Loge4, photos.rf
   }
   .petit {
     margin-top: 1.25rem;
-    font-size: 0.875rem;
+    font-size: 0.9375rem;
   }
   .ecouter-video {
     --accent: var(--c-or);
@@ -813,7 +811,7 @@ const loge = [photos.rff25Loge1, photos.rff25Loge2, photos.rff25Loge4, photos.rf
     color: var(--c-or);
   }
   .pitch {
-    font-size: 0.9375rem;
+    font-size: 1rem;
     line-height: 1.55;
     color: var(--c-pierre-claire);
   }
@@ -830,7 +828,7 @@ const loge = [photos.rff25Loge1, photos.rff25Loge2, photos.rff25Loge4, photos.rf
   table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.9375rem;
+    font-size: 1rem;
   }
   th,
   td {
@@ -859,7 +857,7 @@ const loge = [photos.rff25Loge1, photos.rff25Loge2, photos.rff25Loge4, photos.rf
     align-items: center;
     gap: 1.25rem;
     margin-top: 2.5rem;
-    font-size: 0.8125rem;
+    font-size: 0.875rem;
   }
   .studio-pied .doux {
     max-width: 40rem;

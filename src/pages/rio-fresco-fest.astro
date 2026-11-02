@@ -68,7 +68,7 @@ const jsonLd = eventJsonLd(
   jsonLd={jsonLd}
 >
   <section class="hero theme-nuit" aria-labelledby="titre-page">
-    <Image class="hero-bg" src={photos.rffFoule.src} alt="" widths={[640, 1100, 1600, 2200]} sizes="100vw" loading="eager" fetchpriority="high" />
+    <Image class="hero-bg" src={photos.rffFoule.src} alt="" widths={[640, 1100, 1280, 1600, 1920, 2200]} sizes="100vw" loading="eager" fetchpriority="high" />
     <div class="wrap hero-inner">
       <Image class="hero-logo" src={logoRff} alt="Rio Fresco Fest, Rufisque" width={220} loading="eager" />
       <p class="surtitre">{rff.organizer} présente · Édition 2026</p>
@@ -170,7 +170,7 @@ const jsonLd = eventJsonLd(
       </div>
       <div class="e25-grid">
         <figure class="e25-affiche" data-reveal>
-          <Image src={photos.rff25Affiche.src} alt={photos.rff25Affiche.alt} widths={[480, 800, 1200]} sizes="(min-width: 56rem) 38vw, 100vw" quality={85} />
+          <Image src={photos.rff25Affiche.src} alt={photos.rff25Affiche.alt} widths={[480, 800, 1200, 1280, 1600, 1920]} sizes="(min-width: 56rem) 38vw, 100vw" quality={85} />
           <figcaption>Affiche officielle de l’édition 2025</figcaption>
         </figure>
         <div class="e25-programme">
@@ -215,7 +215,7 @@ const jsonLd = eventJsonLd(
           {
             loge2025.map((ph) => (
               <figure class="loge">
-                <Image src={ph.src} alt={ph.alt} widths={[300, 560]} sizes="(min-width: 64rem) 22vw, 60vw" />
+                <Image src={ph.src} alt={ph.alt} widths={[300, 560, 1280, 1600, 1920]} sizes="(min-width: 64rem) 22vw, 60vw" />
               </figure>
             ))
           }
@@ -348,7 +348,7 @@ const jsonLd = eventJsonLd(
     font-weight: 700;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    font-size: 0.875rem;
+    font-size: 0.9375rem;
   }
   .infos span + span::before {
     content: '';
@@ -398,7 +398,7 @@ const jsonLd = eventJsonLd(
   }
   .quote figcaption {
     margin-top: 1.25rem;
-    font-size: 0.9375rem;
+    font-size: 1rem;
     color: var(--c-encre-douce);
   }
 
@@ -427,7 +427,7 @@ const jsonLd = eventJsonLd(
     display: flex;
     align-items: baseline;
     gap: 0.75rem;
-    font-size: 0.8125rem;
+    font-size: 0.875rem;
     font-weight: 700;
     letter-spacing: 0.1em;
     text-transform: uppercase;
@@ -445,11 +445,11 @@ const jsonLd = eventJsonLd(
     font-weight: 700;
   }
   .sous-titre {
-    font-size: 0.875rem;
+    font-size: 0.9375rem;
     color: var(--c-bleu-pale);
   }
   .lead {
-    font-size: 0.9375rem;
+    font-size: 1rem;
   }
   .pilier dl {
     margin: 0.5rem 0 0;
@@ -457,21 +457,21 @@ const jsonLd = eventJsonLd(
     gap: 0.9rem;
   }
   .pilier dt {
-    font-size: 0.8125rem;
+    font-size: 0.875rem;
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
   }
   .pilier dd {
     margin: 0.2rem 0 0;
-    font-size: 0.9375rem;
+    font-size: 1rem;
     color: var(--c-bleu-pale);
   }
   .cible {
     margin-top: 0.75rem;
     padding-top: 0.75rem;
     border-top: 1px dashed var(--line);
-    font-size: 0.875rem;
+    font-size: 0.9375rem;
   }
   .cible span {
     margin-right: 0.4rem;
@@ -535,7 +535,7 @@ const jsonLd = eventJsonLd(
     margin-block: 1.25rem 1rem;
   }
   .e25-formats {
-    font-size: 0.8125rem;
+    font-size: 0.875rem;
     font-weight: 700;
     letter-spacing: 0.16em;
     text-transform: uppercase;
@@ -559,7 +559,7 @@ const jsonLd = eventJsonLd(
   }
   .e25-affiche figcaption {
     margin-top: 0.75rem;
-    font-size: 0.8125rem;
+    font-size: 0.875rem;
     color: var(--soft);
   }
   .e25-jours {
@@ -576,7 +576,7 @@ const jsonLd = eventJsonLd(
     border-left: 3px solid var(--c-orange);
   }
   .jour-date {
-    font-size: 0.8125rem;
+    font-size: 0.875rem;
     font-weight: 700;
     letter-spacing: 0.14em;
     text-transform: uppercase;
@@ -647,7 +647,7 @@ const jsonLd = eventJsonLd(
   }
   .groupe h3 {
     margin-bottom: 0.75rem;
-    font-size: 0.8125rem;
+    font-size: 0.875rem;
     font-weight: 700;
     letter-spacing: 0.12em;
     text-transform: uppercase;

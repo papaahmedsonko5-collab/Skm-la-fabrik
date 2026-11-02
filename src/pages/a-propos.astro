@@ -21,7 +21,7 @@ const tournants = ['2014', '2024'];
       <Image
         src={photos.studio.src}
         alt={photos.studio.alt}
-        widths={[640, 960, 1280]}
+        widths={[640, 960, 1280, 1600, 1920]}
         sizes="100vw"
         quality={85}
         loading="eager"
@@ -51,7 +51,7 @@ const tournants = ['2014', '2024'];
       </h2>
       <div class="devise-bas">
         <div class="devise-photo" data-reveal>
-          <Image src={photos.formation.src} alt={photos.formation.alt} widths={[480, 800, 1162]} sizes="(min-width: 56rem) 50vw, 100vw" quality={85} />
+          <Image src={photos.formation.src} alt={photos.formation.alt} widths={[480, 800, 1162, 1280, 1600, 1920]} sizes="(min-width: 56rem) 50vw, 100vw" quality={85} />
         </div>
         <div class="devise-texte" data-reveal>
           <p class="chapeau">
@@ -242,8 +242,6 @@ const tournants = ['2014', '2024'];
     object-fit: cover;
     object-position: 50% 40%;
     opacity: 0.55;
-    -webkit-mask-image: linear-gradient(180deg, #000 30%, transparent 100%);
-    mask-image: linear-gradient(180deg, #000 30%, transparent 100%);
   }
   .hero::after {
     content: '';
@@ -434,7 +432,7 @@ const tournants = ['2014', '2024'];
     line-height: 1.3;
   }
   .etape .doux {
-    font-size: 0.9375rem;
+    font-size: 1rem;
     line-height: 1.6;
   }
 
@@ -500,7 +498,7 @@ const tournants = ['2014', '2024'];
   }
   .valeurs dd {
     margin: 0;
-    font-size: 0.9375rem;
+    font-size: 1rem;
   }
 
   /* 05 · Modèle */
@@ -526,7 +524,7 @@ const tournants = ['2014', '2024'];
   }
   .cycle .tag {
     margin-top: 1.5rem;
-    font-size: 0.75rem;
+    font-size: 0.8125rem;
     font-weight: 700;
     letter-spacing: 0.14em;
     text-transform: uppercase;
@@ -536,7 +534,7 @@ const tournants = ['2014', '2024'];
     font-size: 1.75rem;
   }
   .cycle-texte {
-    font-size: 0.9375rem;
+    font-size: 1rem;
     color: var(--c-encre-douce);
   }
   .cycle .boucle {
@@ -583,7 +581,7 @@ const tournants = ['2014', '2024'];
     border-color: var(--c-or);
   }
   .role {
-    font-size: 0.75rem;
+    font-size: 0.8125rem;
     font-weight: 700;
     letter-spacing: 0.14em;
     text-transform: uppercase;
@@ -594,7 +592,7 @@ const tournants = ['2014', '2024'];
     font-size: clamp(1.75rem, 1.4rem + 1vw, 2.25rem);
   }
   .full {
-    font-size: 0.875rem;
+    font-size: 0.9375rem;
     color: var(--c-pierre);
   }
   .scope {
@@ -602,7 +600,7 @@ const tournants = ['2014', '2024'];
     font-weight: 600;
   }
   .bio {
-    font-size: 0.9375rem;
+    font-size: 1rem;
   }
   .rejoindre {
     display: flex;

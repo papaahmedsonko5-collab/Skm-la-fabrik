@@ -23,7 +23,7 @@ const Tag = headingLevel;
     <div class="media">
       {
         cover ? (
-          <Image src={cover} alt={coverAlt ?? ''} widths={[400, 640, 900]} sizes="(min-width: 64rem) 30vw, (min-width: 40rem) 45vw, 100vw" />
+          <Image src={cover} alt={coverAlt ?? ''} widths={[400, 640, 900, 1280, 1600, 1920]} sizes="(min-width: 64rem) 30vw, (min-width: 40rem) 45vw, 100vw" />
         ) : (
           <span class="affiche" aria-hidden="true">
             {title}
@@ -103,7 +103,7 @@ const Tag = headingLevel;
     color: var(--c-or);
   }
   .meta {
-    font-size: 0.75rem;
+    font-size: 0.8125rem;
     font-weight: 700;
     letter-spacing: 0.14em;
     text-transform: uppercase;
@@ -118,7 +118,7 @@ const Tag = headingLevel;
     color: var(--accent, var(--c-or));
   }
   .resume {
-    font-size: 0.9375rem;
+    font-size: 1rem;
     line-height: 1.55;
     color: var(--soft, var(--c-pierre));
   }

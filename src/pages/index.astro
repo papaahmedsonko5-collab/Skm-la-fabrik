@@ -56,7 +56,7 @@ const etapes = [
         <Image
           src={photos.rffDanse.src}
           alt={photos.rffDanse.alt}
-          widths={[640, 960, 1415]}
+          widths={[640, 960, 1280, 1415, 1600, 1920]}
           sizes="(min-width: 64rem) 58vw, 100vw"
           quality={85}
           loading="eager"
@@ -103,7 +103,7 @@ const etapes = [
       </h2>
       <div class="manifeste-bas">
         <div class="manifeste-photo" data-reveal>
-          <Image src={photos.communaute.src} alt={photos.communaute.alt} widths={[480, 800, 987]} sizes="(min-width: 56rem) 40vw, 100vw" quality={85} />
+          <Image src={photos.communaute.src} alt={photos.communaute.alt} widths={[480, 800, 987, 1280, 1600, 1920]} sizes="(min-width: 56rem) 40vw, 100vw" quality={85} />
         </div>
         <div class="manifeste-carte" data-reveal>
           <blockquote>
@@ -135,7 +135,7 @@ const etapes = [
                 <span class="num">{p.num}</span>
                 <span class="titre nom">{p.title}</span>
                 <span class="desc">{p.short}</span>
-                <Image src={p.photo.src} alt="" widths={[200, 320]} sizes="10rem" class="vignette" />
+                <Image src={p.photo.src} alt="" widths={[200, 320, 1280, 1600, 1920]} sizes="10rem" class="vignette" />
               </a>
             </li>
           ))
@@ -166,7 +166,7 @@ const etapes = [
           etapes.map((e, i) => (
             <li class="etape" data-reveal>
               <div class="etape-photo">
-                <Image src={e.photo.src} alt="" widths={[360, 640]} sizes="(min-width: 64rem) 22vw, (min-width: 40rem) 45vw, 100vw" quality={85} />
+                <Image src={e.photo.src} alt="" widths={[360, 640, 1280, 1600, 1920]} sizes="(min-width: 64rem) 22vw, (min-width: 40rem) 45vw, 100vw" quality={85} />
                 <span class="etape-num" aria-hidden="true">0{i + 1}</span>
               </div>
               <h3 class="titre titre-h3">{e.titre}</h3>
@@ -197,7 +197,7 @@ const etapes = [
         </div>
       </div>
       <div class="rff-visuel" data-reveal>
-        <Image src={photos.rffDigue.src} alt={photos.rffDigue.alt} widths={[480, 800, 1100]} sizes="(min-width: 64rem) 45vw, 100vw" />
+        <Image src={photos.rffDigue.src} alt={photos.rffDigue.alt} widths={[480, 800, 1100, 1280, 1600, 1920]} sizes="(min-width: 64rem) 45vw, 100vw" />
         <div style="--stat-color: var(--c-orange)">
           <Stats data={rff2026Stats} size="moyen" />
         </div>
@@ -208,7 +208,7 @@ const etapes = [
   <section class="theme-papier section" aria-labelledby="label">
     <div class="wrap label">
       <div class="label-visuel" data-reveal>
-        <Image src={photos.studio.src} alt={photos.studio.alt} widths={[480, 800]} sizes="(min-width: 64rem) 42vw, 100vw" />
+        <Image src={photos.studio.src} alt={photos.studio.alt} widths={[480, 800, 1280, 1600, 1920]} sizes="(min-width: 64rem) 42vw, 100vw" />
         <div class="label-logo"><Image src={logoSk} alt="Sunu Kaddu" width={130} height={130} /></div>
       </div>
       <div class="label-texte" data-reveal>
@@ -243,7 +243,7 @@ const etapes = [
             { tag: 'Réinsertion', title: 'Fort B', href: '/projets/fort-b', photo: photos.fortB, text: 'Des ateliers d’écriture et d’expression pour des mineurs incarcérés, vers un retour dans la société.' },
           ].map((a, i) => (
             <a class:list={['action', { decale: i === 1 }]} href={a.href} data-reveal>
-              <Image src={a.photo.src} alt="" widths={[400, 640]} sizes="(min-width: 64rem) 30vw, 100vw" />
+              <Image src={a.photo.src} alt="" widths={[400, 640, 1280, 1600, 1920]} sizes="(min-width: 64rem) 30vw, 100vw" />
               <span class="surtitre">{a.tag}</span>
               <span class="titre titre-h3">{a.title}</span>
               <span class="doux">{a.text}</span>
@@ -266,7 +266,7 @@ const etapes = [
           news.map((n) => (
             <article class="news">
               <a href={`/actualites/${n.id}`}>
-                <Image src={n.data.cover} alt="" widths={[400, 640]} sizes="(min-width: 64rem) 32vw, 85vw" />
+                <Image src={n.data.cover} alt="" widths={[400, 640, 1280, 1600, 1920]} sizes="(min-width: 64rem) 32vw, 85vw" />
                 <span class="news-meta">
                   {n.data.type} · {n.data.period}
                 </span>
@@ -295,7 +295,7 @@ const etapes = [
     padding-block: clamp(5rem, 3rem + 8vw, 9.5rem);
   }
 
-  /* Hero : photo cadrée à droite, fondue dans le noir, titre qui la chevauche */
+  /* Hero : titre à gauche, photo entière cadrée à droite */
   .hero {
     position: relative;
     overflow: hidden;
@@ -317,7 +317,8 @@ const etapes = [
   }
   .hero-grid {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    gap: clamp(1.5rem, 1rem + 2vw, 3rem);
     align-items: center;
   }
   .hero-texte {
@@ -325,13 +326,12 @@ const etapes = [
     z-index: 1;
     grid-column: 1;
     grid-row: 1;
-    margin-right: -14rem;
   }
   .hero-texte .surtitre {
     margin-bottom: 1.5rem;
   }
   .hero-titre {
-    font-size: clamp(2.75rem, 1.3rem + 4.6vw, 6.75rem);
+    font-size: clamp(2.75rem, 1.2rem + 4vw, 6rem);
     line-height: 0.92;
     text-wrap: balance;
   }
@@ -359,14 +359,6 @@ const etapes = [
     height: clamp(26rem, 66svh, 42rem);
     object-fit: cover;
     object-position: 60% 35%;
-    -webkit-mask-image:
-      linear-gradient(90deg, transparent 0, #000 42%),
-      linear-gradient(180deg, transparent 0, #000 16%, #000 84%, transparent 100%);
-    -webkit-mask-composite: source-in;
-    mask-image:
-      linear-gradient(90deg, transparent 0, #000 42%),
-      linear-gradient(180deg, transparent 0, #000 16%, #000 84%, transparent 100%);
-    mask-composite: intersect;
   }
   .cartes {
     display: grid;
@@ -391,7 +383,7 @@ const etapes = [
   }
   .carte-meta {
     grid-column: 1 / -1;
-    font-size: 0.75rem;
+    font-size: 0.8125rem;
     font-weight: 700;
     letter-spacing: 0.16em;
     text-transform: uppercase;
@@ -439,7 +431,7 @@ const etapes = [
   }
   @media (max-width: 64rem) {
     .hero {
-      padding-top: 0;
+      padding-top: 5.75rem;
     }
     .hero-grid {
       grid-template-columns: minmax(0, 1fr);
@@ -447,19 +439,14 @@ const etapes = [
     .hero-photo {
       grid-column: 1;
       grid-row: 1;
-      margin-inline: calc(var(--gutter) * -1);
     }
     .hero-photo :global(img) {
       height: clamp(18rem, 52svh, 30rem);
-      -webkit-mask-image: linear-gradient(180deg, #000 50%, transparent 100%);
-      -webkit-mask-composite: source-over;
-      mask-image: linear-gradient(180deg, #000 50%, transparent 100%);
-      mask-composite: add;
     }
     .hero-texte {
       grid-column: 1;
       grid-row: 2;
-      margin: -5rem 0 0;
+      margin: 2rem 0 0;
     }
   }
   @media (max-width: 56rem) {
@@ -510,7 +497,8 @@ const etapes = [
   .manifeste-bas {
     display: grid;
     grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
-    align-items: end;
+    gap: clamp(1.25rem, 1rem + 1.5vw, 2rem);
+    align-items: stretch;
     margin-block: clamp(3rem, 2rem + 4vw, 6rem) clamp(3.5rem, 2.5rem + 3vw, 5.5rem);
   }
   .manifeste-photo :global(img) {
@@ -524,7 +512,8 @@ const etapes = [
     display: grid;
     gap: 1.5rem;
     justify-items: start;
-    margin: 0 0 -2.5rem -5rem;
+    margin: 0;
+    align-self: stretch;
     padding: clamp(1.75rem, 1rem + 2vw, 3rem);
     background: #fff;
   }
@@ -533,7 +522,7 @@ const etapes = [
   }
   blockquote footer {
     margin-top: 0.75rem;
-    font-size: 0.875rem;
+    font-size: 0.9375rem;
     color: var(--c-encre-douce);
   }
   @media (max-width: 56rem) {
@@ -541,7 +530,7 @@ const etapes = [
       grid-template-columns: minmax(0, 1fr);
     }
     .manifeste-carte {
-      margin: -3rem 1rem 0;
+      margin: 0;
     }
   }
 
@@ -705,7 +694,7 @@ const etapes = [
     height: auto;
   }
   .rff-date {
-    font-size: 0.9375rem;
+    font-size: 1rem;
     font-weight: 700;
     letter-spacing: 0.1em;
     text-transform: uppercase;
@@ -754,7 +743,7 @@ const etapes = [
     gap: 1.5rem;
   }
   .services {
-    font-size: 0.9375rem;
+    font-size: 1rem;
     line-height: 1.8;
     color: var(--c-encre-douce);
   }
@@ -798,7 +787,7 @@ const etapes = [
     margin-top: 3.5rem;
     padding-top: 1.5rem;
     border-top: 1px solid var(--line);
-    font-size: 0.9375rem;
+    font-size: 1rem;
   }
 
   .news {
@@ -815,7 +804,7 @@ const etapes = [
     object-fit: cover;
   }
   .news-meta {
-    font-size: 0.75rem;
+    font-size: 0.8125rem;
     font-weight: 700;
     letter-spacing: 0.14em;
     text-transform: uppercase;
