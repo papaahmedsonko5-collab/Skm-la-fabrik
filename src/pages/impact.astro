@@ -1,0 +1,493 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Button from '@/components/Button.astro';
+import Stats from '@/components/Stats.astro';
+import { photos } from '@/data/photos';
+import { blueprintStats } from '@/data/site';
+import { actions, constat, convictions, cycle, ecosysteme, odd, pourquoi, tiers } from '@/data/impact';
+
+const actionPhotos = {
+  'set-setal': photos.setSetal,
+  handischool: photos.handischool,
+  'fort-b': photos.fortB,
+  concours: photos.communaute,
+} as const;
+const photoFor = (id: string) => actionPhotos[id as keyof typeof actionPhotos] ?? photos.communaute;
+---
+
+<BaseLayout
+  title="Impact communautaire"
+  description="Éducation, inclusion, réinsertion et environnement : les actions communautaires de Sunu Kaddu et SKM La Fabrik à Rufisque, leur alignement sur les ODD et les formules de partenariat RSE."
+>
+  <section class="hero theme-papier" aria-labelledby="titre-page">
+    <div class="wrap hero-grid">
+      <div>
+        <p class="surtitre">Impact communautaire · RSE & ESG</p>
+        <h1 id="titre-page" class="titre titre-h1">L’écho<br />de <span class="accent">Rufisque</span></h1>
+        <p class="chapeau doux">D’une initiative de terrain à un moteur de transformation culturelle et économique.</p>
+      </div>
+      <figure class="hero-photo">
+        <Image src={photos.communaute.src} alt={photos.communaute.alt} widths={[480, 800, 1200]} sizes="(min-width: 56rem) 50vw, 100vw" loading="eager" fetchpriority="high" />
+      </figure>
+    </div>
+  </section>
+
+  <section class="constat theme-sombre section" aria-labelledby="t-constat">
+    <div class="wrap constat-grid">
+      <div data-reveal>
+        <p class="surtitre">Le constat</p>
+        <h2 id="t-constat" class="titre titre-h2">{constat.title}</h2>
+        <p class="chapeau doux">{constat.text}</p>
+      </div>
+      <div class="convictions" data-reveal>
+        <p class="surtitre">Notre conviction</p>
+        {convictions.map((c) => <p class="citation">{c}</p>)}
+      </div>
+    </div>
+  </section>
+
+  <section class="ecosysteme theme-blanc section" aria-labelledby="t-eco">
+    <div class="wrap">
+      <p class="surtitre">Un modèle intégré</p>
+      <h2 id="t-eco" class="titre titre-h2">L’écosystème d’impact 360°</h2>
+      <ul class="eco">
+        {
+          ecosysteme.map((e) => (
+            <li data-reveal>
+              <span class="role">{e.role}</span>
+              <h3 class="titre">{e.name}</h3>
+              <p>{e.text}</p>
+            </li>
+          ))
+        }
+      </ul>
+      <ol class="cycle" aria-label="Le cycle Sunu Kaddu">
+        {
+          cycle.map((c, i) => (
+            <li>
+              <span aria-hidden="true">{i + 1}</span>
+              {c}
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <section class="actions theme-papier section" aria-labelledby="t-actions">
+    <div class="wrap">
+      <header class="actions-head" data-reveal>
+        <p class="surtitre">L’impact par l’exemple</p>
+        <h2 id="t-actions" class="titre titre-h2">Nos actions sur le terrain</h2>
+      </header>
+      <ol class="liste-actions">
+        {
+          actions.map((a, i) => {
+            const ph = photoFor(a.id);
+            return (
+              <li class:list={['action', { inverse: i % 2 === 1 }]} data-reveal>
+                <figure>
+                  <Image src={ph.src} alt={ph.alt} widths={[400, 700, 1000]} sizes="(min-width: 56rem) 40vw, 100vw" />
+                </figure>
+                <div>
+                  <p class="axe">{a.axis}</p>
+                  <h3 class="titre titre-h3">{a.title}</h3>
+                  <p>{a.text}</p>
+                  <a class="lien-fleche" href={a.href}>
+                    Voir le projet <span aria-hidden="true">→</span>
+                  </a>
+                </div>
+              </li>
+            );
+          })
+        }
+      </ol>
+    </div>
+  </section>
+
+  <section class="chiffres theme-sombre section" aria-labelledby="t-chiffres">
+    <div class="wrap">
+      <p class="surtitre">Repères</p>
+      <h2 id="t-chiffres" class="titre titre-h2">Une décennie de bâtisseurs</h2>
+      <Stats data={blueprintStats} />
+    </div>
+  </section>
+
+  <section class="theme-blanc section" aria-labelledby="t-odd">
+    <div class="wrap">
+      <p class="surtitre">Alignement stratégique</p>
+      <h2 id="t-odd" class="titre titre-h2">Objectifs de développement durable</h2>
+      <table class="odd">
+        <caption class="sr-only">Contribution des actions de Sunu Kaddu aux objectifs de développement durable des Nations unies</caption>
+        <thead>
+          <tr>
+            <th scope="col">ODD</th>
+            <th scope="col">Notre contribution</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            odd.map((o) => (
+              <tr>
+                <th scope="row">
+                  <span class="titre odd-num">{o.num}</span>
+                  <span>{o.name}</span>
+                </th>
+                <td>{o.text}</td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="partenariat theme-papier section" aria-labelledby="t-part">
+    <div class="wrap">
+      <div class="part-grid">
+        <div data-reveal>
+          <p class="surtitre">Pourquoi s’associer à Sunu Kaddu</p>
+          <h2 id="t-part" class="titre titre-h2">Bâtir demain, dès aujourd’hui</h2>
+          <p class="chapeau doux">Devenez partenaire de la transformation culturelle de Rufisque. Commençons par une rencontre de découverte de 30 minutes.</p>
+          <Button href="/contact?objet=partenariat" style="--btn-bg: var(--c-encre); --btn-ink: var(--c-papier); --btn-bg-hover: var(--c-noir)">Planifier une rencontre</Button>
+        </div>
+        <dl class="pourquoi">
+          {
+            pourquoi.map((p) => (
+              <div data-reveal>
+                <dt>{p.title}</dt>
+                <dd>{p.text}</dd>
+              </div>
+            ))
+          }
+        </dl>
+      </div>
+
+      <div class="tiers-wrap">
+        <h3 class="titre titre-h3">Les formules de partenariat</h3>
+        <div class="tiers-scroll" role="region" aria-label="Tableau des formules de partenariat" tabindex="0">
+          <table class="tiers">
+            <thead>
+              <tr>
+                <th scope="col"><span class="sr-only">Contrepartie</span></th>
+                {tiers.columns.map((c, i) => <th scope="col" class:list={{ fondateur: i === 1 }}>{c}</th>)}
+              </tr>
+            </thead>
+            <tbody>
+              {
+                tiers.rows.map((r) => (
+                  <tr>
+                    <th scope="row">{r.feature}</th>
+                    {r.values.map((v, i) => <td class:list={{ fondateur: i === 1 }}>{v}</td>)}
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+        <p class="note">{tiers.note}</p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .hero-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 2.5rem clamp(2rem, 1rem + 4vw, 5rem);
+    align-items: center;
+    padding-block: clamp(3.5rem, 2rem + 4vw, 6rem);
+  }
+  .hero-grid .chapeau {
+    margin-top: 1.75rem;
+    max-width: 30rem;
+  }
+  .hero .accent {
+    color: var(--c-terracotta-profond);
+  }
+  .hero-photo {
+    margin: 0;
+  }
+  .hero-photo :global(img) {
+    width: 100%;
+    aspect-ratio: 5 / 4;
+    object-fit: cover;
+  }
+
+  .constat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 3rem clamp(2rem, 1rem + 4vw, 6rem);
+  }
+  .constat-grid .chapeau {
+    margin-top: 1.5rem;
+  }
+  .convictions {
+    display: grid;
+    gap: 1.5rem;
+    align-content: start;
+    padding-left: 1.5rem;
+    border-left: 4px solid var(--c-terracotta);
+  }
+  .convictions .citation {
+    font-size: clamp(1.25rem, 1.05rem + 0.8vw, 1.625rem);
+    line-height: 1.3;
+  }
+
+  .eco {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1px;
+    margin: 2.5rem 0 0;
+    padding: 0;
+    list-style: none;
+    background: var(--c-ligne-claire);
+    border: 1px solid var(--c-ligne-claire);
+  }
+  .eco li {
+    display: grid;
+    align-content: start;
+    gap: 0.6rem;
+    padding: 1.75rem 1.5rem;
+    background: var(--c-blanc, #fff);
+  }
+  .role {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--c-terracotta-profond);
+  }
+  .eco h3 {
+    font-size: 1.75rem;
+  }
+  .eco p {
+    font-size: 0.9375rem;
+    color: var(--c-encre-douce);
+  }
+  .cycle {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 1.5rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .cycle li {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.7rem 1.1rem;
+    background: var(--c-encre);
+    color: var(--c-papier);
+    font-weight: 700;
+    font-size: 0.875rem;
+  }
+  .cycle li:not(:last-child)::after {
+    content: '→';
+    margin-left: 0.4rem;
+    color: var(--c-or);
+  }
+  .cycle span {
+    color: var(--c-or);
+  }
+
+  .actions-head {
+    margin-bottom: 2.5rem;
+  }
+  .liste-actions {
+    display: grid;
+    gap: clamp(2.5rem, 2rem + 2vw, 4rem);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .action {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: 1.5rem clamp(2rem, 1rem + 4vw, 5rem);
+    align-items: center;
+  }
+  .action.inverse figure {
+    order: 2;
+  }
+  .action figure {
+    margin: 0;
+  }
+  .action :global(img) {
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+  }
+  .action > div {
+    display: grid;
+    gap: 0.9rem;
+    max-width: 34rem;
+  }
+  .axe {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--c-terracotta-profond);
+  }
+  .action .lien-fleche {
+    --accent: var(--c-or-profond);
+  }
+
+  .chiffres h2 {
+    margin-bottom: 2.5rem;
+  }
+
+  .odd {
+    width: 100%;
+    margin-top: 2.5rem;
+    border-collapse: collapse;
+  }
+  .odd thead th {
+    padding-bottom: 0.75rem;
+    text-align: left;
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--c-encre-douce);
+  }
+  .odd tbody th,
+  .odd td {
+    padding: 1.1rem 0;
+    border-top: 1px solid var(--c-ligne-claire);
+    vertical-align: top;
+    text-align: left;
+  }
+  .odd tbody th {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    width: 22rem;
+    padding-right: 2rem;
+    font-weight: 700;
+  }
+  .odd-num {
+    min-width: 2.5rem;
+    font-size: 2rem;
+    line-height: 1;
+    color: var(--c-terracotta-profond);
+  }
+
+  .part-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 3rem clamp(2rem, 1rem + 4vw, 5rem);
+  }
+  .part-grid .chapeau {
+    margin-block: 1.5rem 2rem;
+  }
+  .pourquoi {
+    margin: 0;
+    display: grid;
+    gap: 0;
+    border-top: 1px solid var(--c-ligne-claire);
+  }
+  .pourquoi > div {
+    padding: 1.1rem 0;
+    border-bottom: 1px solid var(--c-ligne-claire);
+  }
+  .pourquoi dt {
+    font-weight: 700;
+  }
+  .pourquoi dd {
+    margin: 0.3rem 0 0;
+    color: var(--c-encre-douce);
+  }
+  .tiers-wrap {
+    margin-top: clamp(3rem, 2rem + 3vw, 5rem);
+  }
+  .tiers-wrap h3 {
+    margin-bottom: 1.5rem;
+  }
+  .tiers-scroll {
+    overflow-x: auto;
+  }
+  .tiers-scroll:focus-visible {
+    outline: 2px solid var(--c-or-profond);
+    outline-offset: 4px;
+  }
+  .tiers {
+    width: 100%;
+    min-width: 36rem;
+    border-collapse: collapse;
+    font-size: 0.9375rem;
+  }
+  .tiers th,
+  .tiers td {
+    padding: 0.9rem 1rem;
+    border-bottom: 1px solid var(--c-ligne-claire);
+    text-align: left;
+    vertical-align: top;
+  }
+  .tiers thead th {
+    background: var(--c-encre);
+    color: var(--c-papier);
+    font-size: 0.875rem;
+  }
+  .tiers thead th.fondateur {
+    background: var(--c-or);
+    color: var(--c-noir);
+  }
+  .tiers tbody th {
+    font-weight: 700;
+  }
+  .tiers td.fondateur {
+    background: rgb(201 161 59 / 0.12);
+    font-weight: 600;
+  }
+  .note {
+    margin-top: 1rem;
+    font-size: 0.875rem;
+    color: var(--c-encre-douce);
+  }
+
+  @media (max-width: 64rem) {
+    .eco {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 56rem) {
+    .hero-grid,
+    .constat-grid,
+    .action,
+    .part-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .action.inverse figure {
+      order: 0;
+    }
+    .odd tbody th {
+      width: auto;
+    }
+  }
+  @media (max-width: 36rem) {
+    .eco {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .odd,
+    .odd tbody,
+    .odd tr {
+      display: block;
+    }
+    .odd thead {
+      display: none;
+    }
+    .odd tbody th {
+      border-top: 1px solid var(--c-ligne-claire);
+      padding-bottom: 0.4rem;
+    }
+    .odd td {
+      display: block;
+      border-top: 0;
+      padding-top: 0;
+    }
+  }
+</style>

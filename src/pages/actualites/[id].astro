@@ -1,0 +1,136 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { Image } from 'astro:assets';
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { sortNews } from '@/lib/content';
+
+export const getStaticPaths = (async () => {
+  const news = await getCollection('actualites', ({ data }) => !data.draft);
+  return news.map((entry) => ({ params: { id: entry.id }, props: { entry } }));
+}) satisfies GetStaticPaths;
+
+interface Props {
+  entry: CollectionEntry<'actualites'>;
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const d = entry.data;
+const autres = sortNews(await getCollection('actualites', (n) => !n.data.draft && n.id !== entry.id)).slice(0, 3);
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: d.title,
+  description: d.summary,
+  ...(d.date ? { datePublished: d.date.toISOString() } : {}),
+  image: new URL(d.cover.src, Astro.site).toString(),
+  publisher: { '@type': 'Organization', name: 'SKM La Fabrik' },
+};
+---
+
+<BaseLayout title={d.title} description={d.summary} image={d.cover.src} jsonLd={jsonLd}>
+  <article>
+    <header class="wrap entete">
+      <nav aria-label="Fil d’Ariane" class="ariane">
+        <a href="/actualites">Actualités</a> <span aria-hidden="true">/</span> <span>{d.type}</span>
+      </nav>
+      <h1 class="titre titre-h1">{d.title}</h1>
+      <p class="meta">
+        {d.date ? <time datetime={d.date.toISOString()}>{d.date.toLocaleDateString('fr-SN', { dateStyle: 'long' })}</time> : d.period}
+      </p>
+      <p class="chapeau resume">{d.summary}</p>
+    </header>
+    <figure class="couverture">
+      <Image src={d.cover} alt={d.coverAlt} widths={[640, 1000, 1400]} sizes="100vw" loading="eager" fetchpriority="high" />
+    </figure>
+    <div class="wrap corps prose">
+      <Content />
+    </div>
+  </article>
+
+  {
+    autres.length > 0 && (
+      <aside class="wrap section autres" aria-labelledby="t-autres">
+        <h2 id="t-autres" class="surtitre">À lire aussi</h2>
+        <ul>
+          {autres.map((n) => (
+            <li>
+              <a href={`/actualites/${n.id}`}>
+                <span class="type">{n.data.type}</span>
+                <span class="titre t">{n.data.title}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </aside>
+    )
+  }
+</BaseLayout>
+
+<style>
+  .entete {
+    max-width: 62rem;
+    padding-block: clamp(3rem, 2rem + 3vw, 5rem) 2.5rem;
+  }
+  .ariane {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--c-or);
+  }
+  .meta {
+    margin-top: 1.25rem;
+    font-weight: 600;
+    color: var(--c-pierre-claire);
+  }
+  .resume {
+    margin-top: 1.25rem;
+  }
+  .couverture {
+    margin: 0;
+  }
+  .couverture :global(img) {
+    width: 100%;
+    height: clamp(16rem, 45vw, 36rem);
+    object-fit: cover;
+  }
+  .corps {
+    max-width: 46rem;
+    padding-block: 3.5rem 2rem;
+    --accent: var(--c-or);
+  }
+  .autres {
+    border-top: 1px solid var(--c-ligne-sombre);
+  }
+  .autres ul {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+    gap: 1.5rem;
+    margin: 1.5rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .autres a {
+    display: grid;
+    gap: 0.5rem;
+    text-decoration: none;
+  }
+  .autres a:hover .t {
+    color: var(--c-or);
+  }
+  .type {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--c-or);
+  }
+  .t {
+    font-size: 1.5rem;
+  }
+</style>

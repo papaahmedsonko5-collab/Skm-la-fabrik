@@ -1,0 +1,439 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Button from '@/components/Button.astro';
+import VideoEmbed from '@/components/VideoEmbed.astro';
+import logoSk from '@/assets/brand/logo-sunu-kaddu.png';
+import { photos } from '@/data/photos';
+import { heritage, label, productions, scenes, sunuTapeArtists } from '@/data/music';
+import { offresArtistes, tarifsSource } from '@/data/offres';
+import { rff } from '@/data/rff';
+
+const pad = (n: number) => String(n).padStart(2, '0');
+---
+
+<BaseLayout
+  title="Sunu Kaddu Music"
+  description="Sunu Kaddu Music, le label fondé par PPS the Writah à Rufisque : studio Key I Am, productions, scènes, artistes de la Sunu Tape et formules studio pour les artistes."
+>
+  <section class="hero theme-sombre" aria-labelledby="titre-page">
+    <div class="wrap hero-grid">
+      <div class="hero-texte">
+        <p class="surtitre">Le label · Depuis 2014</p>
+        <h1 id="titre-page" class="titre titre-display">Sunu<br />Kaddu<br /><span class="accent">Music</span></h1>
+        <p class="sens citation">{label.meaning}</p>
+        <div class="ctas">
+          <Button href="/contact?objet=production">Produire un titre</Button>
+          <a class="lien-fleche" href="#studio">Les formules studio <span aria-hidden="true">→</span></a>
+        </div>
+      </div>
+      <figure class="hero-photo">
+        <Image src={photos.studio.src} alt={photos.studio.alt} widths={[480, 800, 1200]} sizes="(min-width: 56rem) 45vw, 100vw" loading="eager" fetchpriority="high" />
+        <div class="macaron">
+          <Image src={logoSk} alt="Logo Sunu Kaddu" width={120} loading="eager" />
+        </div>
+      </figure>
+    </div>
+  </section>
+
+  <section class="vision theme-papier section" aria-labelledby="t-vision">
+    <div class="wrap vision-grid">
+      <h2 id="t-vision" class="titre titre-h2" data-reveal>La vision d’un leader&nbsp;: PPS the Writah</h2>
+      <div class="vision-texte" data-reveal>
+        <p class="chapeau">{label.vision}</p>
+        <p>{label.mission}</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="heritage theme-sombre section" aria-labelledby="t-heritage">
+    <div class="wrap">
+      <p class="surtitre">Formation & technologie</p>
+      <h2 id="t-heritage" class="titre titre-h2">Un centre d’excellence technique</h2>
+      <ol class="frise">
+        {
+          heritage.map((h) => (
+            <li data-reveal>
+              <span class="titre an">{h.year}</span>
+              <h3>{h.title}</h3>
+              <p class="doux">{h.text}</p>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <section class="catalogue section" aria-labelledby="t-catalogue">
+    <div class="wrap cat-grid">
+      <div class="cat-col" data-reveal>
+        <p class="surtitre">Face A</p>
+        <h2 id="t-catalogue" class="titre titre-h2">Productions majeures</h2>
+        <ol class="tracklist">
+          {
+            productions.map((p, i) => (
+              <li>
+                <span class="n">{pad(i + 1)}</span>
+                <span class="t">{p.title}</span>
+                <span class="k">{p.kind}</span>
+              </li>
+            ))
+          }
+        </ol>
+      </div>
+      <div class="cat-col" data-reveal>
+        <p class="surtitre">Face B</p>
+        <h2 class="titre titre-h2">Scènes emblématiques</h2>
+        <ol class="tracklist">
+          {
+            scenes.map((s, i) => (
+              <li>
+                <span class="n">{pad(i + 1)}</span>
+                <span class="t">{s.name}</span>
+                <span class="k">{s.place}</span>
+              </li>
+            ))
+          }
+        </ol>
+        <p class="liens">
+          <a class="lien-fleche" href="/projets/xaatim-ak-kallama">Xaatim ak Kallama <span aria-hidden="true">→</span></a>
+          <a class="lien-fleche" href="/projets/loge-des-poetes">La Loge des Poètes <span aria-hidden="true">→</span></a>
+          <a class="lien-fleche" href="/projets?categorie=Productions%20musicales">Toutes les productions <span aria-hidden="true">→</span></a>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="ecouter theme-anthracite section" aria-labelledby="t-ecouter">
+    <div class="wrap ecouter-grid">
+      <div data-reveal>
+        <p class="surtitre">Voir & écouter</p>
+        <h2 id="t-ecouter" class="titre titre-h2">Sur scène</h2>
+        <p class="doux">
+          La playlist officielle du Rio Fresco Fest 2026 documente les cinq jours du festival, dont le plateau de la Loge des Poètes.
+        </p>
+        <p class="doux petit">Les liens d’écoute officiels du catalogue (Audiomack, plateformes de streaming) seront ajoutés dès leur confirmation par le label.</p>
+      </div>
+      <VideoEmbed playlist={rff.playlistId} title="Playlist officielle du Rio Fresco Fest 2026" poster={photos.scene1.src} />
+    </div>
+  </section>
+
+  <section class="sunutape theme-papier section" aria-labelledby="t-tape">
+    <div class="wrap tape-grid">
+      <div data-reveal>
+        <p class="surtitre">Compilation · 2015</p>
+        <h2 id="t-tape" class="titre titre-h2">Les voix de la Sunu Tape</h2>
+        <p class="doux">
+          Pour le premier anniversaire de Key I Am, le label a offert une compilation gratuite de 23 titres. Elle a mis en lumière des artistes
+          de Rufisque, Thiès, Dakar, Bargny et des zones rurales, de Keur Ndiaye Lo à Sangalkam.
+        </p>
+        <a class="lien-fleche" href="/projets/sunu-tape-vol-1">La fiche de la compilation <span aria-hidden="true">→</span></a>
+      </div>
+      <ul class="artistes" aria-label="Artistes de la Sunu Tape Vol. 1">
+        {sunuTapeArtists.map((a) => <li>{a}</li>)}
+      </ul>
+    </div>
+  </section>
+
+  <section id="studio" class="studio theme-sombre section" aria-labelledby="t-studio">
+    <div class="wrap">
+      <header class="studio-head" data-reveal>
+        <div>
+          <p class="surtitre">Studio 360° · Artistes & créatifs</p>
+          <h2 id="t-studio" class="titre titre-h2">Les formules studio</h2>
+        </div>
+        <p class="doux">Création, mixage, mastering et promotion des talents locaux, au sein de SKM La Fabrik.</p>
+      </header>
+      <div class="offres">
+        {
+          offresArtistes.map((o) => (
+            <section class:list={['offre', { phare: o.highlight }]} aria-labelledby={`f-${o.id}`} data-reveal>
+              <h3 id={`f-${o.id}`} class="titre">{o.name}</h3>
+              <p class="pitch">{o.pitch}</p>
+              <table>
+                <caption class="sr-only">Formule {o.name}, prix en francs CFA</caption>
+                <tbody>
+                  {o.lines.map((l) => (
+                    <tr>
+                      <th scope="row">{l.label}</th>
+                      <td>{l.price}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </section>
+          ))
+        }
+      </div>
+      <div class="studio-pied">
+        <p class="doux">{tarifsSource}</p>
+        <Button href="/contact?objet=production">Réserver le studio</Button>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .hero-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 3rem clamp(2rem, 1rem + 4vw, 5rem);
+    align-items: center;
+    padding-block: clamp(3.5rem, 2rem + 4vw, 6rem);
+  }
+  .hero-texte {
+    display: grid;
+    gap: 1.5rem;
+  }
+  .sens {
+    font-size: clamp(1.25rem, 1rem + 1vw, 1.75rem);
+    color: var(--c-pierre-claire);
+  }
+  .ctas {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem 1.75rem;
+  }
+  .hero-photo {
+    position: relative;
+    margin: 0;
+  }
+  .hero-photo > :global(img) {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+  }
+  .macaron {
+    position: absolute;
+    left: -1.5rem;
+    bottom: -1.5rem;
+    display: grid;
+    place-items: center;
+    width: 8.5rem;
+    height: 8.5rem;
+    border-radius: 50%;
+    background: var(--c-papier);
+  }
+  .macaron :global(img) {
+    width: 6.5rem;
+    height: auto;
+  }
+
+  .vision-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    gap: 2rem clamp(2rem, 1rem + 4vw, 6rem);
+  }
+  .vision-texte {
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  .frise {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 2rem;
+    margin: 3rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .frise li {
+    display: grid;
+    align-content: start;
+    gap: 0.6rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--c-or);
+  }
+  .an {
+    font-size: clamp(3rem, 2rem + 3vw, 4.5rem);
+    line-height: 1;
+    color: var(--c-or);
+  }
+  .frise h3 {
+    font-size: 1.125rem;
+    font-weight: 700;
+  }
+
+  .catalogue {
+    background: var(--c-noir);
+    color: var(--c-papier);
+  }
+  .catalogue .surtitre {
+    color: var(--c-or);
+  }
+  .cat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 3rem clamp(2rem, 1rem + 4vw, 6rem);
+  }
+  .tracklist {
+    margin: 2rem 0 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: none;
+  }
+  .tracklist li {
+    display: grid;
+    grid-template-columns: 2.5rem minmax(0, 1fr) auto;
+    gap: 1rem;
+    align-items: baseline;
+    padding: 0.85rem 0;
+    border-bottom: 1px solid var(--c-ligne-sombre);
+  }
+  .n {
+    font-variant-numeric: tabular-nums;
+    color: var(--c-or);
+    font-weight: 700;
+    font-size: 0.875rem;
+  }
+  .t {
+    font-weight: 600;
+    font-size: 1.0625rem;
+  }
+  .k {
+    font-size: 0.8125rem;
+    color: var(--c-pierre-claire);
+    text-align: right;
+  }
+  .liens {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1.75rem;
+    margin-top: 2rem;
+  }
+
+  .ecouter-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    gap: 2.5rem clamp(2rem, 1rem + 4vw, 5rem);
+    align-items: center;
+  }
+  .ecouter-grid h2 {
+    margin-bottom: 1.25rem;
+  }
+  .petit {
+    margin-top: 1rem;
+    font-size: 0.875rem;
+  }
+
+  .tape-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: 2.5rem clamp(2rem, 1rem + 4vw, 5rem);
+  }
+  .tape-grid .doux {
+    margin-block: 1.25rem 1.5rem;
+  }
+  .artistes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 1.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-family: var(--f-titre);
+    font-size: clamp(1.5rem, 1.1rem + 1.4vw, 2.25rem);
+    line-height: 1.2;
+    text-transform: uppercase;
+  }
+  .artistes li:nth-child(3n + 2) {
+    color: var(--c-or-profond);
+  }
+
+  .studio-head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: end;
+    gap: 1rem 3rem;
+    margin-bottom: 2.5rem;
+  }
+  .studio-head .doux {
+    max-width: 26rem;
+  }
+  .offres {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+    gap: 1px;
+    background: var(--c-ligne-sombre);
+    border: 1px solid var(--c-ligne-sombre);
+  }
+  .offre {
+    display: grid;
+    align-content: start;
+    gap: 1rem;
+    padding: 1.75rem;
+    background: var(--c-noir);
+  }
+  .offre.phare {
+    background: var(--c-anthracite);
+    box-shadow: inset 0 3px 0 var(--c-or);
+  }
+  .offre h3 {
+    font-size: 1.875rem;
+    color: var(--c-or);
+  }
+  .pitch {
+    font-size: 0.9375rem;
+    color: var(--c-pierre-claire);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9375rem;
+  }
+  th,
+  td {
+    padding: 0.7rem 0;
+    border-top: 1px solid var(--c-ligne-sombre);
+    vertical-align: top;
+  }
+  th {
+    text-align: left;
+    font-weight: 400;
+    padding-right: 1rem;
+  }
+  td {
+    text-align: right;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .studio-pied {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 2rem;
+    font-size: 0.8125rem;
+  }
+
+  @media (max-width: 56rem) {
+    .hero-grid,
+    .vision-grid,
+    .frise,
+    .cat-grid,
+    .ecouter-grid,
+    .tape-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .macaron {
+      left: 1rem;
+      width: 7rem;
+      height: 7rem;
+    }
+    .macaron :global(img) {
+      width: 5.25rem;
+    }
+  }
+  @media (max-width: 30rem) {
+    .tracklist li {
+      grid-template-columns: 2rem minmax(0, 1fr);
+    }
+    .k {
+      grid-column: 2;
+      text-align: left;
+    }
+  }
+</style>

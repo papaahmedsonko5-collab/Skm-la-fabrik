@@ -292,6 +292,14 @@ const jsonLd = eventJsonLd(
     background: var(--c-orange);
     vertical-align: middle;
   }
+  @media (max-width: 40rem) {
+    .infos {
+      flex-direction: column;
+    }
+    .infos span + span::before {
+      display: none;
+    }
+  }
   .ctas {
     display: flex;
     flex-wrap: wrap;

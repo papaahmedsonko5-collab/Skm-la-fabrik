@@ -1,0 +1,174 @@
+---
+import { Image } from 'astro:assets';
+import { getCollection } from 'astro:content';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Gallery from '@/components/Gallery.astro';
+import PageIntro from '@/components/PageIntro.astro';
+import { photos } from '@/data/photos';
+import { sortNews } from '@/lib/content';
+
+const news = sortNews(await getCollection('actualites', ({ data }) => !data.draft));
+const [une, ...autres] = news;
+
+const mediatheque = [
+  { ...photos.rffFoule, large: true },
+  photos.studio,
+  photos.formation,
+  photos.scene2,
+  photos.scene3,
+  { ...photos.defile, large: true },
+  photos.echecs,
+  photos.handischool,
+  photos.setSetal,
+  photos.chanteuse,
+];
+---
+
+<BaseLayout
+  title="Actualités & galerie"
+  description="Reportages, annonces et photos de SKM La Fabrik, Sunu Kaddu Music et du Rio Fresco Fest à Rufisque."
+>
+  <PageIntro
+    eyebrow="Actualités · Galerie"
+    title={'Le journal<br />de la <span class="accent">Fabrik</span>'}
+    lead="Reportages, annonces et moments forts, à Rufisque et sur nos scènes."
+  >
+    <nav class="ancres" aria-label="Sections de la page">
+      <a href="#journal">Actualités</a>
+      <a href="#galerie">Galerie photo</a>
+    </nav>
+  </PageIntro>
+
+  <section id="journal" class="wrap journal" aria-label="Actualités">
+    {
+      une && (
+        <article class="une" data-reveal>
+          <a href={`/actualites/${une.id}`} class="une-lien">
+            <Image src={une.data.cover} alt={une.data.coverAlt} widths={[640, 1000, 1400]} sizes="(min-width: 64rem) 60vw, 100vw" loading="eager" />
+            <div class="une-texte">
+              <p class="meta">
+                <span>{une.data.type}</span> {une.data.period}
+              </p>
+              <h2 class="titre titre-h2">{une.data.title}</h2>
+              <p>{une.data.summary}</p>
+              <span class="lien-fleche">
+                Lire <span aria-hidden="true">→</span>
+              </span>
+            </div>
+          </a>
+        </article>
+      )
+    }
+    {
+      autres.length > 0 && (
+        <ul class="liste">
+          {autres.map((n) => (
+            <li data-reveal>
+              <article>
+                <a href={`/actualites/${n.id}`} class="carte">
+                  <Image src={n.data.cover} alt={n.data.coverAlt} widths={[400, 640]} sizes="(min-width: 64rem) 30vw, 100vw" />
+                  <p class="meta">
+                    <span>{n.data.type}</span> {n.data.period}
+                  </p>
+                  <h2 class="titre titre-h3">{n.data.title}</h2>
+                  <p class="resume">{n.data.summary}</p>
+                </a>
+              </article>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </section>
+
+  <section id="galerie" class="theme-sombre section" aria-labelledby="t-galerie">
+    <div class="wrap">
+      <p class="surtitre">Médiathèque</p>
+      <h2 id="t-galerie" class="titre titre-h2 galerie-titre">Galerie photo</h2>
+      <Gallery items={mediatheque} label="Galerie photo de SKM La Fabrik" />
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .ancres {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-top: 2rem;
+    font-weight: 700;
+  }
+  .ancres a {
+    text-underline-offset: 0.3em;
+  }
+  .journal {
+    display: grid;
+    gap: clamp(2.5rem, 2rem + 2vw, 4rem);
+    padding-bottom: var(--section-y);
+  }
+  .une-lien {
+    display: grid;
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+    gap: 2rem clamp(2rem, 1rem + 3vw, 4rem);
+    align-items: center;
+    text-decoration: none;
+  }
+  .une-lien :global(img) {
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+  }
+  .une-texte {
+    display: grid;
+    gap: 1rem;
+  }
+  .une-lien:hover h2,
+  .carte:hover h2 {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.15em;
+  }
+  .meta {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--c-pierre-claire);
+  }
+  .meta span {
+    margin-right: 0.6rem;
+    color: var(--c-or);
+  }
+  .liste {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+    gap: 2.5rem 1.5rem;
+    margin: 0;
+    padding: 2.5rem 0 0;
+    list-style: none;
+    border-top: 1px solid var(--c-ligne-sombre);
+  }
+  .carte {
+    display: grid;
+    gap: 0.75rem;
+    text-decoration: none;
+  }
+  .carte :global(img) {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    margin-bottom: 0.25rem;
+  }
+  .resume {
+    font-size: 0.9375rem;
+    color: var(--c-pierre-claire);
+  }
+  .galerie-titre {
+    margin-bottom: 2rem;
+  }
+  @media (max-width: 56rem) {
+    .une-lien {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>
