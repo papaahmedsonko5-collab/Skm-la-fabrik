@@ -17,9 +17,11 @@ export interface Props {
   /** Données structurées supplémentaires propres à la page. */
   jsonLd?: Record<string, unknown> | Record<string, unknown>[];
   noindex?: boolean;
+  /** Menu transparent sur la photo d'ouverture (pages à hero photo). */
+  overlayHeader?: boolean;
 }
 
-const { title, description = site.description, image = '/og-default.jpg', tone = 'fabrik', jsonLd, noindex = false } =
+const { title, description = site.description, image = '/og-default.jpg', tone = 'fabrik', jsonLd, noindex = false, overlayHeader = false } =
   Astro.props;
 
 const fullTitle = title ? `${title} · ${site.name}` : `${site.name} · ${site.tagline}`;
@@ -60,7 +62,7 @@ const structured = [organizationJsonLd(Astro.site), ...(jsonLd ? (Array.isArray(
   </head>
   <body>
     <a class="skip" href="#contenu">Aller au contenu</a>
-    <Header tone={tone} />
+    <Header tone={tone} overlay={overlayHeader} />
     <main id="contenu" tabindex="-1">
       <slot />
     </main>

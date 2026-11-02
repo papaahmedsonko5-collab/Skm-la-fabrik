@@ -34,7 +34,7 @@ const etapes = [
 ] as const;
 ---
 
-<BaseLayout>
+<BaseLayout overlayHeader>
   <section class="hero" aria-labelledby="accroche">
     <div class="hero-lueur" aria-hidden="true"></div>
     <div class="wrap hero-grid">
@@ -300,7 +300,7 @@ const etapes = [
     position: relative;
     overflow: hidden;
     isolation: isolate;
-    padding-block: clamp(2rem, 1rem + 3vw, 4rem) clamp(3rem, 2rem + 3vw, 5rem);
+    padding-block: calc(4.75rem + clamp(2rem, 1rem + 3vw, 4rem)) clamp(3rem, 2rem + 3vw, 5rem);
     background: var(--c-noir);
     color: var(--c-papier);
     --accent: var(--c-or);
@@ -438,6 +438,9 @@ const etapes = [
     border-color: var(--c-or);
   }
   @media (max-width: 64rem) {
+    .hero {
+      padding-top: 0;
+    }
     .hero-grid {
       grid-template-columns: minmax(0, 1fr);
     }

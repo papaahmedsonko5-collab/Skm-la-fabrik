@@ -6,12 +6,14 @@ import { isActive } from '@/lib/nav';
 
 interface Props {
   tone?: 'fabrik' | 'rff';
+  /** Menu transparent posé sur la photo d'ouverture, qui se fonce au défilement. */
+  overlay?: boolean;
 }
-const { tone = 'fabrik' } = Astro.props;
+const { tone = 'fabrik', overlay = false } = Astro.props;
 const path = Astro.url.pathname;
 ---
 
-<header class="header" data-tone={tone}>
+<header class="header" data-tone={tone} data-overlay={overlay ? '' : undefined}>
   <div class="bar wrap">
     <a class="brand" href="/" aria-label="SKM La Fabrik, accueil">
       <Image src={logo} alt="" width={64} height={64} loading="eager" fetchpriority="high" class="logo" />
@@ -64,6 +66,12 @@ const path = Astro.url.pathname;
         toggle.focus();
       }
     });
+    const header = document.querySelector<HTMLElement>('.header[data-overlay]');
+    if (header) {
+      const onScroll = () => header.classList.toggle('is-scrolled', window.scrollY > 24);
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+    }
     window.matchMedia('(min-width: 75rem)').addEventListener('change', (e) => {
       if (e.matches) setOpen(false);
     });
@@ -81,6 +89,19 @@ const path = Astro.url.pathname;
     background: var(--h-bg);
     border-bottom: 1px solid var(--h-line);
     color: var(--c-papier);
+  }
+  .header[data-overlay] {
+    margin-bottom: -4.75rem;
+    border-bottom-color: transparent;
+    background: linear-gradient(180deg, rgb(0 0 0 / 0.55), transparent);
+    transition:
+      background-color 0.3s,
+      border-color 0.3s;
+  }
+  .header[data-overlay].is-scrolled,
+  :global(body.menu-open) .header[data-overlay] {
+    border-bottom-color: var(--h-line);
+    background: var(--h-bg);
   }
   .header[data-tone='rff'] {
     --h-bg: var(--c-nuit);
@@ -131,46 +152,38 @@ const path = Astro.url.pathname;
     display: inline-flex;
     align-items: center;
     min-height: 2.75rem;
-    font-size: 0.8125rem;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
+    font-size: 0.9375rem;
+    font-weight: 500;
     text-decoration: none;
-    color: #e9e3d7;
+    color: rgb(255 255 255 / 0.78);
     transition: color 0.2s;
   }
-  .nav ul a::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0.45rem;
-    height: 2px;
-    background: var(--h-accent);
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform 0.3s var(--ease);
+  .nav ul a:hover {
+    color: #fff;
   }
-  .nav ul a:hover::after,
-  .nav ul a[aria-current='page']::after {
-    transform: scaleX(1);
-  }
-  .nav a[aria-current='page'] {
-    color: var(--h-accent);
+  .nav ul a[aria-current='page'] {
+    color: #fff;
+    font-weight: 700;
   }
   .nav .cta {
-    padding: 0 1.25rem;
+    padding: 0 1.6rem;
+    border: 1px solid rgb(255 255 255 / 0.22);
+    border-radius: 999px;
+    background: rgb(255 255 255 / 0.14);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    color: #fff;
+    font-weight: 600;
+    transition:
+      background-color 0.2s,
+      color 0.2s,
+      border-color 0.2s;
+  }
+  .nav .cta:hover,
+  .nav .cta[aria-current='page'] {
+    border-color: var(--h-accent);
     background: var(--h-accent);
     color: var(--h-bg);
-    font-weight: 700;
-    transition: background 0.2s;
-  }
-  .nav .cta:hover {
-    background: #fff;
-  }
-  .nav .cta[aria-current='page'] {
-    color: var(--h-bg);
-    background: #fff;
   }
   .toggle {
     display: none;
@@ -185,13 +198,15 @@ const path = Astro.url.pathname;
       align-items: center;
       gap: 0.75rem;
       min-height: 2.75rem;
-      padding: 0 0.9rem;
-      border: 1px solid var(--c-ligne-sombre);
-      background: transparent;
-      font-size: 0.8125rem;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
+      padding: 0 1.1rem;
+      border: 1px solid rgb(255 255 255 / 0.22);
+      border-radius: 999px;
+      background: rgb(255 255 255 / 0.14);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      color: #fff;
+      font-size: 0.875rem;
+      font-weight: 600;
       cursor: pointer;
     }
     .toggle-icon {
@@ -246,9 +261,7 @@ const path = Astro.url.pathname;
       font-weight: 400;
       font-size: 1.75rem;
       letter-spacing: 0.01em;
-    }
-    .nav ul a::after {
-      display: none;
+      text-transform: uppercase;
     }
     .nav .cta {
       justify-content: center;
