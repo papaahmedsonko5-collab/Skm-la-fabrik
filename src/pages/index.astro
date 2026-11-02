@@ -436,17 +436,37 @@ const etapes = [
     .hero-grid {
       grid-template-columns: minmax(0, 1fr);
     }
+    /* Téléphone et tablette : photo plein écran, texte posé dessus en bas */
+    .hero-grid {
+      align-items: start;
+    }
     .hero-photo {
-      grid-column: 1;
-      grid-row: 1;
+      position: absolute;
+      inset: 0 0 auto;
+      height: max(100svh, 36rem);
+      z-index: -1;
+    }
+    .hero-photo::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgb(13 12 10 / 0.5) 0, rgb(13 12 10 / 0) 16%, rgb(13 12 10 / 0) 34%, rgb(13 12 10 / 0.78) 56%, var(--c-noir) 82%);
     }
     .hero-photo :global(img) {
-      height: clamp(18rem, 52svh, 30rem);
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: 48% 12%;
     }
     .hero-texte {
       grid-column: 1;
-      grid-row: 2;
-      margin: 2rem 0 0;
+      grid-row: 1;
+      margin: 0;
+      padding-top: clamp(11rem, 40svh, 26rem);
+      text-shadow: 0 2px 20px rgb(13 12 10 / 0.5);
+    }
+    .hero-lueur {
+      display: none;
     }
   }
   @media (max-width: 56rem) {
@@ -841,11 +861,7 @@ const etapes = [
     font-weight: 700;
   }
 
-  /* Fondu de la photo d'ouverture : seule photo du site fondue dans le noir */
-  .hero-photo :global(img) {
-    -webkit-mask-image: linear-gradient(180deg, #000 55%, transparent 100%);
-    mask-image: linear-gradient(180deg, #000 55%, transparent 100%);
-  }
+  /* Fondu de la photo d'ouverture (seule photo fondue du site) : voiles dégradés sur .hero-photo::after */
   /* Ordinateur : la photo couvre tout l'écran d'ouverture, le texte passe dessus */
   @media (min-width: 64.01rem) {
     .hero-grid {
