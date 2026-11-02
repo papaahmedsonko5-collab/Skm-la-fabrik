@@ -29,96 +29,232 @@ const jsonLd = {
 };
 ---
 
-<BaseLayout title={d.title} description={d.summary} image={d.cover.src} jsonLd={jsonLd}>
+<BaseLayout title={d.title} description={d.summary} image={d.cover.src} jsonLd={jsonLd} overlayHeader>
   <article>
-    <header class="wrap entete">
-      <nav aria-label="Fil d’Ariane" class="ariane">
-        <a href="/actualites">Actualités</a> <span aria-hidden="true">/</span> <span>{d.type}</span>
-      </nav>
-      <h1 class="titre titre-h1">{d.title}</h1>
-      <p class="meta">
-        {d.date ? <time datetime={d.date.toISOString()}>{d.date.toLocaleDateString('fr-SN', { dateStyle: 'long' })}</time> : d.period}
-      </p>
-      <p class="chapeau resume">{d.summary}</p>
+    <header class="hero">
+      <Image
+        src={d.cover}
+        alt={d.coverAlt}
+        widths={[640, 1000, 1400, 1920]}
+        sizes="100vw"
+        quality={85}
+        loading="eager"
+        fetchpriority="high"
+        class="hero-img"
+      />
+      <div class="wrap hero-texte">
+        <nav aria-label="Fil d’Ariane" class="ariane">
+          <a href="/actualites">Actualités</a> <span aria-hidden="true">/</span> <span>{d.type}</span>
+        </nav>
+        <h1 class="titre hero-titre">{d.title}</h1>
+        <p class="meta">
+          {d.date ? <time datetime={d.date.toISOString()}>{d.date.toLocaleDateString('fr-SN', { dateStyle: 'long' })}</time> : d.period}
+        </p>
+      </div>
     </header>
-    <figure class="couverture">
-      <Image src={d.cover} alt={d.coverAlt} widths={[640, 1000, 1400]} sizes="100vw" loading="eager" fetchpriority="high" />
-    </figure>
-    <div class="wrap corps prose">
-      <Content />
+
+    <div class="theme-papier lecture">
+      <div class="wrap lecture-inner">
+        <p class="chapo">{d.summary}</p>
+        <div class="prose corps">
+          <Content />
+        </div>
+        <a class="lien-fleche retour" href="/actualites">
+          <span aria-hidden="true">←</span> Toutes les actualités
+        </a>
+      </div>
     </div>
   </article>
 
   {
     autres.length > 0 && (
-      <aside class="wrap section autres" aria-labelledby="t-autres">
-        <h2 id="t-autres" class="surtitre">À lire aussi</h2>
-        <ul>
-          {autres.map((n) => (
-            <li>
-              <a href={`/actualites/${n.id}`}>
-                <span class="type">{n.data.type}</span>
-                <span class="titre t">{n.data.title}</span>
-              </a>
-            </li>
-          ))}
-        </ul>
+      <aside class="theme-sombre section autres" aria-labelledby="t-autres">
+        <div class="wrap">
+          <h2 id="t-autres" class="index">
+            <span>+</span> À lire aussi
+          </h2>
+          <ul>
+            {autres.map((n) => (
+              <li>
+                <a href={`/actualites/${n.id}`}>
+                  <Image src={n.data.cover} alt="" widths={[400, 640]} sizes="(min-width: 64rem) 30vw, 100vw" />
+                  <span class="type">
+                    {n.data.type} · {n.data.period}
+                  </span>
+                  <span class="t">{n.data.title}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
       </aside>
     )
   }
 </BaseLayout>
 
 <style>
-  .entete {
-    max-width: 62rem;
-    padding-block: clamp(3rem, 2rem + 3vw, 5rem) 2.5rem;
+  .section {
+    padding-block: clamp(5rem, 3rem + 8vw, 9.5rem);
+  }
+
+  /* Hero : photo plein cadre fondue dans le noir, titre posé en bas */
+  .hero {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    display: grid;
+    align-items: end;
+    min-height: clamp(32rem, 86svh, 52rem);
+    padding-top: 4.75rem;
+    background: var(--c-noir);
+    color: var(--c-papier);
+  }
+  .hero :global(.hero-img) {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(180deg, rgb(13 12 10 / 0.35) 0, transparent 22%, transparent 35%, rgb(13 12 10 / 0.8) 75%, var(--c-noir) 100%);
+  }
+  .hero-texte {
+    padding-block: 2rem clamp(2.5rem, 2rem + 3vw, 4.5rem);
   }
   .ariane {
     display: flex;
-    gap: 0.5rem;
-    margin-bottom: 1.5rem;
-    font-size: 0.8125rem;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 0.6rem;
+    margin-bottom: 1.25rem;
+    font-size: var(--t-micro);
     font-weight: 600;
-    letter-spacing: 0.14em;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
     color: var(--c-or);
   }
+  .ariane a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    text-underline-offset: 0.3em;
+  }
+  .hero-titre {
+    max-width: 20ch;
+    font-size: clamp(2.5rem, 1.5rem + 4.4vw, 6.25rem);
+    line-height: 0.92;
+  }
   .meta {
-    margin-top: 1.25rem;
+    margin-top: 1.5rem;
+    font-size: var(--t-small);
     font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
     color: var(--c-pierre-claire);
   }
-  .resume {
-    margin-top: 1.25rem;
+
+  /* Lecture éditoriale : colonne étroite sur papier */
+  .lecture {
+    padding-block: clamp(3.5rem, 2.5rem + 5vw, 7rem) clamp(4rem, 3rem + 5vw, 7.5rem);
   }
-  .couverture {
-    margin: 0;
+  .lecture-inner {
+    display: grid;
+    justify-items: start;
+    max-width: calc(40rem + 2 * var(--gutter));
   }
-  .couverture :global(img) {
-    width: 100%;
-    height: clamp(16rem, 45vw, 36rem);
-    object-fit: cover;
+  .chapo {
+    margin-bottom: clamp(2rem, 1.5rem + 2vw, 3rem);
+    padding-bottom: clamp(2rem, 1.5rem + 2vw, 3rem);
+    border-bottom: 1px solid var(--line);
+    font-size: clamp(1.375rem, 1.1rem + 1.2vw, 2rem);
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+    text-wrap: pretty;
   }
   .corps {
-    max-width: 46rem;
-    padding-block: 3.5rem 2rem;
-    --accent: var(--c-or);
+    max-width: 40rem;
+    font-size: 1.1875rem;
+    line-height: 1.75;
   }
-  .autres {
-    border-top: 1px solid var(--c-ligne-sombre);
+  .corps :global(strong) {
+    font-weight: 700;
   }
+  .corps :global(h2) {
+    font-size: clamp(1.75rem, 1.4rem + 1.2vw, 2.375rem);
+  }
+  .corps :global(li + li) {
+    margin-top: 0.6em;
+  }
+  .corps :global(li::marker) {
+    color: var(--c-or-profond);
+    font-weight: 700;
+  }
+  .corps :global(ol) {
+    padding-left: 1.4em;
+  }
+  .corps :global(blockquote) {
+    margin: 2.25em 0;
+    padding: 0 0 0 1.25em;
+    border-left: 3px solid var(--c-or);
+    font-family: var(--f-citation);
+    font-style: italic;
+    font-size: clamp(1.625rem, 1.25rem + 1.3vw, 2.25rem);
+    line-height: 1.3;
+  }
+  .corps :global(blockquote p) {
+    margin: 0;
+  }
+  .retour {
+    margin-top: clamp(2.5rem, 2rem + 2vw, 4rem);
+  }
+
+  /* Repères numérotés (repris de l'accueil) */
+  .index {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin-bottom: clamp(1.5rem, 1rem + 1.5vw, 2.5rem);
+    font-family: var(--f-texte);
+    font-size: var(--t-micro);
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--soft);
+  }
+  .index span {
+    font-family: var(--f-titre);
+    font-size: 1.25rem;
+    font-weight: 400;
+    letter-spacing: 0;
+    color: var(--accent);
+  }
+
   .autres ul {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
-    gap: 1.5rem;
-    margin: 1.5rem 0 0;
+    gap: 2.5rem 1.5rem;
+    margin: 0;
     padding: 0;
     list-style: none;
   }
   .autres a {
     display: grid;
-    gap: 0.5rem;
+    align-content: start;
+    gap: 0.75rem;
     text-decoration: none;
+  }
+  .autres :global(img) {
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+    margin-bottom: 0.25rem;
   }
   .autres a:hover .t {
     color: var(--c-or);
@@ -131,6 +267,10 @@ const jsonLd = {
     color: var(--c-or);
   }
   .t {
-    font-size: 1.5rem;
+    font-family: var(--f-titre);
+    font-size: clamp(1.5rem, 1.3rem + 0.6vw, 1.875rem);
+    line-height: 1;
+    text-transform: uppercase;
+    transition: color 0.3s;
   }
 </style>

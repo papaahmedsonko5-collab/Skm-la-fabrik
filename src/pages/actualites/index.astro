@@ -2,8 +2,8 @@
 import { Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
 import BaseLayout from '@/layouts/BaseLayout.astro';
+import Carousel from '@/components/Carousel.astro';
 import Gallery from '@/components/Gallery.astro';
-import PageIntro from '@/components/PageIntro.astro';
 import { photos } from '@/data/photos';
 import { sortNews } from '@/lib/content';
 
@@ -28,129 +28,289 @@ const mediatheque = [
   title="Actualités & galerie"
   description="Reportages, annonces et photos de SKM La Fabrik, Sunu Kaddu Music et du Rio Fresco Fest à Rufisque."
 >
-  <PageIntro
-    eyebrow="Actualités · Galerie"
-    title={'Le journal<br />de la <span class="accent">Fabrik</span>'}
-    lead="Reportages, annonces et moments forts, à Rufisque et sur nos scènes."
-  >
-    <nav class="ancres" aria-label="Sections de la page">
-      <a href="#journal">Actualités</a>
-      <a href="#galerie">Galerie photo</a>
-    </nav>
-  </PageIntro>
+  <section class="theme-sombre intro" aria-labelledby="titre-page">
+    <div class="intro-lueur" aria-hidden="true"></div>
+    <div class="wrap intro-grid">
+      <div>
+        <p class="surtitre">Actualités · Galerie</p>
+        <h1 id="titre-page" class="titre intro-titre">Le journal<br />de la <span class="accent">Fabrik</span></h1>
+      </div>
+      <div class="intro-texte">
+        <p class="chapeau doux">Reportages, annonces et moments forts, à Rufisque et sur nos scènes.</p>
+        <nav class="ancres" aria-label="Sections de la page">
+          <a href="#journal">Actualités <span aria-hidden="true">↓</span></a>
+          <a href="#galerie">Galerie photo <span aria-hidden="true">↓</span></a>
+        </nav>
+      </div>
+    </div>
+  </section>
 
-  <section id="journal" class="wrap journal" aria-label="Actualités">
-    {
-      une && (
-        <article class="une" data-reveal>
-          <a href={`/actualites/${une.id}`} class="une-lien">
-            <Image src={une.data.cover} alt={une.data.coverAlt} widths={[640, 1000, 1400]} sizes="(min-width: 64rem) 60vw, 100vw" loading="eager" />
-            <div class="une-texte">
-              <p class="meta">
-                <span>{une.data.type}</span> {une.data.period}
-              </p>
-              <h2 class="titre titre-h2">{une.data.title}</h2>
-              <p>{une.data.summary}</p>
-              <span class="lien-fleche">
-                Lire <span aria-hidden="true">→</span>
-              </span>
-            </div>
-          </a>
-        </article>
-      )
-    }
-    {
-      autres.length > 0 && (
-        <ul class="liste">
-          {autres.map((n) => (
-            <li data-reveal>
-              <article>
-                <a href={`/actualites/${n.id}`} class="carte">
-                  <Image src={n.data.cover} alt={n.data.coverAlt} widths={[400, 640]} sizes="(min-width: 64rem) 30vw, 100vw" />
+  <section id="journal" class="theme-sombre journal" aria-labelledby="t-journal">
+    <div class="wrap">
+      <h2 id="t-journal" class="index"><span>01</span> À la une</h2>
+      {
+        une && (
+          <article class="une">
+            <a href={`/actualites/${une.id}`} class="une-lien">
+              <div class="une-photo">
+                <Image
+                  src={une.data.cover}
+                  alt={une.data.coverAlt}
+                  widths={[640, 1000, 1400, 1800]}
+                  sizes="(min-width: 80rem) 80rem, 100vw"
+                  quality={85}
+                  loading="eager"
+                  fetchpriority="high"
+                />
+              </div>
+              <div class="une-carte">
+                <p class="meta">
+                  <span>{une.data.type}</span> {une.data.period}
+                </p>
+                <h3 class="titre une-titre">{une.data.title}</h3>
+                <p class="une-resume">{une.data.summary}</p>
+                <span class="lien-fleche">
+                  Lire le reportage <span aria-hidden="true">→</span>
+                </span>
+              </div>
+            </a>
+          </article>
+        )
+      }
+    </div>
+  </section>
+
+  {
+    autres.length > 0 && (
+      <section class="theme-papier section fil" aria-labelledby="t-fil">
+        <div class="wrap">
+          <div class="fil-tete">
+            <p class="index">
+              <span>02</span> Le fil
+            </p>
+            <h2 id="t-fil" class="titre titre-h2">Toutes les actualités</h2>
+          </div>
+          <Carousel label="Autres actualités" tone="clair" itemWidth="clamp(17rem, 30vw, 26rem)">
+            {autres.map((n) => (
+              <article class="carte">
+                <a href={`/actualites/${n.id}`}>
+                  <Image src={n.data.cover} alt={n.data.coverAlt} widths={[400, 640]} sizes="(min-width: 64rem) 30vw, 85vw" />
                   <p class="meta">
                     <span>{n.data.type}</span> {n.data.period}
                   </p>
-                  <h2 class="titre titre-h3">{n.data.title}</h2>
-                  <p class="resume">{n.data.summary}</p>
+                  <h3 class="carte-titre">{n.data.title}</h3>
+                  <p class="carte-resume">{n.data.summary}</p>
                 </a>
               </article>
-            </li>
-          ))}
-        </ul>
-      )
-    }
-  </section>
+            ))}
+          </Carousel>
+        </div>
+      </section>
+    )
+  }
 
   <section id="galerie" class="theme-sombre section" aria-labelledby="t-galerie">
     <div class="wrap">
-      <p class="surtitre">Médiathèque</p>
-      <h2 id="t-galerie" class="titre titre-h2 galerie-titre">Galerie photo</h2>
+      <div class="galerie-tete">
+        <p class="index"><span>{autres.length > 0 ? '03' : '02'}</span> Médiathèque</p>
+        <h2 id="t-galerie" class="titre titre-h2">Galerie photo</h2>
+      </div>
       <Gallery items={mediatheque} label="Galerie photo de SKM La Fabrik" />
     </div>
   </section>
 </BaseLayout>
 
 <style>
+  .section {
+    padding-block: clamp(5rem, 3rem + 8vw, 9.5rem);
+  }
+
+  .intro {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    padding-block: clamp(4rem, 3rem + 5vw, 8rem) clamp(3rem, 2rem + 3vw, 5rem);
+  }
+  .intro-lueur {
+    position: absolute;
+    z-index: -1;
+    top: -30rem;
+    right: -24rem;
+    width: 70rem;
+    height: 70rem;
+    background: radial-gradient(closest-side, rgb(201 161 59 / 0.22), rgb(224 102 44 / 0.06) 55%, transparent 78%);
+    pointer-events: none;
+  }
+  .intro-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    gap: 2rem 4rem;
+    align-items: end;
+  }
+  .intro .surtitre {
+    margin-bottom: 1.25rem;
+  }
+  .intro-titre {
+    font-size: clamp(3.25rem, 1.8rem + 6vw, 8.5rem);
+    line-height: 0.88;
+  }
+  .intro-texte {
+    display: grid;
+    gap: 1.5rem;
+  }
   .ancres {
     display: flex;
     flex-wrap: wrap;
-    gap: 1.5rem;
-    margin-top: 2rem;
-    font-weight: 700;
+    gap: 0.5rem 1.75rem;
   }
   .ancres a {
-    text-underline-offset: 0.3em;
-  }
-  .journal {
-    display: grid;
-    gap: clamp(2.5rem, 2rem + 2vw, 4rem);
-    padding-bottom: var(--section-y);
-  }
-  .une-lien {
-    display: grid;
-    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
-    gap: 2rem clamp(2rem, 1rem + 3vw, 4rem);
+    display: inline-flex;
     align-items: center;
-    text-decoration: none;
-  }
-  .une-lien :global(img) {
-    width: 100%;
-    aspect-ratio: 3 / 2;
-    object-fit: cover;
-  }
-  .une-texte {
-    display: grid;
-    gap: 1rem;
-  }
-  .une-lien:hover h2,
-  .carte:hover h2 {
-    text-decoration: underline;
-    text-decoration-thickness: 2px;
-    text-underline-offset: 0.15em;
-  }
-  .meta {
-    font-size: 0.8125rem;
-    font-weight: 600;
+    gap: 0.5rem;
+    min-height: 2.75rem;
+    font-size: var(--t-small);
+    font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--c-pierre-claire);
+    text-decoration: none;
+    border-bottom: 2px solid var(--c-or);
+  }
+  .ancres a:hover {
+    color: var(--c-or);
+  }
+  @media (max-width: 56rem) {
+    .intro-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  /* Repères numérotés (repris de l'accueil) */
+  .index {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin-bottom: clamp(1.5rem, 1rem + 1.5vw, 2.5rem);
+    font-family: var(--f-texte);
+    font-size: var(--t-micro);
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--soft);
+  }
+  .index span {
+    font-family: var(--f-titre);
+    font-size: 1.25rem;
+    font-weight: 400;
+    letter-spacing: 0;
+    color: var(--accent);
+  }
+
+  .meta {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--soft);
   }
   .meta span {
     margin-right: 0.6rem;
-    color: var(--c-or);
+    color: var(--accent);
   }
-  .liste {
+
+  /* À la une : grande photo cinématographique, carte papier qui la chevauche */
+  .journal {
+    padding-block: clamp(2rem, 1rem + 3vw, 4rem) clamp(5rem, 3rem + 8vw, 9.5rem);
+  }
+  .une-lien {
+    position: relative;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
-    gap: 2.5rem 1.5rem;
-    margin: 0;
-    padding: 2.5rem 0 0;
-    list-style: none;
-    border-top: 1px solid var(--c-ligne-sombre);
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    text-decoration: none;
+  }
+  .une-photo {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    overflow: hidden;
+  }
+  .une-photo :global(img) {
+    display: block;
+    width: 100%;
+    height: clamp(22rem, 62svh, 40rem);
+    object-fit: cover;
+    transition: transform 1s var(--ease);
+    -webkit-mask-image: linear-gradient(180deg, #000 55%, transparent 100%);
+    mask-image: linear-gradient(180deg, #000 55%, transparent 100%);
+  }
+  .une-lien:hover .une-photo :global(img) {
+    transform: scale(1.02);
+  }
+  .une-carte {
+    grid-column: 6 / -1;
+    grid-row: 1;
+    align-self: end;
+    position: relative;
+    z-index: 1;
+    display: grid;
+    gap: 1.1rem;
+    justify-items: start;
+    margin-bottom: -3rem;
+    padding: clamp(1.75rem, 1rem + 2.4vw, 3.25rem);
+    background: var(--c-papier);
+    color: var(--c-encre);
+    --accent: var(--c-or-profond);
+    --soft: var(--c-encre-douce);
+  }
+  .une-titre {
+    font-size: clamp(2rem, 1.4rem + 2.4vw, 3.75rem);
+    line-height: 0.95;
+  }
+  .une-resume {
+    color: var(--c-encre-douce);
+    line-height: 1.6;
+  }
+  .une-lien:hover .une-titre {
+    text-decoration: underline;
+    text-decoration-color: var(--c-or);
+    text-decoration-thickness: 3px;
+    text-underline-offset: 0.12em;
+  }
+  @media (max-width: 64rem) {
+    .une-carte {
+      grid-column: 3 / -1;
+    }
+  }
+  @media (max-width: 48rem) {
+    .une-lien {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .une-photo {
+      margin-inline: calc(var(--gutter) * -1);
+    }
+    .une-photo :global(img) {
+      height: clamp(16rem, 50svh, 24rem);
+    }
+    .une-carte {
+      grid-column: 1;
+      grid-row: 2;
+      margin: -4rem 0 0 0.75rem;
+    }
+  }
+
+  /* Le fil : carrousel des autres actualités */
+  .fil {
+    padding-top: clamp(6rem, 4rem + 8vw, 11rem);
+  }
+  .fil-tete {
+    margin-bottom: clamp(2rem, 1.5rem + 2vw, 3.5rem);
   }
   .carte {
+    height: 100%;
+  }
+  .carte a {
     display: grid;
-    gap: 0.75rem;
+    align-content: start;
+    gap: 0.8rem;
+    height: 100%;
     text-decoration: none;
   }
   .carte :global(img) {
@@ -159,16 +319,24 @@ const mediatheque = [
     object-fit: cover;
     margin-bottom: 0.25rem;
   }
-  .resume {
-    font-size: 0.9375rem;
-    color: var(--c-pierre-claire);
+  .carte-titre {
+    margin: 0;
+    font-size: 1.35rem;
+    font-weight: 700;
+    line-height: 1.3;
   }
-  .galerie-titre {
-    margin-bottom: 2rem;
+  .carte a:hover .carte-titre {
+    text-decoration: underline;
+    text-decoration-color: var(--c-or);
+    text-underline-offset: 0.2em;
   }
-  @media (max-width: 56rem) {
-    .une-lien {
-      grid-template-columns: minmax(0, 1fr);
-    }
+  .carte-resume {
+    font-size: var(--t-small);
+    line-height: 1.55;
+    color: var(--c-encre-douce);
+  }
+
+  .galerie-tete {
+    margin-bottom: clamp(2rem, 1.5rem + 2vw, 3rem);
   }
 </style>

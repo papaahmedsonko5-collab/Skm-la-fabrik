@@ -5,7 +5,7 @@ import { getCollection, render, type CollectionEntry } from 'astro:content';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import Button from '@/components/Button.astro';
 import Gallery from '@/components/Gallery.astro';
-import ProjectCard from '@/components/ProjectCard.astro';
+import PortfolioVignette from '@/components/PortfolioVignette.astro';
 import { sortProjects } from '@/lib/content';
 import { contactObjectForCategory } from '@/lib/contact';
 
@@ -21,180 +21,491 @@ interface Props {
 const { project } = Astro.props;
 const { Content } = await render(project);
 const d = project.data;
-const related = sortProjects(await getCollection('projets', (p) => p.data.category === d.category && p.id !== project.id)).slice(0, 3);
+const tous = sortProjects(await getCollection('projets'));
+const related = tous.filter((p) => p.data.category === d.category && p.id !== project.id).slice(0, 3);
 const objet = contactObjectForCategory(d.category);
+
+// Navigation précédent / suivant dans l'ordre du portfolio (boucle aux extrémités).
+const position = tous.findIndex((p) => p.id === project.id);
+const precedent = tous.length > 1 ? tous[(position - 1 + tous.length) % tous.length] : undefined;
+const suivant = tous.length > 1 ? tous[(position + 1) % tous.length] : undefined;
+
+/** Valeur encore à documenter, écrite entre crochets dans le contenu (« [Année à préciser] »). */
+const aPreciser = (v: string) => v.trim().startsWith('[');
+
+const infos = [
+  { label: 'Catégorie', value: d.category },
+  { label: 'Période', value: d.period },
+  { label: 'Lieu', value: d.place },
+];
 ---
 
-<BaseLayout title={d.title} description={d.summary} image={d.cover?.src}>
+<BaseLayout title={d.title} description={d.summary} image={d.cover?.src} overlayHeader>
   <article>
-    <header class="wrap entete">
-      <nav aria-label="Fil d’Ariane" class="ariane">
-        <a href="/projets">Projets</a> <span aria-hidden="true">/</span> <span>{d.category}</span>
-      </nav>
-      <h1 class="titre titre-h1">{d.title}</h1>
-      <p class="chapeau resume">{d.summary}</p>
+    <header class:list={['hero', { 'hero-photo': d.cover, 'hero-typo': !d.cover }]}>
+      {
+        d.cover ? (
+          <Image
+            src={d.cover}
+            alt={d.coverAlt ?? ''}
+            widths={[640, 1000, 1400, 1920]}
+            sizes="100vw"
+            quality={85}
+            loading="eager"
+            fetchpriority="high"
+            class="hero-img"
+          />
+        ) : (
+          <div class="hero-lueur" aria-hidden="true" />
+        )
+      }
+      <div class="wrap hero-texte">
+        <nav aria-label="Fil d’Ariane" class="ariane">
+          <a href="/projets">Projets</a> <span aria-hidden="true">/</span>
+          <a href={`/projets?categorie=${encodeURIComponent(d.category)}`}>{d.category}</a>
+        </nav>
+        <h1 class="titre hero-titre">{d.title}</h1>
+        <p class="hero-resume">{d.summary}</p>
+      </div>
     </header>
 
-    {
-      d.cover && (
-        <figure class="couverture">
-          <Image src={d.cover} alt={d.coverAlt ?? ''} widths={[640, 1000, 1400]} sizes="100vw" loading="eager" fetchpriority="high" />
-        </figure>
-      )
-    }
+    <div class="theme-sombre bandeau">
+      <dl class="wrap bandeau-liste" aria-label="Infos clés du projet">
+        {
+          infos.map((info) => (
+            <div>
+              <dt>{info.label}</dt>
+              <dd class:list={{ 'a-preciser': aPreciser(info.value) }}>{info.value}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
 
-    <div class="wrap corps">
-      <aside class="fiche" aria-label="Fiche du projet">
-        <dl>
-          <div><dt>Catégorie</dt><dd>{d.category}</dd></div>
-          <div><dt>Date</dt><dd>{d.period}</dd></div>
-          <div><dt>Lieu</dt><dd>{d.place}</dd></div>
-          {d.partners.length > 0 && <div><dt>Partenaires</dt><dd>{d.partners.join(', ')}</dd></div>}
-        </dl>
-        {d.relatedPage && <a class="lien-fleche" href={d.relatedPage}>Page dédiée <span aria-hidden="true">→</span></a>}
-      </aside>
-      <div class="prose">
-        <Content />
+    <div class="theme-sombre">
+      <div class="wrap corps">
+        <div class="prose">
+          <Content />
+        </div>
+        {
+          (d.partners.length > 0 || d.relatedPage) && (
+            <aside class="fiche" aria-label="Fiche du projet">
+              {d.partners.length > 0 && (
+                <div>
+                  <h2 class="fiche-titre">Partenaires</h2>
+                  <ul class="partenaires">
+                    {d.partners.map((p) => (
+                      <li>{p}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {d.relatedPage && (
+                <a class="lien-fleche" href={d.relatedPage}>
+                  Page dédiée <span aria-hidden="true">→</span>
+                </a>
+              )}
+            </aside>
+          )
+        }
       </div>
     </div>
 
     {
       d.gallery.length > 0 && (
-        <section class="wrap galerie" aria-labelledby="t-galerie">
-          <h2 id="t-galerie" class="titre titre-h3">Galerie</h2>
-          <Gallery items={d.gallery} label={`Photos du projet ${d.title}`} />
+        <section class="theme-sombre galerie" aria-labelledby="t-galerie">
+          <div class="wrap">
+            <h2 id="t-galerie" class="index">
+              <span>01</span> Galerie
+            </h2>
+            <Gallery items={d.gallery} label={`Photos du projet ${d.title}`} />
+          </div>
         </section>
       )
     }
 
     {
       d.videos.length > 0 && (
-        <section class="wrap galerie" aria-labelledby="t-videos">
-          <h2 id="t-videos" class="titre titre-h3">Vidéos</h2>
-          <ul class="videos">
-            {d.videos.map((v) => (
-              <li>
-                <a href={v.url} target="_blank" rel="noopener">{v.title}</a>
-              </li>
-            ))}
-          </ul>
+        <section class="theme-sombre galerie" aria-labelledby="t-videos">
+          <div class="wrap">
+            <h2 id="t-videos" class="index">
+              <span>{d.gallery.length > 0 ? '02' : '01'}</span> Vidéos
+            </h2>
+            <ul class="videos">
+              {d.videos.map((v) => (
+                <li>
+                  <a class="lien-fleche" href={v.url} target="_blank" rel="noopener">
+                    {v.title} <span aria-hidden="true">↗</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
         </section>
       )
     }
 
-    <section class="theme-papier collaborer">
+    <section class="theme-papier collaborer" aria-labelledby="t-collaborer">
       <div class="wrap collaborer-inner">
-        <p class="titre titre-h3">Un projet similaire en tête&nbsp;?</p>
+        <h2 id="t-collaborer" class="titre titre-h2">Un projet similaire <span class="accent">en tête&nbsp;?</span></h2>
         <Button href={`/contact?objet=${objet}`} style="--btn-bg: var(--c-encre); --btn-ink: var(--c-papier); --btn-bg-hover: var(--c-noir)">Parlons-en</Button>
       </div>
     </section>
+  </article>
 
-    {
-      related.length > 0 && (
-        <section class="wrap section" aria-labelledby="t-autres">
-          <h2 id="t-autres" class="surtitre autres">Dans la même catégorie</h2>
+  {
+    (precedent || suivant) && (
+      <nav class="theme-sombre suite" aria-label="Autres projets du portfolio">
+        <div class="wrap suite-grille">
+          {precedent && (
+            <a class="suite-lien" href={`/projets/${precedent.id}`} rel="prev">
+              <span class="suite-sens">
+                <span aria-hidden="true">←</span> Projet précédent
+              </span>
+              <span class="titre suite-titre">{precedent.data.title}</span>
+            </a>
+          )}
+          {suivant && (
+            <a class="suite-lien suite-suivant" href={`/projets/${suivant.id}`} rel="next">
+              <span class="suite-sens">
+                Projet suivant <span aria-hidden="true">→</span>
+              </span>
+              <span class="titre suite-titre">{suivant.data.title}</span>
+            </a>
+          )}
+        </div>
+      </nav>
+    )
+  }
+
+  {
+    related.length > 0 && (
+      <section class="theme-anthracite section" aria-labelledby="t-autres">
+        <div class="wrap">
+          <h2 id="t-autres" class="index">
+            <span>+</span> Dans la même catégorie&nbsp;: {d.category}
+          </h2>
           <ul class="grille">
             {related.map((p) => (
               <li>
-                <ProjectCard project={p} />
+                <PortfolioVignette project={p} />
               </li>
             ))}
           </ul>
-        </section>
-      )
-    }
-  </article>
+        </div>
+      </section>
+    )
+  }
 </BaseLayout>
 
 <style>
-  .entete {
-    padding-block: clamp(3rem, 2rem + 3vw, 5rem) 2.5rem;
+  .section {
+    padding-block: clamp(5rem, 3rem + 8vw, 9.5rem);
+  }
+
+  /* Hero cinématographique : photo plein cadre fondue dans le noir */
+  .hero {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    display: grid;
+    align-items: end;
+    background: var(--c-noir);
+    color: var(--c-papier);
+    --accent: var(--c-or);
+  }
+  .hero-photo {
+    min-height: clamp(34rem, 92svh, 56rem);
+    padding-top: 4.75rem;
+  }
+  .hero-typo {
+    padding-top: calc(4.75rem + clamp(4rem, 3rem + 5vw, 8rem));
+  }
+  .hero :global(.hero-img) {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .hero-photo::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+      linear-gradient(180deg, rgb(13 12 10 / 0.35) 0, transparent 22%, transparent 40%, rgb(13 12 10 / 0.75) 72%, var(--c-noir) 100%),
+      linear-gradient(90deg, rgb(13 12 10 / 0.55), transparent 65%);
+  }
+  .hero-lueur {
+    position: absolute;
+    z-index: -1;
+    top: -30rem;
+    right: -20rem;
+    width: 72rem;
+    height: 72rem;
+    background: radial-gradient(closest-side, rgb(201 161 59 / 0.26), rgb(224 102 44 / 0.07) 55%, transparent 78%);
+    pointer-events: none;
+  }
+  .hero-texte {
+    padding-block: 2rem clamp(2.5rem, 2rem + 3vw, 4.5rem);
   }
   .ariane {
     display: flex;
-    gap: 0.5rem;
-    margin-bottom: 1.5rem;
-    font-size: 0.8125rem;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 0.6rem;
+    margin-bottom: 1.25rem;
+    font-size: var(--t-micro);
     font-weight: 600;
-    letter-spacing: 0.14em;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
     color: var(--c-or);
   }
   .ariane a {
-    text-underline-offset: 0.25em;
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    text-underline-offset: 0.3em;
   }
-  .resume {
+  .hero-titre {
+    max-width: 18ch;
+    font-size: clamp(3rem, 1.6rem + 6vw, 8.5rem);
+    line-height: 0.9;
+  }
+  .hero-resume {
+    max-width: 38rem;
     margin-top: 1.5rem;
+    font-size: var(--t-lead);
+    line-height: 1.55;
     color: var(--c-pierre-claire);
   }
-  .couverture :global(img) {
-    width: 100%;
-    height: clamp(16rem, 45vw, 38rem);
-    object-fit: cover;
+
+  /* Bandeau des infos clés */
+  .bandeau {
+    border-block: 1px solid var(--line);
   }
-  .corps {
+  .bandeau-liste {
     display: grid;
-    grid-template-columns: minmax(0, 20rem) minmax(0, 1fr);
-    gap: 2.5rem 5rem;
-    padding-block: 4rem;
-    --accent: var(--c-or);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-block: 0;
   }
-  @media (max-width: 56rem) {
-    .corps {
+  .bandeau-liste > div {
+    padding: 1.5rem 1.5rem 1.5rem 0;
+  }
+  .bandeau-liste > div + div {
+    padding-left: 1.5rem;
+    border-left: 1px solid var(--line);
+  }
+  .bandeau dt {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--c-or);
+  }
+  .bandeau dd {
+    margin: 0.45rem 0 0;
+    font-size: 1.0625rem;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+  .bandeau .a-preciser {
+    font-weight: 400;
+    font-style: italic;
+    color: var(--soft);
+  }
+  @media (max-width: 48rem) {
+    .bandeau-liste {
       grid-template-columns: minmax(0, 1fr);
     }
+    .bandeau-liste > div,
+    .bandeau-liste > div + div {
+      padding: 1.1rem 0;
+      border-left: 0;
+    }
+    .bandeau-liste > div + div {
+      border-top: 1px solid var(--line);
+    }
+  }
+
+  /* Corps : texte Markdown confortable et fiche latérale */
+  .corps {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 18rem);
+    gap: 3rem clamp(3rem, 2rem + 4vw, 7rem);
+    padding-block: clamp(3.5rem, 2.5rem + 4vw, 6.5rem);
+    --accent: var(--c-or);
+  }
+  .prose {
+    max-width: 42rem;
+    color: var(--c-pierre-claire);
+  }
+  .prose > :global(p:first-child) {
+    font-size: clamp(1.25rem, 1.1rem + 0.5vw, 1.5rem);
+    line-height: 1.55;
+    color: var(--c-papier);
+  }
+  .prose :global(strong) {
+    color: var(--c-papier);
+  }
+  .prose :global(h2) {
+    color: var(--c-papier);
+  }
+  .prose :global(li + li) {
+    margin-top: 0.6em;
+  }
+  .prose :global(li::marker) {
+    color: var(--c-or);
+  }
+  .prose :global(blockquote) {
+    margin: 2em 0;
+    padding-left: 1.25em;
+    border-left: 2px solid var(--c-or);
+    font-family: var(--f-citation);
+    font-style: italic;
+    font-size: clamp(1.5rem, 1.2rem + 1vw, 2rem);
+    line-height: 1.35;
+    color: var(--c-papier);
   }
   .fiche {
     display: grid;
     align-content: start;
     gap: 1.5rem;
   }
-  .fiche dl {
-    margin: 0;
-    border-top: 1px solid var(--c-anthracite-2);
-  }
-  .fiche dl > div {
-    padding: 0.85rem 0;
-    border-bottom: 1px solid var(--c-anthracite-2);
-  }
-  .fiche dt {
+  .fiche-titre {
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--line);
     font-size: 0.75rem;
     font-weight: 700;
-    letter-spacing: 0.14em;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
     color: var(--c-or);
   }
-  .fiche dd {
-    margin: 0.25rem 0 0;
+  .partenaires {
+    margin: 0;
+    padding: 0;
+    list-style: none;
   }
+  .partenaires li {
+    padding-block: 0.6rem;
+    border-bottom: 1px solid var(--line);
+    font-weight: 600;
+  }
+  @media (min-width: 56rem) {
+    .fiche {
+      position: sticky;
+      top: 6rem;
+      align-self: start;
+    }
+  }
+  @media (max-width: 56rem) {
+    .corps {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  /* Repères numérotés (repris de l'accueil) */
+  .index {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin-bottom: clamp(1.5rem, 1rem + 1.5vw, 2.5rem);
+    font-family: var(--f-texte);
+    font-size: var(--t-micro);
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--soft);
+  }
+  .index span {
+    font-family: var(--f-titre);
+    font-size: 1.25rem;
+    font-weight: 400;
+    letter-spacing: 0;
+    color: var(--accent);
+  }
+
   .galerie {
-    padding-bottom: 4rem;
-  }
-  .galerie h2 {
-    margin-bottom: 1.5rem;
+    padding-block: 0 clamp(4rem, 3rem + 4vw, 6.5rem);
   }
   .videos {
     display: grid;
     gap: 0.5rem;
-    padding-left: 1.2rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
   }
+
   .collaborer {
-    padding-block: 3.5rem;
+    padding-block: clamp(4rem, 3rem + 4vw, 6.5rem);
   }
   .collaborer-inner {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
-    align-items: center;
-    gap: 1.5rem;
+    align-items: end;
+    gap: 2rem;
   }
-  .autres {
-    margin-bottom: 1.5rem;
+  .collaborer h2 {
+    max-width: 16ch;
   }
+
+  /* Projet précédent / suivant */
+  .suite {
+    border-bottom: 1px solid var(--line);
+  }
+  .suite-grille {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .suite-lien {
+    display: grid;
+    gap: 0.75rem;
+    align-content: start;
+    padding-block: clamp(2.5rem, 2rem + 2vw, 4rem);
+    padding-right: 1.5rem;
+    text-decoration: none;
+  }
+  .suite-suivant {
+    grid-column: 2;
+    justify-items: end;
+    padding-inline: 1.5rem 0;
+    border-left: 1px solid var(--line);
+    text-align: right;
+  }
+  .suite-sens {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--c-or);
+  }
+  .suite-titre {
+    font-size: clamp(1.75rem, 1.3rem + 1.8vw, 3.25rem);
+    line-height: 0.95;
+    transition: color 0.3s;
+  }
+  .suite-lien:hover .suite-titre {
+    color: var(--c-or);
+  }
+  @media (max-width: 40rem) {
+    .suite-grille {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .suite-suivant {
+      grid-column: 1;
+      padding-left: 0;
+      border-left: 0;
+      border-top: 1px solid var(--line);
+    }
+  }
+
   .grille {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
+    gap: 3rem 1.5rem;
     margin: 0;
     padding: 0;
     list-style: none;
