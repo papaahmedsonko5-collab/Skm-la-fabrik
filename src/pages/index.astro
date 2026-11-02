@@ -209,9 +209,9 @@ const etapes = [
     <div class="wrap label">
       <div class="label-visuel" data-reveal>
         <Image src={photos.studio.src} alt={photos.studio.alt} widths={[480, 800, 1280, 1600, 1920]} sizes="(min-width: 64rem) 42vw, 100vw" />
-        <div class="label-logo"><Image src={logoSk} alt="Sunu Kaddu" width={130} height={130} /></div>
       </div>
       <div class="label-texte" data-reveal>
+        <div class="label-logo"><Image src={logoSk} alt="Sunu Kaddu" width={130} height={130} /></div>
         <p class="surtitre">Le label · Sunu Kaddu Music</p>
         <h2 id="label" class="titre titre-h2">« Notre Parole », en wolof.</h2>
         <p class="chapeau">
@@ -266,7 +266,7 @@ const etapes = [
           news.map((n) => (
             <article class="news">
               <a href={`/actualites/${n.id}`}>
-                <Image src={n.data.cover} alt="" widths={[400, 640, 1280, 1600, 1920]} sizes="(min-width: 64rem) 32vw, 85vw" />
+                <Image src={n.data.cover} style={`object-position: ${n.data.coverPosition}`} alt="" widths={[400, 640, 1280, 1600, 1920]} sizes="(min-width: 64rem) 32vw, 85vw" />
                 <span class="news-meta">
                   {n.data.type} · {n.data.period}
                 </span>
@@ -292,7 +292,7 @@ const etapes = [
 <style>
   /* Respiration plus généreuse entre les sections de l'accueil */
   .section {
-    padding-block: clamp(5rem, 3rem + 8vw, 9.5rem);
+    padding-block: clamp(5rem, 3rem + 6vw, 7.5rem);
   }
 
   /* Hero : titre à gauche, photo entière cadrée à droite */
@@ -727,16 +727,10 @@ const etapes = [
     aspect-ratio: 4 / 5;
     object-fit: cover;
   }
-  .label-logo {
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    padding: 1.25rem 1.5rem 0 0;
-    background: var(--c-papier);
-  }
   .label-logo :global(img) {
-    width: 6.5rem;
-    height: 6.5rem;
+    display: block;
+    width: 5rem;
+    height: 5rem;
   }
   .label-texte {
     display: grid;
@@ -845,5 +839,23 @@ const etapes = [
     border-bottom: 1px solid var(--line);
     text-align: center;
     font-weight: 700;
+  }
+
+  /* Fondu de la photo d'ouverture : seule photo du site fondue dans le noir */
+  .hero-photo :global(img) {
+    -webkit-mask-image: linear-gradient(180deg, #000 55%, transparent 100%);
+    mask-image: linear-gradient(180deg, #000 55%, transparent 100%);
+  }
+  @media (min-width: 64.01rem) {
+    .hero-photo :global(img) {
+      -webkit-mask-image:
+        linear-gradient(90deg, transparent 0, #000 38%),
+        linear-gradient(180deg, transparent 0, #000 14%, #000 86%, transparent 100%);
+      -webkit-mask-composite: source-in;
+      mask-image:
+        linear-gradient(90deg, transparent 0, #000 38%),
+        linear-gradient(180deg, transparent 0, #000 14%, #000 86%, transparent 100%);
+      mask-composite: intersect;
+    }
   }
 </style>

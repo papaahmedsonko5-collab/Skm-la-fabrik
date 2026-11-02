@@ -55,6 +55,7 @@ const mediatheque = [
               <div class="une-photo">
                 <Image
                   src={une.data.cover}
+                  style={`object-position: ${une.data.coverPosition}`}
                   alt={une.data.coverAlt}
                   widths={[640, 1000, 1280, 1400, 1600, 1800, 1920]}
                   sizes="(min-width: 80rem) 80rem, 100vw"
@@ -94,7 +95,7 @@ const mediatheque = [
             {autres.map((n) => (
               <article class="carte">
                 <a href={`/actualites/${n.id}`}>
-                  <Image src={n.data.cover} alt={n.data.coverAlt} widths={[400, 640, 1280, 1600, 1920]} sizes="(min-width: 64rem) 30vw, 85vw" />
+                  <Image src={n.data.cover} style={`object-position: ${n.data.coverPosition}`} alt={n.data.coverAlt} widths={[400, 640, 1280, 1600, 1920]} sizes="(min-width: 64rem) 30vw, 85vw" />
                   <p class="meta">
                     <span>{n.data.type}</span> {n.data.period}
                   </p>
@@ -122,7 +123,7 @@ const mediatheque = [
 
 <style>
   .section {
-    padding-block: clamp(5rem, 3rem + 8vw, 9.5rem);
+    padding-block: clamp(5rem, 3rem + 6vw, 7.5rem);
   }
 
   .intro {

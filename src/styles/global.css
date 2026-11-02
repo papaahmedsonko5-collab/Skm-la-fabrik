@@ -48,7 +48,7 @@
   /* Espacements */
   --gutter: clamp(1rem, 0.5rem + 2.4vw, 2.5rem);
   --section-y: clamp(4.5rem, 3rem + 6vw, 7.5rem);
-  --max: 85rem;
+  --max: 96rem;
 
   --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
   --focus: 0 0 0 3px var(--c-noir), 0 0 0 5px var(--c-or);

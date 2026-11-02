@@ -55,6 +55,8 @@ const actualites = defineCollection({
       summary: z.string().max(220),
       cover: image(),
       coverAlt: z.string(),
+      /** Point focal CSS (object-position) quand la photo est recadrée, ex. « center 15% ». */
+      coverPosition: z.string().regex(/^[a-z0-9% .]+$/).default('center'),
       featured: z.boolean().default(false),
       draft: z.boolean().default(false),
     }),

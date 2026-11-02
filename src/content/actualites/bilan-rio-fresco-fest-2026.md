@@ -5,6 +5,7 @@ period: Juin 2026
 summary: "Cinq jours au Boulodrome, quatre piliers, une cérémonie en présence des autorités et le concert du parrain Baaba Maal : retour sur l’édition 2026."
 cover: ../../assets/photos/ceremonie-officielle.jpg
 coverAlt: Cérémonie officielle du Rio Fresco Fest 2026 avec les autorités
+coverPosition: center 14%
 featured: true
 ---
 
