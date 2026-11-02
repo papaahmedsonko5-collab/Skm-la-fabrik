@@ -1,0 +1,64 @@
+---
+import { mediaUrl } from '@/lib/admin/supabase';
+
+export interface Props {
+  name: string;
+  label: string;
+  path?: string | null;
+  alt?: string;
+  altName?: string;
+  required?: boolean;
+}
+const { name, label, path = null, alt = '', altName = `${name}_alt`, required = false } = Astro.props;
+const previewId = `apercu-${name}`;
+---
+
+<div class="photo-champ">
+  <div class="photo-apercu">
+    {path ? <img id={previewId} src={mediaUrl(path)} alt="" /> : <img id={previewId} alt="" hidden />}
+    {!path && <span class="aide">Aucune photo</span>}
+  </div>
+  <div class="champs">
+    <label>
+      {label}
+      <span class="aide">JPEG, PNG ou WebP. Les grandes photos sont réduites à 2400 px avant l’envoi, en gardant la qualité HD.</span>
+      <input type="file" name={name} accept="image/jpeg,image/png,image/webp,image/avif" data-apercu={previewId} required={required && !path} />
+    </label>
+    <label>
+      Description de la photo
+      <span class="aide">Pour les personnes malvoyantes et le référencement. Décrivez ce qu’on voit, sans nommer quelqu’un qui n’est pas identifié.</span>
+      <input type="text" name={altName} value={alt} maxlength="200" />
+    </label>
+  </div>
+</div>
+
+<style>
+  .photo-champ {
+    display: grid;
+    grid-template-columns: 12rem minmax(0, 1fr);
+    gap: 1.25rem;
+    align-items: start;
+  }
+  .photo-apercu {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border: 1px dashed var(--a-ligne);
+    border-radius: 0.9rem;
+    background: var(--c-papier-2);
+  }
+  .photo-apercu img[hidden] {
+    display: none;
+  }
+  .photo-apercu img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  @media (max-width: 40rem) {
+    .photo-champ {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

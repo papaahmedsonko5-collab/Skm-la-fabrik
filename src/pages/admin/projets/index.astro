@@ -1,0 +1,73 @@
+---
+import AdminLayout from '@/layouts/AdminLayout.astro';
+import { flashFrom, formatDate, type Projet } from '@/lib/admin/data';
+import { mediaUrl } from '@/lib/admin/supabase';
+
+export const prerender = false;
+
+const { data } = await Astro.locals.supabase!
+  .from('projets')
+  .select('id, slug, title, category, period, year, cover_path, featured, draft, updated_at')
+  .order('featured', { ascending: false })
+  .order('year', { ascending: false, nullsFirst: false });
+const items = (data ?? []) as Projet[];
+---
+
+<AdminLayout title="Projets" flash={flashFrom(Astro.url)}>
+  <a slot="actions" class="bouton or" href="/admin/projets/nouveau">Nouveau projet</a>
+  <div class="carte">
+    {
+      items.length === 0 ? (
+        <p class="vide">Aucun projet. Créez le premier, ou importez le contenu actuel du site depuis le tableau de bord.</p>
+      ) : (
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Photo</th>
+                <th scope="col">Titre</th>
+                <th scope="col">Catégorie</th>
+                <th scope="col">État</th>
+                <th scope="col">Modifiée</th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.map((a) => (
+                <tr>
+                  <td>{a.cover_path ? <img class="vignette" src={mediaUrl(a.cover_path)} alt="" loading="lazy" /> : <span class="aide">Aucune</span>}</td>
+                  <td>
+                    <a class="lien" href={`/admin/projets/${a.id}`}>
+                      {a.title}
+                    </a>
+                    {a.featured && <span class="aide"> · Projet phare</span>}
+                    <span class="sous">{a.period}</span>
+                  </td>
+                  <td>{a.category}</td>
+                  <td>
+                    <span class:list={['pastille', a.draft ? 'brouillon' : 'publie']}>{a.draft ? 'Brouillon' : 'En ligne'}</span>
+                  </td>
+                  <td class="aide">{formatDate(a.updated_at)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )
+    }
+  </div>
+</AdminLayout>
+
+<style>
+  .vignette {
+    display: block;
+    width: 5.5rem;
+    height: 3.6rem;
+    border-radius: 0.5rem;
+    object-fit: cover;
+  }
+  .sous {
+    display: block;
+    color: var(--a-doux);
+    font-size: 0.875rem;
+  }
+</style>

@@ -1,4 +1,5 @@
 ---
+import { t, tt } from '@/lib/cms';
 import { Image } from 'astro:assets';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import Button from '@/components/Button.astro';
@@ -31,12 +32,9 @@ const tournants = ['2014', '2024'];
     <div class="hero-lueur" aria-hidden="true"></div>
     <div class="wrap hero-contenu">
       <p class="surtitre">À propos · De Sunu Kaddu à La Fabrik</p>
-      <h1 id="titre-page" class="titre hero-titre">Nul n’entre ici <br />s’il n’est <span class="accent">créatif.</span></h1>
+      <h1 id="titre-page" class="titre hero-titre" set:html={tt('apropos.hero.titre')} />
       <div class="hero-bas">
-        <p class="hero-chapeau">
-          Depuis sa création en 2014 par l’artiste PPS the Writah, Sunu Kaddu s’est imposé comme un acteur majeur des cultures
-          urbaines à Rufisque et au Sénégal.
-        </p>
+        <p class="hero-chapeau">{t('apropos.hero.chapeau')}</p>
         <p class="hero-legende">Studio Key I Am · Cité Senelec, Rufisque</p>
       </div>
     </div>

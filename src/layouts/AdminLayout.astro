@@ -1,0 +1,526 @@
+---
+import '@/styles/global.css';
+import logo from '@/assets/brand/logo-skm-la-fabrik.png';
+import { Image } from 'astro:assets';
+
+export interface Props {
+  title: string;
+  /** Sur-titre au-dessus du titre de la page (ex. « Espace admin »). */
+  kicker?: string;
+  /** Message de confirmation ou d'erreur affiché en haut de page. */
+  flash?: { type: 'ok' | 'erreur'; text: string } | null;
+  bare?: boolean;
+}
+
+const { title, kicker = 'Espace admin', flash = null, bare = false } = Astro.props;
+const path = Astro.url.pathname;
+const admin = Astro.locals.admin;
+
+const nav = [
+  { href: '/admin', label: 'Tableau de bord', icon: 'home' },
+  { href: '/admin/demandes', label: 'Demandes', icon: 'inbox' },
+  { href: '/admin/actualites', label: 'Actualités', icon: 'news' },
+  { href: '/admin/projets', label: 'Projets', icon: 'grid' },
+  { href: '/admin/textes', label: 'Textes des pages', icon: 'text' },
+] as const;
+
+const isActive = (href: string) => (href === '/admin' ? path === '/admin' : path.startsWith(href));
+
+const icons: Record<string, string> = {
+  home: 'M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3z',
+  inbox: 'M3 13h5l1.5 3h5L16 13h5M3 13l3-8h12l3 8v7H3z',
+  news: 'M4 4h13v16H6a2 2 0 0 1-2-2zM17 8h3v10a2 2 0 0 1-2 2M8 8h5M8 12h5M8 16h3',
+  grid: 'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z',
+  text: 'M5 6h14M5 12h14M5 18h9',
+  out: 'M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10',
+  site: 'M14 4h6v6M20 4l-9 9M18 14v6H4V6h6',
+};
+---
+
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>{title} · Admin SKM La Fabrik</title>
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <script is:inline src="/admin/admin.js" defer></script>
+  </head>
+  <body class:list={['admin', { bare }]}>
+    {
+      !bare && (
+        <aside class="side" aria-label="Navigation de l'admin">
+          <a class="side-logo" href="/admin" aria-label="Tableau de bord">
+            <Image src={logo} alt="SKM La Fabrik" width={88} />
+          </a>
+          <nav>
+            <ul>
+              {nav.map((n) => (
+                <li>
+                  <a href={n.href} aria-current={isActive(n.href) ? 'page' : undefined}>
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d={icons[n.icon]} />
+                    </svg>
+                    <span>{n.label}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+          <div class="side-bas">
+            <a href="/" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d={icons.site} />
+              </svg>
+              <span>Voir le site</span>
+            </a>
+            <form method="post" action="/admin/deconnexion">
+              <button type="submit">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d={icons.out} />
+                </svg>
+                <span>Se déconnecter</span>
+              </button>
+            </form>
+          </div>
+        </aside>
+      )
+    }
+    <main class="contenu" id="contenu">
+      <header class="entete">
+        <div>
+          <p class="kicker">{kicker}</p>
+          <h1>{title}</h1>
+        </div>
+        <div class="entete-actions">
+          <slot name="actions" />
+          {admin && <span class="moi" title={admin.email}>{admin.email.slice(0, 1).toUpperCase()}</span>}
+        </div>
+      </header>
+      {
+        flash && (
+          <p class:list={['flash', flash.type]} role={flash.type === 'erreur' ? 'alert' : 'status'}>
+            {flash.text}
+          </p>
+        )
+      }
+      <slot />
+    </main>
+  </body>
+</html>
+
+<style is:global>
+  body.admin {
+    --a-fond: #efe9de;
+    --a-carte: #fffdf9;
+    --a-ligne: #e1d8c8;
+    --a-texte: var(--c-encre);
+    --a-doux: #6b6358;
+    display: grid;
+    grid-template-columns: 15.5rem minmax(0, 1fr);
+    gap: 1.5rem;
+    min-height: 100svh;
+    margin: 0;
+    padding: 1.25rem;
+    background: var(--a-fond);
+    color: var(--a-texte);
+    font-family: var(--f-texte);
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+  body.admin.bare {
+    grid-template-columns: minmax(0, 1fr);
+    place-items: center;
+  }
+  .admin .side {
+    position: sticky;
+    top: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    height: calc(100svh - 2.5rem);
+    padding: 1.5rem 1rem;
+    border-radius: 1.5rem;
+    background: var(--c-noir);
+    color: var(--c-papier);
+  }
+  .admin .side-logo {
+    display: block;
+    padding: 0 0.75rem;
+  }
+  .admin .side-logo img {
+    width: 5.5rem;
+    height: auto;
+  }
+  .admin .side ul {
+    display: grid;
+    gap: 0.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .admin .side a,
+  .admin .side button {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    width: 100%;
+    min-height: 2.9rem;
+    padding: 0.6rem 0.85rem;
+    border: 0;
+    border-radius: 0.85rem;
+    background: none;
+    color: var(--c-pierre-claire);
+    font: inherit;
+    font-weight: 500;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .admin .side a:hover,
+  .admin .side button:hover {
+    background: rgb(255 255 255 / 0.06);
+    color: var(--c-papier);
+  }
+  .admin .side a[aria-current='page'] {
+    background: var(--c-or);
+    color: var(--c-noir);
+    font-weight: 700;
+  }
+  .admin .side svg {
+    flex: none;
+    width: 1.3rem;
+    height: 1.3rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .admin .side-bas {
+    display: grid;
+    gap: 0.25rem;
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px solid var(--c-ligne-sombre);
+  }
+  .admin .contenu {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    min-width: 0;
+    padding: 0.5rem 0.5rem 3rem;
+  }
+  .admin.bare .contenu {
+    width: min(100%, 26rem);
+  }
+  .admin .entete {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .admin .kicker {
+    margin: 0;
+    color: var(--a-doux);
+    font-size: 0.875rem;
+  }
+  .admin h1 {
+    margin: 0.15rem 0 0;
+    font-family: var(--f-texte);
+    font-size: clamp(1.5rem, 1.2rem + 1vw, 2rem);
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    text-transform: none;
+  }
+  .admin .entete-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .admin .moi {
+    display: grid;
+    place-items: center;
+    width: 2.6rem;
+    height: 2.6rem;
+    border-radius: 50%;
+    background: var(--c-noir);
+    color: var(--c-or);
+    font-weight: 800;
+  }
+  .admin .flash {
+    margin: 0;
+    padding: 0.9rem 1.1rem;
+    border-radius: 0.85rem;
+    font-weight: 600;
+  }
+  .admin .flash.ok {
+    background: #e3efe0;
+    color: #23461d;
+  }
+  .admin .flash.erreur {
+    background: #f7e1d8;
+    color: #7c2b10;
+  }
+
+  /* Cartes et grilles */
+  .admin .carte {
+    padding: 1.4rem;
+    border: 1px solid var(--a-ligne);
+    border-radius: 1.25rem;
+    background: var(--a-carte);
+  }
+  .admin .carte h2 {
+    margin: 0 0 1rem;
+    font-family: var(--f-texte);
+    font-size: 1.1rem;
+    font-weight: 800;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .admin .carte-tete {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  .admin .carte-tete h2 {
+    margin: 0;
+  }
+
+  /* Boutons */
+  .admin .bouton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 2.75rem;
+    padding: 0.55rem 1.2rem;
+    border: 1px solid transparent;
+    border-radius: 0.8rem;
+    background: var(--c-noir);
+    color: var(--c-papier);
+    font: inherit;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .admin .bouton:hover {
+    background: var(--c-anthracite-2);
+  }
+  .admin .bouton.or {
+    background: var(--c-or);
+    color: var(--c-noir);
+  }
+  .admin .bouton.or:hover {
+    background: var(--c-or-vif);
+  }
+  .admin .bouton.contour {
+    border-color: var(--a-ligne);
+    background: var(--a-carte);
+    color: var(--a-texte);
+  }
+  .admin .bouton.contour:hover {
+    border-color: var(--c-encre);
+  }
+  .admin .bouton.danger {
+    border-color: #e5b8a6;
+    background: var(--a-carte);
+    color: #8f3412;
+  }
+  .admin .bouton[disabled] {
+    opacity: 0.6;
+    cursor: wait;
+  }
+  .admin .lien {
+    color: var(--c-or-profond);
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .admin .lien:hover {
+    text-decoration: underline;
+  }
+
+  /* Formulaires */
+  .admin .champs {
+    display: grid;
+    gap: 1.1rem;
+  }
+  .admin .champs.deux {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+  }
+  .admin label,
+  .admin .label {
+    display: grid;
+    gap: 0.4rem;
+    font-size: 0.9375rem;
+    font-weight: 700;
+  }
+  .admin .aide {
+    color: var(--a-doux);
+    font-size: 0.875rem;
+    font-weight: 400;
+  }
+  .admin input[type='text'],
+  .admin input[type='email'],
+  .admin input[type='password'],
+  .admin input[type='date'],
+  .admin input[type='number'],
+  .admin input[type='url'],
+  .admin input[type='search'],
+  .admin select,
+  .admin textarea {
+    width: 100%;
+    min-height: 2.9rem;
+    padding: 0.6rem 0.85rem;
+    border: 1px solid var(--a-ligne);
+    border-radius: 0.75rem;
+    background: #fff;
+    color: var(--a-texte);
+    font: inherit;
+    font-weight: 400;
+  }
+  .admin textarea {
+    min-height: 8rem;
+    resize: vertical;
+    line-height: 1.6;
+  }
+  .admin textarea.long {
+    min-height: 18rem;
+  }
+  .admin input:focus-visible,
+  .admin select:focus-visible,
+  .admin textarea:focus-visible,
+  .admin .bouton:focus-visible,
+  .admin a:focus-visible,
+  .admin button:focus-visible {
+    outline: 3px solid var(--c-or);
+    outline-offset: 2px;
+  }
+  .admin .case {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-weight: 600;
+  }
+  .admin .case input {
+    width: 1.2rem;
+    height: 1.2rem;
+    accent-color: var(--c-or-profond);
+  }
+  .admin .actions-bas {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+  }
+
+  /* Tableaux */
+  .admin .table-wrap {
+    overflow-x: auto;
+  }
+  .admin table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9375rem;
+  }
+  .admin th {
+    padding: 0.6rem 0.75rem;
+    border-bottom: 1px solid var(--a-ligne);
+    color: var(--a-doux);
+    font-size: 0.8125rem;
+    font-weight: 700;
+    text-align: left;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .admin td {
+    padding: 0.85rem 0.75rem;
+    border-bottom: 1px solid var(--a-ligne);
+    vertical-align: middle;
+  }
+  .admin tr:last-child td {
+    border-bottom: 0;
+  }
+  .admin .vide {
+    margin: 0;
+    padding: 2rem 1rem;
+    color: var(--a-doux);
+    text-align: center;
+  }
+
+  /* Pastilles de statut */
+  .admin .pastille {
+    display: inline-block;
+    padding: 0.2rem 0.65rem;
+    border-radius: 999px;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .admin .pastille.nouvelle {
+    background: #f6e7bf;
+    color: #5b4208;
+  }
+  .admin .pastille.en_cours {
+    background: #dfe5f3;
+    color: #1f2f5c;
+  }
+  .admin .pastille.traitee {
+    background: #e3efe0;
+    color: #23461d;
+  }
+  .admin .pastille.archivee,
+  .admin .pastille.brouillon {
+    background: #ebe6dc;
+    color: #5a5348;
+  }
+  .admin .pastille.publie {
+    background: #e3efe0;
+    color: #23461d;
+  }
+
+  @media (max-width: 56rem) {
+    body.admin {
+      grid-template-columns: minmax(0, 1fr);
+      padding: 0.75rem;
+    }
+    .admin .side {
+      position: static;
+      height: auto;
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem;
+    }
+    .admin .side ul {
+      display: flex;
+      flex-wrap: wrap;
+    }
+    .admin .side a span,
+    .admin .side button span {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
+    .admin .side-logo img {
+      width: 3.5rem;
+    }
+    .admin .side-bas {
+      display: flex;
+      margin: 0 0 0 auto;
+      padding: 0;
+      border: 0;
+    }
+  }
+</style>

@@ -1,0 +1,175 @@
+---
+import AdminLayout from '@/layouts/AdminLayout.astro';
+import PhotoField from '@/components/admin/PhotoField.astro';
+import { field, flashFrom, slugify, uploadImage, type Actualite } from '@/lib/admin/data';
+import { newsTypes } from '@/content.config';
+
+export const prerender = false;
+
+const supabase = Astro.locals.supabase!;
+const { id } = Astro.params;
+const isNew = id === 'nouvelle';
+if (!isNew && (!id || !/^[0-9a-f-]{36}$/.test(id))) return Astro.redirect('/admin/actualites?erreur=introuvable', 303);
+
+const positions = [
+  { value: 'center 15%', label: 'Haut de la photo (visages)' },
+  { value: 'center', label: 'Centre' },
+  { value: 'center 85%', label: 'Bas de la photo' },
+];
+
+let erreur: string | null = null;
+let current: Partial<Actualite> = { type: 'Actualité', cover_position: 'center', draft: true, featured: false };
+
+if (!isNew) {
+  const { data } = await supabase.from('actualites').select('*').eq('id', id!).maybeSingle();
+  if (!data) return Astro.redirect('/admin/actualites?erreur=introuvable', 303);
+  current = data as Actualite;
+}
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+
+  if (form.get('action') === 'supprimer' && !isNew) {
+    await supabase.from('actualites').delete().eq('id', id!);
+    return Astro.redirect('/admin/actualites?ok=supprime', 303);
+  }
+
+  const title = field(form, 'title', 200);
+  const type = field(form, 'type');
+  const position = field(form, 'cover_position');
+  const values = {
+    title,
+    slug: slugify(field(form, 'slug') || title),
+    type: (newsTypes as readonly string[]).includes(type) ? type : 'Actualité',
+    date: field(form, 'date') || null,
+    period: field(form, 'period', 80),
+    summary: field(form, 'summary', 220),
+    body: field(form, 'body', 30_000),
+    cover_alt: field(form, 'cover_alt', 200),
+    cover_position: positions.some((p) => p.value === position) ? position : 'center',
+    featured: form.get('featured') === 'on',
+    draft: form.get('etat') !== 'publie',
+  };
+  current = { ...current, ...values };
+
+  if (title.length < 3) erreur = 'Le titre doit faire au moins 3 caractères.';
+  else if (!values.summary) erreur = 'Le résumé est obligatoire.';
+
+  if (!erreur) {
+    const up = await uploadImage(supabase, form.get('cover'), 'actualites');
+    if (up && 'error' in up) erreur = up.error;
+    else {
+      const cover_path = up?.path ?? current.cover_path ?? null;
+      if (!values.draft && !cover_path) erreur = 'Ajoutez une photo avant de mettre l’actualité en ligne.';
+      else {
+        const row = { ...values, cover_path };
+        // Une seule actualité « à la une » à la fois.
+        if (row.featured) await supabase.from('actualites').update({ featured: false }).neq('id', isNew ? '00000000-0000-0000-0000-000000000000' : id!);
+        const res = isNew
+          ? await supabase.from('actualites').insert(row).select('id').single()
+          : await supabase.from('actualites').update(row).eq('id', id!).select('id').single();
+        if (res.error) {
+          erreur = res.error.code === '23505' ? 'Cette adresse (identifiant) est déjà utilisée par une autre actualité.' : 'L’enregistrement a échoué. Vérifiez les champs.';
+        } else {
+          return Astro.redirect(`/admin/actualites/${res.data.id}?ok=enregistre`, 303);
+        }
+      }
+    }
+  }
+}
+
+const flash = erreur ? { type: 'erreur' as const, text: erreur } : flashFrom(Astro.url);
+---
+
+<AdminLayout title={isNew ? 'Nouvelle actualité' : (current.title ?? 'Actualité')} kicker="Actualités" flash={flash}>
+  <a slot="actions" class="bouton contour" href="/admin/actualites">Retour à la liste</a>
+  {!isNew && !current.draft && <a slot="actions" class="bouton contour" href={`/actualites/${current.slug}`} target="_blank" rel="noopener">Voir sur le site</a>}
+
+  <form method="post" enctype="multipart/form-data" class="grille">
+    <div class="carte champs">
+      <label>
+        Titre
+        <input type="text" name="title" value={current.title ?? ''} required minlength="3" maxlength="200" />
+      </label>
+      <label>
+        Résumé
+        <span class="aide">Affiché sur les cartes et dans Google. 220 caractères au maximum.</span>
+        <textarea name="summary" maxlength="220" required>{current.summary ?? ''}</textarea>
+      </label>
+      <label>
+        Texte de l’article
+        <span class="aide">Laissez une ligne vide entre deux paragraphes. **Texte** pour du gras, ## pour un intertitre.</span>
+        <textarea class="long" name="body">{current.body ?? ''}</textarea>
+      </label>
+      <PhotoField name="cover" label="Photo principale" path={current.cover_path ?? null} alt={current.cover_alt ?? ''} altName="cover_alt" />
+      <label>
+        Cadrage de la photo sur les cartes
+        <select name="cover_position">
+          {positions.map((p) => <option value={p.value} selected={current.cover_position === p.value}>{p.label}</option>)}
+        </select>
+      </label>
+    </div>
+
+    <aside class="carte champs">
+      <fieldset class="etat">
+        <legend class="label">État</legend>
+        <label class="case"><input type="radio" name="etat" value="brouillon" checked={current.draft !== false} /> Brouillon (non visible)</label>
+        <label class="case"><input type="radio" name="etat" value="publie" checked={current.draft === false} /> En ligne</label>
+      </fieldset>
+      <label class="case"><input type="checkbox" name="featured" checked={current.featured === true} /> À la une</label>
+      <label>
+        Type
+        <select name="type">
+          {newsTypes.map((t) => <option value={t} selected={current.type === t}>{t}</option>)}
+        </select>
+      </label>
+      <label>
+        Date de publication
+        <input type="date" name="date" value={current.date ?? ''} />
+      </label>
+      <label>
+        Période
+        <span class="aide">Ex. « Juin 2026 ».</span>
+        <input type="text" name="period" value={current.period ?? ''} maxlength="80" />
+      </label>
+      <label>
+        Adresse de la page
+        <span class="aide">Laissez vide pour la créer à partir du titre.</span>
+        <input type="text" name="slug" value={current.slug ?? ''} maxlength="80" pattern="[a-z0-9-]*" />
+      </label>
+      <div class="actions-bas">
+        <button class="bouton or" type="submit" name="action" value="enregistrer">Enregistrer</button>
+        {!isNew && <button class="bouton danger" type="submit" name="action" value="supprimer" formnovalidate data-confirm="Supprimer définitivement cette actualité ?">Supprimer</button>}
+      </div>
+      <p class="aide">Après l’enregistrement, cliquez sur « Publier le site » dans le tableau de bord pour mettre le site à jour.</p>
+    </aside>
+  </form>
+</AdminLayout>
+
+<style>
+  .grille {
+    display: grid;
+    grid-template-columns: minmax(0, 1.7fr) minmax(16rem, 1fr);
+    gap: 1.25rem;
+    align-items: start;
+  }
+  aside {
+    position: sticky;
+    top: 1.25rem;
+  }
+  .etat {
+    display: grid;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+  @media (max-width: 64rem) {
+    .grille {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    aside {
+      position: static;
+    }
+  }
+</style>

@@ -1,0 +1,265 @@
+---
+import AdminLayout from '@/layouts/AdminLayout.astro';
+import PhotoField from '@/components/admin/PhotoField.astro';
+import { field, flashFrom, listField, slugify, uploadImage, type Projet } from '@/lib/admin/data';
+import { mediaUrl } from '@/lib/admin/supabase';
+import { projectCategories } from '@/content.config';
+
+export const prerender = false;
+
+const supabase = Astro.locals.supabase!;
+const { id } = Astro.params;
+const isNew = id === 'nouveau';
+if (!isNew && (!id || !/^[0-9a-f-]{36}$/.test(id))) return Astro.redirect('/admin/projets?erreur=introuvable', 303);
+
+let erreur: string | null = null;
+let current: Partial<Projet> = { category: projectCategories[0], draft: true, featured: false, partners: [], gallery: [], videos: [], missing: [] };
+
+if (!isNew) {
+  const { data } = await supabase.from('projets').select('*').eq('id', id!).maybeSingle();
+  if (!data) return Astro.redirect('/admin/projets?erreur=introuvable', 303);
+  current = data as Projet;
+}
+
+/** « Titre | https://… » sur chaque ligne. */
+function parseVideos(raw: string): { title: string; url: string }[] {
+  return raw
+    .split('\n')
+    .map((l) => l.split('|').map((s) => s.trim()))
+    .filter(([t, u]) => t && u && /^https:\/\/[^\s]+$/.test(u))
+    .map(([title, url]) => ({ title: title!.slice(0, 160), url: url! }))
+    .slice(0, 20);
+}
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+
+  if (form.get('action') === 'supprimer' && !isNew) {
+    await supabase.from('projets').delete().eq('id', id!);
+    return Astro.redirect('/admin/projets?ok=supprime', 303);
+  }
+
+  const title = field(form, 'title', 200);
+  const category = field(form, 'category');
+  const yearRaw = Number(field(form, 'year'));
+  const related = field(form, 'related_page', 120);
+
+  // Galerie : photos gardées (avec leur description), puis nouvelles photos.
+  const kept: { path: string; alt: string }[] = [];
+  for (const [i, g] of (current.gallery ?? []).entries()) {
+    if (form.get(`g_suppr_${i}`) === 'on') continue;
+    kept.push({ path: g.path, alt: field(form, `g_alt_${i}`, 200) });
+  }
+
+  const values = {
+    title,
+    slug: slugify(field(form, 'slug') || title),
+    category: (projectCategories as readonly string[]).includes(category) ? category : projectCategories[0],
+    period: field(form, 'period', 80),
+    year: Number.isInteger(yearRaw) && yearRaw >= 2000 && yearRaw <= 2100 ? yearRaw : null,
+    place: field(form, 'place', 160),
+    partners: listField(form, 'partners').slice(0, 40),
+    summary: field(form, 'summary', 180),
+    body: field(form, 'body', 30_000),
+    cover_alt: field(form, 'cover_alt', 200),
+    videos: parseVideos(field(form, 'videos', 4000)),
+    related_page: /^\/[a-z0-9/-]*$/.test(related) ? related : null,
+    missing: listField(form, 'missing').slice(0, 20),
+    featured: form.get('featured') === 'on',
+    draft: form.get('etat') !== 'publie',
+  };
+  current = { ...current, ...values, gallery: kept };
+
+  if (title.length < 2) erreur = 'Le titre est obligatoire.';
+  else if (!values.summary) erreur = 'Le résumé est obligatoire.';
+
+  if (!erreur) {
+    const up = await uploadImage(supabase, form.get('cover'), 'projets');
+    if (up && 'error' in up) erreur = up.error;
+    const gallery = [...kept];
+    if (!erreur) {
+      for (const f of form.getAll('gallery_new').slice(0, 24)) {
+        const g = await uploadImage(supabase, f, 'projets');
+        if (g && 'error' in g) {
+          erreur = g.error;
+          break;
+        }
+        if (g) gallery.push({ path: g.path, alt: '' });
+      }
+    }
+    if (!erreur) {
+      const row = { ...values, gallery, cover_path: (up && 'path' in up ? up.path : null) ?? current.cover_path ?? null };
+      const res = isNew
+        ? await supabase.from('projets').insert(row).select('id').single()
+        : await supabase.from('projets').update(row).eq('id', id!).select('id').single();
+      if (res.error) {
+        erreur = res.error.code === '23505' ? 'Cette adresse (identifiant) est déjà utilisée par un autre projet.' : 'L’enregistrement a échoué. Vérifiez les champs.';
+      } else {
+        return Astro.redirect(`/admin/projets/${res.data.id}?ok=enregistre`, 303);
+      }
+    }
+  }
+}
+
+const flash = erreur ? { type: 'erreur' as const, text: erreur } : flashFrom(Astro.url);
+const videosText = (current.videos ?? []).map((v) => `${v.title} | ${v.url}`).join('\n');
+---
+
+<AdminLayout title={isNew ? 'Nouveau projet' : (current.title ?? 'Projet')} kicker="Projets" flash={flash}>
+  <a slot="actions" class="bouton contour" href="/admin/projets">Retour à la liste</a>
+  {!isNew && !current.draft && <a slot="actions" class="bouton contour" href={`/projets/${current.slug}`} target="_blank" rel="noopener">Voir sur le site</a>}
+
+  <form method="post" enctype="multipart/form-data" class="grille">
+    <div class="champs">
+      <div class="carte champs">
+        <label>
+          Titre
+          <input type="text" name="title" value={current.title ?? ''} required maxlength="200" />
+        </label>
+        <label>
+          Résumé
+          <span class="aide">180 caractères au maximum.</span>
+          <textarea name="summary" maxlength="180" required>{current.summary ?? ''}</textarea>
+        </label>
+        <label>
+          Présentation du projet
+          <span class="aide">Laissez une ligne vide entre deux paragraphes. **Texte** pour du gras.</span>
+          <textarea class="long" name="body">{current.body ?? ''}</textarea>
+        </label>
+        <PhotoField name="cover" label="Photo de couverture" path={current.cover_path ?? null} alt={current.cover_alt ?? ''} altName="cover_alt" />
+      </div>
+
+      <div class="carte champs">
+        <h2>Galerie</h2>
+        {
+          (current.gallery ?? []).length > 0 && (
+            <ul class="galerie">
+              {(current.gallery ?? []).map((g, i) => (
+                <li>
+                  <img src={mediaUrl(g.path)} alt="" loading="lazy" />
+                  <input type="text" name={`g_alt_${i}`} value={g.alt} maxlength="200" aria-label={`Description de la photo ${i + 1}`} placeholder="Description" />
+                  <label class="case">
+                    <input type="checkbox" name={`g_suppr_${i}`} /> Retirer
+                  </label>
+                </li>
+              ))}
+            </ul>
+          )
+        }
+        <label>
+          Ajouter des photos
+          <span class="aide">Trois ou quatre photos à la fois au maximum, puis enregistrez. Ajoutez ensuite leur description.</span>
+          <input type="file" name="gallery_new" multiple accept="image/jpeg,image/png,image/webp,image/avif" />
+        </label>
+      </div>
+
+      <div class="carte champs">
+        <h2>Vidéos et liens</h2>
+        <label>
+          Vidéos YouTube
+          <span class="aide">Une par ligne : Titre | https://www.youtube.com/…</span>
+          <textarea name="videos">{videosText}</textarea>
+        </label>
+        <label>
+          Partenaires
+          <span class="aide">Un par ligne.</span>
+          <textarea name="partners">{(current.partners ?? []).join('\n')}</textarea>
+        </label>
+      </div>
+    </div>
+
+    <aside class="carte champs">
+      <fieldset class="etat">
+        <legend class="label">État</legend>
+        <label class="case"><input type="radio" name="etat" value="brouillon" checked={current.draft !== false} /> Brouillon (non visible)</label>
+        <label class="case"><input type="radio" name="etat" value="publie" checked={current.draft === false} /> En ligne</label>
+      </fieldset>
+      <label class="case"><input type="checkbox" name="featured" checked={current.featured === true} /> Projet phare</label>
+      <label>
+        Catégorie
+        <select name="category">
+          {projectCategories.map((c) => <option value={c} selected={current.category === c}>{c}</option>)}
+        </select>
+      </label>
+      <label>
+        Période affichée
+        <span class="aide">Ex. « 2015 » ou « 10 – 14 juin 2026 ».</span>
+        <input type="text" name="period" value={current.period ?? ''} maxlength="80" />
+      </label>
+      <label>
+        Année (pour le tri)
+        <input type="number" name="year" value={current.year ?? ''} min="2000" max="2100" />
+      </label>
+      <label>
+        Lieu
+        <input type="text" name="place" value={current.place ?? ''} maxlength="160" />
+      </label>
+      <label>
+        Page liée du site
+        <span class="aide">Facultatif. Ex. /rio-fresco-fest</span>
+        <input type="text" name="related_page" value={current.related_page ?? ''} maxlength="120" />
+      </label>
+      <label>
+        Adresse de la page
+        <span class="aide">Laissez vide pour la créer à partir du titre.</span>
+        <input type="text" name="slug" value={current.slug ?? ''} maxlength="80" pattern="[a-z0-9-]*" />
+      </label>
+      <label>
+        Informations manquantes
+        <span class="aide">Notes internes, une par ligne. Non affichées sur le site.</span>
+        <textarea name="missing">{(current.missing ?? []).join('\n')}</textarea>
+      </label>
+      <div class="actions-bas">
+        <button class="bouton or" type="submit" name="action" value="enregistrer">Enregistrer</button>
+        {!isNew && <button class="bouton danger" type="submit" name="action" value="supprimer" formnovalidate data-confirm="Supprimer définitivement ce projet ?">Supprimer</button>}
+      </div>
+      <p class="aide">Après l’enregistrement, cliquez sur « Publier le site » dans le tableau de bord pour mettre le site à jour.</p>
+    </aside>
+  </form>
+</AdminLayout>
+
+<style>
+  .grille {
+    display: grid;
+    grid-template-columns: minmax(0, 1.7fr) minmax(16rem, 1fr);
+    gap: 1.25rem;
+    align-items: start;
+  }
+  aside {
+    position: sticky;
+    top: 1.25rem;
+  }
+  .etat {
+    display: grid;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+  .galerie {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+    gap: 1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .galerie li {
+    display: grid;
+    gap: 0.5rem;
+  }
+  .galerie img {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    border-radius: 0.6rem;
+    object-fit: cover;
+  }
+  @media (max-width: 64rem) {
+    .grille {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    aside {
+      position: static;
+    }
+  }
+</style>

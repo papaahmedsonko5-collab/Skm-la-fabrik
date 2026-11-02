@@ -1,0 +1,16 @@
+---
+import AdminLayout from '@/layouts/AdminLayout.astro';
+import { supabaseConfigured } from '@/lib/admin/supabase';
+
+export const prerender = false;
+if (supabaseConfigured) return Astro.redirect('/admin', 303);
+---
+
+<AdminLayout title="Configuration requise" kicker="SKM La Fabrik" bare>
+  <div class="carte">
+    <p>
+      L’espace admin n’est pas encore relié à Supabase. Ajoutez <code>PUBLIC_SUPABASE_URL</code> et
+      <code>PUBLIC_SUPABASE_PUBLISHABLE_KEY</code> dans Vercel (Settings, puis Environment Variables), puis redéployez.
+    </p>
+  </div>
+</AdminLayout>

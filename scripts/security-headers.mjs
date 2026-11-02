@@ -29,11 +29,19 @@ for (const file of await htmlFiles(STATIC)) {
   }
 }
 
+// Photos de l'admin servies par le stockage Supabase.
+let supabaseOrigin = '';
+try {
+  if (process.env.PUBLIC_SUPABASE_URL) supabaseOrigin = new URL(process.env.PUBLIC_SUPABASE_URL).origin;
+} catch {
+  supabaseOrigin = '';
+}
+
 const csp = [
   "default-src 'self'",
   `script-src 'self' ${[...hashes].sort().join(' ')}`.trim(),
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data:",
+  `img-src 'self' data: blob: ${supabaseOrigin}`.trim(),
   "font-src 'self'",
   "connect-src 'self'",
   'frame-src https://www.youtube-nocookie.com',

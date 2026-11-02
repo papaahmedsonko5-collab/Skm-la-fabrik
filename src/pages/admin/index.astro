@@ -1,0 +1,397 @@
+---
+import AdminLayout from '@/layouts/AdminLayout.astro';
+import { flashFrom, formatDateHeure, objetLabel, statutLabels, type Demande } from '@/lib/admin/data';
+
+export const prerender = false;
+
+const supabase = Astro.locals.supabase!;
+
+const [demandesRes, nouvellesRes, actusRes, projetsRes, recentRes, pubRes, moisRes] = await Promise.all([
+  supabase.from('demandes').select('id', { count: 'exact', head: true }),
+  supabase.from('demandes').select('id', { count: 'exact', head: true }).eq('statut', 'nouvelle'),
+  supabase.from('actualites').select('id, draft'),
+  supabase.from('projets').select('id, draft'),
+  supabase.from('demandes').select('id, created_at, nom, objet, statut').order('created_at', { ascending: false }).limit(6),
+  supabase.from('publications').select('created_at, user_email, ok').order('created_at', { ascending: false }).limit(1),
+  supabase
+    .from('demandes')
+    .select('created_at, objet')
+    .gte('created_at', new Date(Date.now() - 1000 * 60 * 60 * 24 * 190).toISOString()),
+]);
+
+const total = demandesRes.count ?? 0;
+const nouvelles = nouvellesRes.count ?? 0;
+const actus = actusRes.data ?? [];
+const projets = projetsRes.data ?? [];
+const recentes = (recentRes.data ?? []) as Pick<Demande, 'id' | 'created_at' | 'nom' | 'objet' | 'statut'>[];
+const derniere = pubRes.data?.[0];
+
+// Demandes des six derniers mois, pour le graphique.
+const mois: { cle: string; label: string; n: number }[] = [];
+const now = new Date();
+for (let i = 5; i >= 0; i--) {
+  const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+  mois.push({
+    cle: `${d.getFullYear()}-${d.getMonth()}`,
+    label: d.toLocaleDateString('fr-FR', { month: 'short' }).replace('.', ''),
+    n: 0,
+  });
+}
+const parObjet = new Map<string, number>();
+for (const row of moisRes.data ?? []) {
+  const d = new Date(row.created_at as string);
+  const m = mois.find((x) => x.cle === `${d.getFullYear()}-${d.getMonth()}`);
+  if (m) m.n++;
+  parObjet.set(row.objet as string, (parObjet.get(row.objet as string) ?? 0) + 1);
+}
+const maxMois = Math.max(1, ...mois.map((m) => m.n));
+const totalPeriode = mois.reduce((a, m) => a + m.n, 0);
+const objets = [...parObjet.entries()].sort((a, b) => b[1] - a[1]);
+
+const flash = flashFrom(Astro.url);
+---
+
+<AdminLayout title="Tableau de bord" flash={flash}>
+  <form slot="actions" method="post" action="/api/admin/publier">
+    <button class="bouton or" type="submit" data-confirm="Mettre le site en ligne avec les dernières modifications ?">Publier le site</button>
+  </form>
+
+  <section class="haut">
+    <div class="carte apercu">
+      <div class="carte-tete">
+        <h2>Demandes reçues</h2>
+        <span class="aide">Six derniers mois</span>
+      </div>
+      <div class="graph" role="img" aria-label={`Demandes par mois : ${mois.map((m) => `${m.label} ${m.n}`).join(', ')}`}>
+        {
+          mois.map((m) => (
+            <div class="barre">
+              <span class="valeur">{m.n}</span>
+              <span class="colonne" style={`--h: ${Math.round((m.n / maxMois) * 100)}%`} />
+              <span class="mois">{m.label}</span>
+            </div>
+          ))
+        }
+      </div>
+      <dl class="chiffres">
+        <div><dt>Sur la période</dt><dd>{totalPeriode}</dd></div>
+        <div class="fort"><dt>À traiter</dt><dd>{nouvelles}</dd></div>
+        <div><dt>Au total</dt><dd>{total}</dd></div>
+      </dl>
+    </div>
+
+    <div class="colonne-droite">
+      <a class="tuile noire" href="/admin/demandes?statut=nouvelle">
+        <span class="tuile-num">{nouvelles}</span>
+        <span class="tuile-lib">{nouvelles > 1 ? 'nouvelles demandes' : 'nouvelle demande'}</span>
+        <span class="tuile-lien">Ouvrir la boîte de réception</span>
+      </a>
+      <div class="tuile or">
+        <span class="tuile-lib">Dernière publication</span>
+        <span class="tuile-date">{derniere ? formatDateHeure(derniere.created_at as string) : 'Aucune depuis l’admin'}</span>
+        {derniere && !derniere.ok && <span class="aide">La dernière tentative a échoué.</span>}
+      </div>
+    </div>
+  </section>
+
+  {
+    actus.length === 0 && projets.length === 0 && (
+      <form method="post" action="/api/admin/importer" class="carte import">
+        <div>
+          <h2>Première utilisation</h2>
+          <p class="aide">Copie les actualités, les projets et leurs photos actuellement sur le site dans l’admin, pour les modifier ici. À faire une seule fois.</p>
+        </div>
+        <button class="bouton or" type="submit" data-confirm="Importer le contenu actuel du site dans l’admin ?">Importer le contenu du site</button>
+      </form>
+    )
+  }
+
+  <section class="raccourcis">
+    <a class="carte raccourci" href="/admin/actualites">
+      <span class="r-titre">Actualités</span>
+      <span class="r-info">{actus.filter((a) => !a.draft).length} en ligne · {actus.filter((a) => a.draft).length} brouillon(s)</span>
+      <span class="lien">Gérer</span>
+    </a>
+    <a class="carte raccourci" href="/admin/projets">
+      <span class="r-titre">Projets</span>
+      <span class="r-info">{projets.filter((p) => !p.draft).length} en ligne · {projets.filter((p) => p.draft).length} brouillon(s)</span>
+      <span class="lien">Gérer</span>
+    </a>
+    <a class="carte raccourci" href="/admin/textes">
+      <span class="r-titre">Textes des pages</span>
+      <span class="r-info">Titres, introductions, coordonnées</span>
+      <span class="lien">Modifier</span>
+    </a>
+  </section>
+
+  <section class="bas">
+    <div class="carte">
+      <div class="carte-tete">
+        <h2>Dernières demandes</h2>
+        <a class="lien" href="/admin/demandes">Tout voir</a>
+      </div>
+      {
+        recentes.length === 0 ? (
+          <p class="vide">Aucune demande pour l’instant. Elles arriveront ici dès qu’un visiteur remplit le formulaire de contact.</p>
+        ) : (
+          <ul class="liste">
+            {recentes.map((d) => (
+              <li>
+                <a href={`/admin/demandes/${d.id}`}>
+                  <span class="initiale" aria-hidden="true">
+                    {d.nom.slice(0, 1).toUpperCase()}
+                  </span>
+                  <span class="qui">
+                    <strong>{d.nom}</strong>
+                    <span>
+                      {objetLabel(d.objet)} · {formatDateHeure(d.created_at)}
+                    </span>
+                  </span>
+                  <span class:list={['pastille', d.statut]}>{statutLabels[d.statut]}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        )
+      }
+    </div>
+    <div class="carte">
+      <h2>Par type de demande</h2>
+      {
+        objets.length === 0 ? (
+          <p class="vide">Pas encore de données.</p>
+        ) : (
+          <ul class="types">
+            {objets.map(([o, n]) => (
+              <li>
+                <span>{objetLabel(o)}</span>
+                <span class="jauge" style={`--p: ${Math.round((n / totalPeriode) * 100)}%`} />
+                <strong>{n}</strong>
+              </li>
+            ))}
+          </ul>
+        )
+      }
+    </div>
+  </section>
+</AdminLayout>
+
+<style>
+  .haut {
+    display: grid;
+    grid-template-columns: minmax(0, 1.7fr) minmax(16rem, 1fr);
+    gap: 1.25rem;
+  }
+  .apercu {
+    background: var(--c-noir);
+    border-color: var(--c-noir);
+    color: var(--c-papier);
+  }
+  .apercu .aide {
+    color: var(--c-pierre);
+  }
+  .graph {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 0.75rem;
+    align-items: end;
+    height: 12rem;
+    padding: 0.5rem 0;
+  }
+  .barre {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    justify-items: center;
+    gap: 0.35rem;
+    height: 100%;
+  }
+  .colonne {
+    align-self: end;
+    width: min(100%, 2.75rem);
+    height: max(var(--h), 4px);
+    border-radius: 0.6rem 0.6rem 0.2rem 0.2rem;
+    background: linear-gradient(180deg, var(--c-or-vif), var(--c-or));
+  }
+  .valeur {
+    font-weight: 700;
+    font-size: 0.875rem;
+    color: var(--c-pierre-claire);
+  }
+  .mois {
+    color: var(--c-pierre);
+    font-size: 0.8125rem;
+    text-transform: capitalize;
+  }
+  .chiffres {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin: 1rem 0 0;
+  }
+  .chiffres div {
+    padding: 0.9rem 1rem;
+    border-radius: 0.9rem;
+    background: rgb(255 255 255 / 0.06);
+    text-align: center;
+  }
+  .chiffres .fort {
+    background: var(--c-or);
+    color: var(--c-noir);
+  }
+  .chiffres dt {
+    font-size: 0.8125rem;
+    opacity: 0.85;
+  }
+  .chiffres dd {
+    margin: 0.15rem 0 0;
+    font-family: var(--f-titre);
+    font-size: 2rem;
+    line-height: 1;
+  }
+  .colonne-droite {
+    display: grid;
+    gap: 1.25rem;
+  }
+  .tuile {
+    display: grid;
+    align-content: space-between;
+    gap: 0.5rem;
+    padding: 1.4rem;
+    border-radius: 1.25rem;
+    text-decoration: none;
+  }
+  .tuile.noire {
+    background: var(--c-anthracite);
+    color: var(--c-papier);
+  }
+  .tuile.noire:hover {
+    background: var(--c-anthracite-2);
+  }
+  .tuile.or {
+    background: var(--c-or);
+    color: var(--c-noir);
+  }
+  .tuile-num {
+    font-family: var(--f-titre);
+    font-size: 3.25rem;
+    line-height: 1;
+    color: var(--c-or);
+  }
+  .tuile-lib {
+    font-weight: 700;
+  }
+  .tuile-date {
+    font-family: var(--f-titre);
+    font-size: 1.6rem;
+    line-height: 1.1;
+  }
+  .tuile-lien {
+    color: var(--c-pierre-claire);
+    font-size: 0.9375rem;
+  }
+  .import {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    border-color: var(--c-or);
+  }
+  .import h2 {
+    margin-bottom: 0.25rem;
+  }
+  .raccourcis {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+    gap: 1.25rem;
+  }
+  .raccourci {
+    display: grid;
+    gap: 0.35rem;
+    text-decoration: none;
+    color: inherit;
+  }
+  .raccourci:hover {
+    border-color: var(--c-or);
+  }
+  .r-titre {
+    font-weight: 800;
+    font-size: 1.1rem;
+  }
+  .r-info {
+    color: var(--a-doux);
+  }
+  .bas {
+    display: grid;
+    grid-template-columns: minmax(0, 1.7fr) minmax(16rem, 1fr);
+    gap: 1.25rem;
+  }
+  .liste {
+    display: grid;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .liste a {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 0.75rem 0.25rem;
+    border-bottom: 1px solid var(--a-ligne);
+    color: inherit;
+    text-decoration: none;
+  }
+  .liste li:last-child a {
+    border-bottom: 0;
+  }
+  .liste a:hover strong {
+    text-decoration: underline;
+  }
+  .initiale {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background: var(--c-papier-2);
+    font-weight: 800;
+  }
+  .qui {
+    display: grid;
+    flex: 1;
+    min-width: 0;
+  }
+  .qui span {
+    color: var(--a-doux);
+    font-size: 0.875rem;
+  }
+  .types {
+    display: grid;
+    gap: 0.9rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .types li {
+    display: grid;
+    grid-template-columns: 8rem minmax(0, 1fr) 2rem;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.9375rem;
+  }
+  .jauge {
+    height: 0.6rem;
+    border-radius: 1rem;
+    background: linear-gradient(90deg, var(--c-or) var(--p), var(--c-papier-2) var(--p));
+  }
+  .types strong {
+    text-align: right;
+  }
+  @media (max-width: 64rem) {
+    .haut,
+    .bas {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

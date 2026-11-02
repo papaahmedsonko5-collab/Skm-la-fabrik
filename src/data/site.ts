@@ -1,3 +1,4 @@
+import { t } from '@/lib/cms';
 /**
  * Données institutionnelles de SKM La Fabrik.
  *
@@ -37,8 +38,8 @@ export const site = {
   foundingYear: 2014,
   locale: 'fr_SN',
   address: {
-    street: '3ᵉ étage, Cité Senelec (Keur Toubab bi)',
-    city: 'Rufisque',
+    street: t('coordonnees.adresse'),
+    city: t('coordonnees.ville'),
     country: 'Sénégal',
     countryCode: 'SN',
   },
@@ -48,10 +49,10 @@ export const site = {
    * reste à `null` tant que le numéro officiel n'est pas confirmé.
    */
   contact: {
-    email: 'sunukaddu@gmail.com',
+    email: t('coordonnees.email'),
     emailConfirmed: false,
     phone: null as string | null,
-    whatsapp: { display: '+221 70 484 40 40', international: '221704844040' } as { display: string; international: string } | null,
+    whatsapp: { display: t('coordonnees.whatsapp'), international: t('coordonnees.whatsapp').replace(/\D/g, '') } as { display: string; international: string } | null,
     /** Contact du Rio Fresco Fest, figurant sur les affiches et confirmé par la structure le 2 novembre 2026. */
     rffPhone: { display: '+221 70 974 07 41', international: '221709740741' },
   },

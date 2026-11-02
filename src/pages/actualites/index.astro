@@ -1,4 +1,5 @@
 ---
+import { t, tt } from '@/lib/cms';
 import { Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
 import BaseLayout from '@/layouts/BaseLayout.astro';
@@ -33,10 +34,10 @@ const mediatheque = [
     <div class="wrap intro-grid">
       <div>
         <p class="surtitre">Actualités · Galerie</p>
-        <h1 id="titre-page" class="titre intro-titre">Le journal<br />de la <span class="accent">Fabrik</span></h1>
+        <h1 id="titre-page" class="titre intro-titre" set:html={tt('actualites.intro.titre')} />
       </div>
       <div class="intro-texte">
-        <p class="chapeau doux">Reportages, annonces et moments forts, à Rufisque et sur nos scènes.</p>
+        <p class="chapeau doux">{t('actualites.intro.chapeau')}</p>
         <nav class="ancres" aria-label="Sections de la page">
           <a href="#journal">Actualités <span aria-hidden="true">↓</span></a>
           <a href="#galerie">Galerie photo <span aria-hidden="true">↓</span></a>

@@ -1,4 +1,5 @@
 ---
+import { t, tt } from '@/lib/cms';
 import { Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
 import BaseLayout from '@/layouts/BaseLayout.astro';
@@ -39,14 +40,9 @@ const etapes = [
     <div class="hero-lueur" aria-hidden="true"></div>
     <div class="wrap hero-grid">
       <div class="hero-texte">
-        <p class="surtitre">Creative Hub · Rufisque, Sénégal · Depuis 2014</p>
-        <h1 id="accroche" class="titre hero-titre">
-          Nous fabriquons les idées, révélons les talents et faisons <span class="accent">vibrer les territoires.</span>
-        </h1>
-        <p class="hero-chapeau">
-          Formation, production, événementiel, festivals et action communautaire&nbsp;: cinq pôles, une seule fabrique, au service
-          de la jeunesse de Rufisque.
-        </p>
+        <p class="surtitre">{t('accueil.hero.surtitre')}</p>
+        <h1 id="accroche" class="titre hero-titre" set:html={tt('accueil.hero.titre')} />
+        <p class="hero-chapeau">{t('accueil.hero.chapeau')}</p>
         <div class="hero-actions">
           <Button href="/a-propos">Découvrir La Fabrik</Button>
           <Button href="/contact?objet=partenariat" variant="contour">Devenir partenaire</Button>

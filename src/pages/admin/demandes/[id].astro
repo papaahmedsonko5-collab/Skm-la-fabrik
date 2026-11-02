@@ -1,0 +1,131 @@
+---
+import AdminLayout from '@/layouts/AdminLayout.astro';
+import { field, flashFrom, formatDateHeure, isStatut, objetLabel, statutLabels, statuts, type Demande } from '@/lib/admin/data';
+import { whatsappLink } from '@/lib/whatsapp';
+
+export const prerender = false;
+
+const supabase = Astro.locals.supabase!;
+const { id } = Astro.params;
+if (!id || !/^[0-9a-f-]{36}$/.test(id)) return Astro.redirect('/admin/demandes?erreur=introuvable', 303);
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  if (form.get('action') === 'supprimer') {
+    await supabase.from('demandes').delete().eq('id', id);
+    return Astro.redirect('/admin/demandes?ok=supprime', 303);
+  }
+  const statut = form.get('statut');
+  await supabase
+    .from('demandes')
+    .update({ statut: isStatut(statut) ? statut : 'en_cours', note_interne: field(form, 'note', 4000) })
+    .eq('id', id);
+  return Astro.redirect(`/admin/demandes/${id}?ok=statut`, 303);
+}
+
+const { data } = await supabase.from('demandes').select('*').eq('id', id).maybeSingle();
+if (!data) return Astro.redirect('/admin/demandes?erreur=introuvable', 303);
+const d = data as Demande;
+
+// Ouvrir une demande la fait passer « en cours ».
+if (d.statut === 'nouvelle') {
+  await supabase.from('demandes').update({ statut: 'en_cours' }).eq('id', id);
+  d.statut = 'en_cours';
+}
+
+const sujet = encodeURIComponent(`SKM La Fabrik : votre demande (${objetLabel(d.objet)})`);
+const phoneDigits = d.telephone.replace(/\D/g, '');
+---
+
+<AdminLayout title={d.nom} kicker={`Demande · ${objetLabel(d.objet)}`} flash={flashFrom(Astro.url)}>
+  <a slot="actions" class="bouton contour" href="/admin/demandes">Retour aux demandes</a>
+
+  <div class="grille">
+    <article class="carte">
+      <div class="carte-tete">
+        <h2>Message</h2>
+        <span class="aide">Reçu le {formatDateHeure(d.created_at)}</span>
+      </div>
+      <p class="message">{d.message}</p>
+      <div class="actions-bas">
+        <a class="bouton or" href={`mailto:${d.email}?subject=${sujet}`}>Répondre par e-mail</a>
+        {
+          phoneDigits.length >= 8 && (
+            <a class="bouton contour" href={whatsappLink(phoneDigits.startsWith('221') ? phoneDigits : `221${phoneDigits}`, `Bonjour ${d.nom}, c’est SKM La Fabrik.`)} target="_blank" rel="noopener">
+              Écrire sur WhatsApp
+            </a>
+          )
+        }
+      </div>
+    </article>
+
+    <aside class="carte">
+      <h2>Coordonnées</h2>
+      <dl class="infos">
+        <div><dt>Nom</dt><dd>{d.nom}</dd></div>
+        {d.organisation && <div><dt>Structure</dt><dd>{d.organisation}</dd></div>}
+        <div><dt>E-mail</dt><dd><a class="lien" href={`mailto:${d.email}`}>{d.email}</a></dd></div>
+        {d.telephone && <div><dt>Téléphone</dt><dd><a class="lien" href={`tel:${d.telephone.replace(/\s/g, '')}`}>{d.telephone}</a></dd></div>}
+        <div><dt>Type</dt><dd>{objetLabel(d.objet)}{d.detail && ` · ${d.detail}`}</dd></div>
+      </dl>
+
+      <form method="post" class="champs suivi">
+        <label>
+          Statut
+          <select name="statut">
+            {statuts.map((s) => <option value={s} selected={d.statut === s}>{statutLabels[s]}</option>)}
+          </select>
+        </label>
+        <label>
+          Note interne
+          <span class="aide">Visible seulement dans l’admin.</span>
+          <textarea name="note" maxlength="4000">{d.note_interne}</textarea>
+        </label>
+        <div class="actions-bas">
+          <button class="bouton" type="submit" name="action" value="enregistrer">Enregistrer</button>
+          <button class="bouton danger" type="submit" name="action" value="supprimer" data-confirm="Supprimer définitivement cette demande ?">Supprimer</button>
+        </div>
+      </form>
+    </aside>
+  </div>
+</AdminLayout>
+
+<style>
+  .grille {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) minmax(17rem, 1fr);
+    gap: 1.25rem;
+    align-items: start;
+  }
+  .message {
+    margin: 0 0 1.5rem;
+    white-space: pre-wrap;
+    font-size: 1.0625rem;
+    line-height: 1.7;
+  }
+  .infos {
+    display: grid;
+    gap: 0.75rem;
+    margin: 0 0 1.5rem;
+  }
+  .infos dt {
+    color: var(--a-doux);
+    font-size: 0.8125rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .infos dd {
+    margin: 0.1rem 0 0;
+    overflow-wrap: anywhere;
+  }
+  .suivi {
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--a-ligne);
+  }
+  @media (max-width: 64rem) {
+    .grille {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

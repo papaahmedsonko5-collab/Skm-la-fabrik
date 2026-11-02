@@ -1,4 +1,5 @@
 ---
+import { t, tt } from '@/lib/cms';
 import { Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
 import BaseLayout from '@/layouts/BaseLayout.astro';
@@ -34,10 +35,10 @@ const filtreCss = projectCategories
     <div class="wrap intro-grid">
       <div>
         <p class="surtitre">Portfolio · Réalisations documentées</p>
-        <h1 id="titre-page" class="titre intro-titre">Nos <span class="accent">projets</span></h1>
+        <h1 id="titre-page" class="titre intro-titre" set:html={tt('projets.intro.titre')} />
       </div>
       <div class="intro-texte">
-        <p class="chapeau doux">Une sélection des projets portés par Sunu Kaddu et SKM La Fabrik depuis 2013, à Rufisque et au-delà.</p>
+        <p class="chapeau doux">{t('projets.intro.chapeau')}</p>
         <ul class="categories" aria-label="Répartition par catégorie">
           {
             projectCategories.map((c) => (

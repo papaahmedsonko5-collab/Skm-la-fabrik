@@ -1,0 +1,89 @@
+---
+import AdminLayout from '@/layouts/AdminLayout.astro';
+import { contenuPages, contenus } from '@/data/contenus';
+import { field, flashFrom } from '@/lib/admin/data';
+
+export const prerender = false;
+
+const supabase = Astro.locals.supabase!;
+const pageChoisie = Astro.url.searchParams.get('page');
+const page = contenuPages.includes(pageChoisie ?? '') ? pageChoisie! : contenuPages[0]!;
+const defs = contenus.filter((c) => c.page === page);
+
+let erreur: string | null = null;
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const rows = defs.map((d, i) => {
+    const raw = field(form, d.key, d.multiline || d.title ? 2000 : 300);
+    // Valeur identique au texte d'origine : on n'enregistre rien de spécial.
+    return { key: d.key, page: d.page, label: d.label, value: raw === d.value ? '' : raw, multiline: Boolean(d.multiline || d.title), position: i };
+  });
+  const { error } = await supabase.from('contenus').upsert(rows, { onConflict: 'key' });
+  if (error) erreur = 'L’enregistrement a échoué.';
+  else return Astro.redirect(`/admin/textes?page=${encodeURIComponent(page)}&ok=enregistre`, 303);
+}
+
+const { data } = await supabase.from('contenus').select('key, value').in('key', defs.map((d) => d.key));
+const saisis = new Map((data ?? []).map((r) => [r.key as string, r.value as string]));
+const flash = erreur ? { type: 'erreur' as const, text: erreur } : flashFrom(Astro.url);
+---
+
+<AdminLayout title="Textes des pages" flash={flash}>
+  <nav class="onglets" aria-label="Pages du site">
+    {
+      contenuPages.map((p) => (
+        <a href={`/admin/textes?page=${encodeURIComponent(p)}`} aria-current={p === page ? 'page' : undefined}>
+          {p}
+        </a>
+      ))
+    }
+  </nav>
+
+  <form method="post" class="carte champs">
+    <p class="aide">
+      Dans un titre, mettez entre crochets les mots à afficher en or, par exemple « Nos [projets] ». Un retour à la ligne crée un saut de
+      ligne. Videz un champ pour revenir au texte d’origine.
+    </p>
+    {
+      defs.map((d) => {
+        const v = saisis.get(d.key) || d.value;
+        return (
+          <label>
+            {d.label}
+            {d.multiline || d.title ? (
+              <textarea name={d.key} maxlength="2000" rows={d.title ? 3 : 4}>{v}</textarea>
+            ) : (
+              <input type="text" name={d.key} value={v} maxlength="300" />
+            )}
+          </label>
+        );
+      })
+    }
+    <div class="actions-bas">
+      <button class="bouton or" type="submit">Enregistrer</button>
+      <span class="aide">Puis « Publier le site » depuis le tableau de bord.</span>
+    </div>
+  </form>
+</AdminLayout>
+
+<style>
+  .onglets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .onglets a {
+    padding: 0.55rem 1rem;
+    border: 1px solid var(--a-ligne);
+    border-radius: 0.75rem;
+    background: var(--a-carte);
+    color: inherit;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .onglets a[aria-current='page'] {
+    border-color: var(--c-noir);
+    background: var(--c-noir);
+    color: var(--c-papier);
+  }
+</style>

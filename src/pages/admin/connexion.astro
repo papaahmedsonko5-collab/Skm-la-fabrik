@@ -1,0 +1,37 @@
+---
+import AdminLayout from '@/layouts/AdminLayout.astro';
+
+export const prerender = false;
+
+const url = Astro.url;
+const rawNext = url.searchParams.get('suite') ?? '/admin';
+// Redirection limitée à l'espace admin (pas de redirection ouverte).
+const next = /^\/admin(\/[\w-]*)*$/.test(rawNext) ? rawNext : '/admin';
+
+let flash: { type: 'ok' | 'erreur'; text: string } | null = null;
+if (url.searchParams.get('erreur') === 'acces') flash = { type: 'erreur', text: 'Ce compte n’a pas accès à l’espace admin.' };
+if (url.searchParams.get('statut') === 'deconnecte') flash = { type: 'ok', text: 'Vous êtes déconnecté.' };
+
+if (Astro.request.method === 'POST' && Astro.locals.supabase) {
+  const form = await Astro.request.formData();
+  const email = String(form.get('email') ?? '').trim();
+  const password = String(form.get('password') ?? '');
+  const { error } = await Astro.locals.supabase.auth.signInWithPassword({ email, password });
+  if (!error) return Astro.redirect(next, 303);
+  flash = { type: 'erreur', text: 'E-mail ou mot de passe incorrect.' };
+}
+---
+
+<AdminLayout title="Connexion" kicker="SKM La Fabrik" flash={flash} bare>
+  <form method="post" class="carte champs">
+    <label>
+      E-mail
+      <input type="email" name="email" autocomplete="username" required />
+    </label>
+    <label>
+      Mot de passe
+      <input type="password" name="password" autocomplete="current-password" required />
+    </label>
+    <button class="bouton or" type="submit">Se connecter</button>
+  </form>
+</AdminLayout>

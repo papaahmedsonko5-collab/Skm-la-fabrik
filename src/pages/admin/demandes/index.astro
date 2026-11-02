@@ -1,0 +1,116 @@
+---
+import AdminLayout from '@/layouts/AdminLayout.astro';
+import { flashFrom, formatDateHeure, isStatut, objetLabel, statutLabels, statuts, type Demande } from '@/lib/admin/data';
+import { contactObjectKeys, contactObjects } from '@/lib/contact';
+
+export const prerender = false;
+
+const supabase = Astro.locals.supabase!;
+const statut = Astro.url.searchParams.get('statut');
+const objet = Astro.url.searchParams.get('objet');
+const q = (Astro.url.searchParams.get('q') ?? '').trim().slice(0, 80);
+
+let query = supabase
+  .from('demandes')
+  .select('id, created_at, nom, organisation, email, objet, detail, statut')
+  .order('created_at', { ascending: false })
+  .limit(200);
+if (isStatut(statut)) query = query.eq('statut', statut);
+else query = query.neq('statut', 'archivee');
+if (objet && (contactObjectKeys as string[]).includes(objet)) query = query.eq('objet', objet);
+if (q) {
+  // Les caractères spéciaux de la syntaxe PostgREST sont retirés de la recherche.
+  const safe = q.replace(/[%,()*]/g, ' ');
+  query = query.or(`nom.ilike.%${safe}%,email.ilike.%${safe}%,organisation.ilike.%${safe}%`);
+}
+const { data } = await query;
+const demandes = (data ?? []) as Pick<Demande, 'id' | 'created_at' | 'nom' | 'organisation' | 'email' | 'objet' | 'detail' | 'statut'>[];
+---
+
+<AdminLayout title="Demandes" flash={flashFrom(Astro.url)}>
+  <div class="carte">
+    <form method="get" class="filtres">
+      <label>
+        Statut
+        <select name="statut">
+          <option value="">À traiter et en cours</option>
+          {statuts.map((s) => <option value={s} selected={statut === s}>{statutLabels[s]}</option>)}
+        </select>
+      </label>
+      <label>
+        Type
+        <select name="objet">
+          <option value="">Tous</option>
+          {contactObjectKeys.map((o) => <option value={o} selected={objet === o}>{contactObjects[o].label}</option>)}
+        </select>
+      </label>
+      <label>
+        Rechercher
+        <input type="search" name="q" value={q} placeholder="Nom, e-mail, structure" />
+      </label>
+      <button class="bouton contour" type="submit">Filtrer</button>
+    </form>
+  </div>
+
+  <div class="carte">
+    {
+      demandes.length === 0 ? (
+        <p class="vide">Aucune demande ne correspond.</p>
+      ) : (
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Reçue</th>
+                <th scope="col">Contact</th>
+                <th scope="col">Type</th>
+                <th scope="col">Statut</th>
+              </tr>
+            </thead>
+            <tbody>
+              {demandes.map((d) => (
+                <tr class:list={{ nouvelle: d.statut === 'nouvelle' }}>
+                  <td class="date">{formatDateHeure(d.created_at)}</td>
+                  <td>
+                    <a class="lien" href={`/admin/demandes/${d.id}`}>
+                      {d.nom}
+                    </a>
+                    <span class="sous">{d.organisation || d.email}</span>
+                  </td>
+                  <td>
+                    {objetLabel(d.objet)}
+                    {d.detail && <span class="sous">{d.detail}</span>}
+                  </td>
+                  <td>
+                    <span class:list={['pastille', d.statut]}>{statutLabels[d.statut]}</span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )
+    }
+  </div>
+</AdminLayout>
+
+<style>
+  .filtres {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+    align-items: end;
+    gap: 1rem;
+  }
+  .sous {
+    display: block;
+    color: var(--a-doux);
+    font-size: 0.875rem;
+  }
+  .date {
+    white-space: nowrap;
+    color: var(--a-doux);
+  }
+  tr.nouvelle td:first-child {
+    box-shadow: inset 3px 0 0 var(--c-or);
+  }
+</style>

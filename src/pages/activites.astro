@@ -1,4 +1,5 @@
 ---
+import { t, tt } from '@/lib/cms';
 import { Image } from 'astro:assets';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import Button from '@/components/Button.astro';
@@ -32,12 +33,9 @@ const scenes = poles.map((p, i) => {
       <div class="hero-tete">
         <div>
           <p class="surtitre">Nos activités · Le moteur</p>
-          <h1 id="titre-page" class="titre hero-titre">Cinq pôles, <br />une même <span class="accent">exigence.</span></h1>
+          <h1 id="titre-page" class="titre hero-titre" set:html={tt('activites.hero.titre')} />
         </div>
-        <p class="hero-chapeau">
-          Former les talents, produire des contenus de haute qualité, faire vivre la scène et réinvestir dans la communauté&nbsp;:
-          chaque pôle nourrit les autres.
-        </p>
+        <p class="hero-chapeau">{t('activites.hero.chapeau')}</p>
       </div>
       <nav aria-label="Les cinq pôles">
         <ol class="sommaire">

@@ -1,6 +1,10 @@
 import { defineCollection } from 'astro:content';
 import { z } from 'astro/zod';
 import { glob } from 'astro/loaders';
+import { existsSync } from 'node:fs';
+
+/** Contenu publié depuis l'admin (scripts/sync-cms.mjs), sinon fichiers du dépôt. */
+const base = (name: 'projets' | 'actualites') => (existsSync(`./src/.cms/${name}`) ? `./src/.cms/${name}` : `./src/content/${name}`);
 
 export const projectCategories = [
   'Festivals',
@@ -18,7 +22,7 @@ const video = z.object({
 });
 
 const projets = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/projets' }),
+  loader: glob({ pattern: '**/*.md', base: base('projets') }),
   schema: ({ image }) =>
     z.object({
       title: z.string(),
@@ -43,7 +47,7 @@ const projets = defineCollection({
 });
 
 const actualites = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/actualites' }),
+  loader: glob({ pattern: '**/*.md', base: base('actualites') }),
   schema: ({ image }) =>
     z.object({
       title: z.string(),
