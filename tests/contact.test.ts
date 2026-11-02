@@ -100,3 +100,19 @@ describe('aides', () => {
     expect(isActive('/', '/a-propos')).toBe(false);
   });
 });
+
+describe('createRateLimiter', () => {
+  it('bloque au-delà du maximum puis libère après la fenêtre', async () => {
+    const { createRateLimiter, clientKey } = await import('../src/lib/rate-limit');
+    const rl = createRateLimiter(2, 1000);
+    expect(rl.hit('ip', 0).allowed).toBe(true);
+    expect(rl.hit('ip', 10).allowed).toBe(true);
+    const blocked = rl.hit('ip', 20);
+    expect(blocked.allowed).toBe(false);
+    expect(blocked.retryAfter).toBeGreaterThan(0);
+    expect(rl.hit('autre', 20).allowed).toBe(true);
+    expect(rl.hit('ip', 1500).allowed).toBe(true);
+    expect(clientKey(new Headers({ 'x-forwarded-for': '1.2.3.4, 10.0.0.1' }))).toBe('1.2.3.4');
+    expect(clientKey(new Headers())).toBe('inconnu');
+  });
+});
