@@ -43,19 +43,24 @@ export const site = {
     countryCode: 'SN',
   },
   /**
-   * Coordonnées : l'e-mail est commun à tous les documents. Les numéros de
-   * téléphone divergent selon les documents ; aucun n'est publié tant que
-   * le numéro officiel n'est pas confirmé (laisser `null`).
+   * Coordonnées. Le WhatsApp a été confirmé par la structure le 2 novembre 2026.
+   * Les numéros de téléphone fixe divergent selon les documents : `phone`
+   * reste à `null` tant que le numéro officiel n'est pas confirmé.
    */
   contact: {
     email: 'sunukaddu@gmail.com',
     emailConfirmed: false,
     phone: null as string | null,
-    whatsapp: null as string | null,
+    whatsapp: { display: '+221 70 484 40 40', international: '221704844040' } as { display: string; international: string } | null,
   },
+  /** Comptes officiels communiqués par la structure le 2 novembre 2026. */
   social: [
-    { label: 'Sunu Kaddu', handle: '@SunuKaddu', href: null as string | null },
-    { label: 'SKM La Fabrik', handle: '@lafabrikskm', href: null as string | null },
+    { network: 'Facebook', label: 'Sunu Kaddu', handle: 'sunukaddu', href: 'https://www.facebook.com/sunukaddu' as string | null },
+    { network: 'Instagram', label: 'Sunu Kaddu Music', handle: '@sunu_kaddu_music', href: 'https://www.instagram.com/sunu_kaddu_music' as string | null },
+    { network: 'Facebook', label: 'PPS the Writah', handle: 'PPSthewritahOfficiel', href: 'https://www.facebook.com/PPSthewritahOfficiel' as string | null },
+    { network: 'Instagram', label: 'PPS the Writah', handle: '@pps_the_writah', href: 'https://www.instagram.com/pps_the_writah/' as string | null },
+    { network: 'X (Twitter)', label: 'PPS the Writah', handle: '@PPSthewritah', href: 'https://twitter.com/PPSthewritah' as string | null },
+    { network: 'Réseaux', label: 'SKM La Fabrik', handle: '@lafabrikskm', href: null as string | null },
   ],
 } as const;
 

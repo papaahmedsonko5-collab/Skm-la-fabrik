@@ -20,6 +20,10 @@ export function organizationJsonLd(base: URL | undefined): Record<string, unknow
       addressCountry: site.address.countryCode,
     },
     ...(site.contact.emailConfirmed ? { email: site.contact.email } : {}),
+    sameAs: site.social.flatMap((s) => (s.href ? [s.href] : [])),
+    ...(site.contact.whatsapp
+      ? { contactPoint: { '@type': 'ContactPoint', contactType: 'customer service', telephone: site.contact.whatsapp.display, availableLanguage: ['fr', 'wo'] } }
+      : {}),
   };
 }
 

@@ -116,3 +116,11 @@ describe('createRateLimiter', () => {
     expect(clientKey(new Headers())).toBe('inconnu');
   });
 });
+
+describe('whatsappLink', () => {
+  it('construit un lien wa.me avec message encodé', async () => {
+    const { whatsappLink } = await import('../src/lib/whatsapp');
+    expect(whatsappLink('221704844040')).toBe('https://wa.me/221704844040');
+    expect(whatsappLink('+221 70 484 40 40', 'Bonjour & merci')).toBe('https://wa.me/221704844040?text=Bonjour+%26+merci');
+  });
+});

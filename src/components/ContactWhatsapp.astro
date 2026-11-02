@@ -1,0 +1,20 @@
+---
+import { site } from '@/data/site';
+import { whatsappLink } from '@/lib/whatsapp';
+
+/** Lien vers le WhatsApp officiel ; n'affiche rien tant qu'aucun numéro n'est confirmé. */
+interface Props {
+  message?: string;
+  class?: string;
+}
+const { message, class: extra } = Astro.props;
+const wa = site.contact.whatsapp;
+---
+
+{
+  wa && (
+    <a class={extra} href={whatsappLink(wa.international, message)} target="_blank" rel="noopener" aria-label={`WhatsApp ${wa.display} (nouvel onglet)`}>
+      {wa.display}
+    </a>
+  )
+}

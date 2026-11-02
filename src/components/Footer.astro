@@ -3,6 +3,7 @@ import { Image } from 'astro:assets';
 import logo from '@/assets/brand/logo-skm-la-fabrik.png';
 import { site } from '@/data/site';
 import ContactEmail from './ContactEmail.astro';
+import ContactWhatsapp from './ContactWhatsapp.astro';
 
 const year = new Date().getFullYear();
 ---
@@ -39,7 +40,15 @@ const year = new Date().getFullYear();
         <ul>
           {
             site.social.map((s) => (
-              <li>{s.href ? <a href={s.href} rel="noopener" target="_blank">{s.handle}</a> : <span>{s.handle}</span>}</li>
+              <li>
+                {s.href ? (
+                  <a href={s.href} rel="noopener" target="_blank">
+                    {s.network} · {s.label}
+                  </a>
+                ) : (
+                  <span>{s.handle}</span>
+                )}
+              </li>
             ))
           }
         </ul>
@@ -51,6 +60,8 @@ const year = new Date().getFullYear();
           {site.address.city}, {site.address.country}
         </address>
         <p><ContactEmail /></p>
+        {site.contact.whatsapp && <p>WhatsApp : <ContactWhatsapp /></p>}
+        <p><a href="/faq">Questions fréquentes</a></p>
       </div>
     </div>
 

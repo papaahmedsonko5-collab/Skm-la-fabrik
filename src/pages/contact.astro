@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import ContactEmail from '@/components/ContactEmail.astro';
+import ContactWhatsapp from '@/components/ContactWhatsapp.astro';
 import PageIntro from '@/components/PageIntro.astro';
 import { site } from '@/data/site';
 import { LIMITS, contactObjectKeys, contactObjects } from '@/lib/contact';
@@ -115,6 +116,16 @@ const objets = contactObjectKeys.map((k) => ({ key: k, ...contactObjects[k] }));
             SKM La Fabrik<br />{site.address.street}<br />{site.address.city}, {site.address.country}
           </dd>
         </div>
+        {
+          site.contact.whatsapp && (
+            <div>
+              <dt>WhatsApp</dt>
+              <dd>
+                <ContactWhatsapp message="Bonjour SKM La Fabrik, " />
+              </dd>
+            </div>
+          )
+        }
         <div>
           <dt>E-mail</dt>
           <dd><ContactEmail /></dd>
@@ -122,17 +133,27 @@ const objets = contactObjectKeys.map((k) => ({ key: k, ...contactObjects[k] }));
         <div>
           <dt>Réseaux sociaux</dt>
           <dd>
-            {
-              site.social.map((s) => (
-                <span class="reseau">
-                  {s.href ? <a href={s.href} target="_blank" rel="noopener">{s.handle}</a> : s.handle} <span class="doux">({s.label})</span>
-                </span>
-              ))
-            }
+            <ul class="reseaux">
+              {
+                site.social.map((s) => (
+                  <li>
+                    {s.href ? (
+                      <a href={s.href} target="_blank" rel="noopener">
+                        {s.network} · {s.label}
+                      </a>
+                    ) : (
+                      <span>
+                        {s.handle} <span class="doux">({s.label})</span>
+                      </span>
+                    )}
+                  </li>
+                ))
+              }
+            </ul>
           </dd>
         </div>
       </dl>
-      <p class="note">Les numéros de téléphone et WhatsApp seront publiés ici dès leur confirmation par la structure.</p>
+      <p class="note">Le numéro de téléphone fixe sera publié ici dès sa confirmation. Réponses aux questions courantes : <a href="/faq">FAQ</a>.</p>
       <div class="raccourcis">
         <p class="surtitre">Raccourcis</p>
         <ul>
@@ -140,6 +161,7 @@ const objets = contactObjectKeys.map((k) => ({ key: k, ...contactObjects[k] }));
           <li><a href="/activites#offre">L’offre entreprises & institutions</a></li>
           <li><a href="/sunu-kaddu-music#studio">Les formules studio</a></li>
           <li><a href="/rio-fresco-fest">Le Rio Fresco Fest 2027</a></li>
+          <li><a href="/faq">Questions fréquentes</a></li>
         </ul>
       </div>
     </aside>
@@ -422,8 +444,20 @@ const objets = contactObjectKeys.map((k) => ({ key: k, ...contactObjects[k] }));
     margin: 0.4rem 0 0;
     line-height: 1.6;
   }
-  .reseau {
-    display: block;
+  .reseaux {
+    display: grid;
+    gap: 0.35rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .reseaux a,
+  .coordonnees dd a {
+    text-underline-offset: 0.25em;
+  }
+  .reseaux a:hover,
+  .coordonnees dd a:hover {
+    color: var(--c-or);
   }
   .note {
     font-size: 0.875rem;
