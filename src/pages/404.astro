@@ -1,0 +1,38 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Button from '@/components/Button.astro';
+---
+
+<BaseLayout title="Page introuvable" description="Cette page n’existe pas ou a été déplacée." noindex>
+  <section class="wrap p404" aria-labelledby="titre-page">
+    <p class="titre code" aria-hidden="true">404</p>
+    <h1 id="titre-page" class="titre titre-h2">Cette page n’existe pas, ou plus.</h1>
+    <p class="chapeau doux">Le lien est peut-être ancien ou mal saisi. Voici où reprendre la visite.</p>
+    <div class="actions">
+      <Button href="/">Retour à l’accueil</Button>
+      <a class="lien-fleche" href="/projets">Voir les projets <span aria-hidden="true">→</span></a>
+      <a class="lien-fleche" href="/contact">Nous écrire <span aria-hidden="true">→</span></a>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .p404 {
+    display: grid;
+    gap: 1.25rem;
+    justify-items: start;
+    padding-block: clamp(4rem, 3rem + 5vw, 8rem);
+  }
+  .code {
+    font-size: clamp(6rem, 4rem + 12vw, 14rem);
+    line-height: 0.85;
+    color: var(--c-or);
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem 2rem;
+    margin-top: 1rem;
+  }
+</style>

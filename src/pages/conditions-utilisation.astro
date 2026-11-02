@@ -1,0 +1,41 @@
+---
+import LegalPage from '@/components/LegalPage.astro';
+import ContactEmail from '@/components/ContactEmail.astro';
+import { site } from '@/data/site';
+---
+
+<LegalPage title="Conditions d’utilisation" description="Règles d’utilisation du site de SKM La Fabrik." updated="2 novembre 2026">
+  <h2>Objet</h2>
+  <p>
+    Le site de {site.name} présente les activités de la structure et de l’association Sunu Kaddu, et permet de lui adresser une demande.
+    En le consultant, vous acceptez les présentes conditions.
+  </p>
+
+  <h2>Accès au site</h2>
+  <p>
+    Le site est accessible gratuitement. Nous nous efforçons d’en assurer la disponibilité, sans pouvoir la garantir en permanence ; il
+    peut être interrompu pour maintenance ou en cas de difficulté technique.
+  </p>
+
+  <h2>Informations publiées</h2>
+  <p>
+    Les informations sont fournies à titre indicatif. Les tarifs présentés sont exprimés en francs CFA, peuvent évoluer et ne constituent
+    pas une offre ferme : chaque prestation fait l’objet d’un devis. Les chiffres d’impact indiqués « en cours de validation » sont issus de
+    nos documents et restent à confirmer.
+  </p>
+
+  <h2>Utilisation du formulaire</h2>
+  <p>
+    Le formulaire de contact est réservé aux demandes sincères. Les envois automatisés, abusifs ou contenant des propos illicites sont
+    interdits et peuvent être bloqués.
+  </p>
+
+  <h2>Propriété intellectuelle</h2>
+  <p>Les contenus du site sont protégés. Leur réutilisation est soumise à notre accord écrit préalable, voir les <a href="/mentions-legales">mentions légales</a>.</p>
+
+  <h2>Liens externes</h2>
+  <p>Le site contient des liens vers des services tiers, comme YouTube. Nous ne sommes pas responsables de leur contenu ni de leurs pratiques.</p>
+
+  <h2>Droit applicable</h2>
+  <p>Ces conditions sont soumises au droit sénégalais. Pour toute question : <ContactEmail />.</p>
+</LegalPage>

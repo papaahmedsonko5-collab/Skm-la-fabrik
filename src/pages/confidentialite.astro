@@ -1,0 +1,67 @@
+---
+import LegalPage from '@/components/LegalPage.astro';
+import ContactEmail from '@/components/ContactEmail.astro';
+import { site } from '@/data/site';
+---
+
+<LegalPage
+  title="Politique de confidentialité"
+  description="Quelles données le site de SKM La Fabrik collecte, pourquoi, combien de temps et comment exercer vos droits."
+  updated="2 novembre 2026"
+>
+  <p>
+    Cette politique s’applique au site de {site.name}. Elle respecte la loi sénégalaise n° 2008-12 du 25 janvier 2008 sur la protection
+    des données à caractère personnel et, pour les visiteurs de l’Union européenne, le Règlement général sur la protection des données (RGPD).
+  </p>
+
+  <h2>Responsable du traitement</h2>
+  <p>{site.legalName}, {site.address.street}, {site.address.city}, {site.address.country}. Contact : <ContactEmail />.</p>
+
+  <h2>Données collectées</h2>
+  <p>Le site ne collecte des données personnelles que lorsque vous remplissez le formulaire de contact :</p>
+  <ul>
+    <li>obligatoires : nom et prénom, adresse e-mail, objet de la demande et message ;</li>
+    <li>facultatives : structure et numéro de téléphone.</li>
+  </ul>
+  <p>Aucune donnée n’est demandée au-delà de ce qui est nécessaire pour vous répondre.</p>
+
+  <h2>Finalité et base légale</h2>
+  <p>
+    Ces données servent uniquement à répondre à votre demande (partenariat, prestation, formation, production ou question générale). Le
+    traitement repose sur votre consentement, exprimé en cochant la case prévue avant l’envoi.
+  </p>
+
+  <h2>Destinataires</h2>
+  <p>
+    Votre demande est transmise par e-mail à l’équipe de SKM La Fabrik. L’envoi est assuré par le service Resend, et le site est hébergé
+    par Vercel ; ces prestataires, situés aux États-Unis, n’utilisent pas vos données pour leur propre compte. Vos données ne sont jamais
+    vendues ni cédées.
+  </p>
+
+  <h2>Durée de conservation</h2>
+  <p>Les demandes sont conservées le temps nécessaire à leur traitement, puis au maximum 12 mois après notre dernier échange.</p>
+
+  <h2>Mesure d’audience et cookies</h2>
+  <p>
+    Le site utilise la mesure d’audience de Vercel (Web Analytics), qui ne dépose aucun cookie et ne permet pas de vous identifier : elle
+    compte les pages vues de manière agrégée. Aucun cookie publicitaire ou de suivi n’est utilisé, c’est pourquoi aucun bandeau de
+    consentement n’est affiché.
+  </p>
+  <p>
+    Les vidéos YouTube ne sont chargées qu’après votre clic sur le bouton de lecture, depuis le domaine youtube-nocookie.com. YouTube
+    (Google) peut alors appliquer sa propre politique de confidentialité.
+  </p>
+
+  <h2>Sécurité</h2>
+  <p>
+    Le site est servi exclusivement en HTTPS. Le formulaire est protégé contre les envois automatisés et répétés, et les clés d’accès aux
+    services d’envoi ne sont jamais exposées dans le navigateur.
+  </p>
+
+  <h2>Vos droits</h2>
+  <p>
+    Vous pouvez demander l’accès, la rectification, l’effacement ou l’opposition au traitement de vos données, et retirer votre
+    consentement à tout moment, en écrivant à <ContactEmail />. Vous pouvez aussi saisir la Commission de protection des données
+    personnelles du Sénégal (CDP) ou, dans l’Union européenne, l’autorité de protection de votre pays.
+  </p>
+</LegalPage>

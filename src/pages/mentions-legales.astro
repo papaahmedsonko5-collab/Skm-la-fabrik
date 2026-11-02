@@ -1,0 +1,35 @@
+---
+import LegalPage from '@/components/LegalPage.astro';
+import ContactEmail from '@/components/ContactEmail.astro';
+import { site } from '@/data/site';
+---
+
+<LegalPage title="Mentions légales" description="Éditeur, hébergeur et propriété intellectuelle du site de SKM La Fabrik." updated="2 novembre 2026">
+  <h2>Éditeur du site</h2>
+  <p>
+    {site.legalName}<br />
+    {site.address.street}, {site.address.city}, {site.address.country}<br />
+    E-mail : <ContactEmail />
+  </p>
+  <p>Numéro d’enregistrement de l’association : <span class="a-completer">à compléter par la structure</span>.</p>
+
+  <h2>Directeur de la publication</h2>
+  <p>Paul Pissety Sagna, dit PPS the Writah, président de l’association Sunu Kaddu.</p>
+
+  <h2>Hébergement</h2>
+  <p>Vercel Inc., 440 N Barranca Avenue #4133, Covina, CA 91723, États-Unis. Site : <a href="https://vercel.com" rel="noopener" target="_blank">vercel.com</a>.</p>
+
+  <h2>Propriété intellectuelle</h2>
+  <p>
+    Les logos SKM La Fabrik, Sunu Kaddu et Rio Fresco Fest, les textes, photographies et vidéos présentés sur ce site appartiennent à leurs
+    auteurs et à l’association Sunu Kaddu. Toute reproduction sans autorisation écrite préalable est interdite. Les noms des partenaires
+    cités restent la propriété de leurs titulaires respectifs.
+  </p>
+  <p>Crédit photo de certaines images du Rio Fresco Fest : The_Meuss.</p>
+
+  <h2>Données personnelles</h2>
+  <p>Le traitement des données transmises via le formulaire de contact est décrit dans la <a href="/confidentialite">politique de confidentialité</a>.</p>
+
+  <h2>Conditions d’utilisation</h2>
+  <p>L’utilisation du site est régie par les <a href="/conditions-utilisation">conditions d’utilisation</a>.</p>
+</LegalPage>

@@ -1,0 +1,50 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  updated: string;
+}
+const { title, description, updated } = Astro.props;
+---
+
+<BaseLayout title={title} description={description}>
+  <article class="wrap legal">
+    <header>
+      <p class="surtitre">Informations légales</p>
+      <h1 class="titre titre-h1">{title}</h1>
+      <p class="maj">Dernière mise à jour : {updated}</p>
+    </header>
+    <div class="prose">
+      <slot />
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .legal {
+    max-width: 50rem;
+    padding-block: clamp(3.5rem, 2.5rem + 3vw, 5.5rem) var(--section-y);
+    --accent: var(--c-or);
+  }
+  header {
+    margin-bottom: 2.5rem;
+  }
+  .surtitre {
+    margin-bottom: 1rem;
+  }
+  .maj {
+    margin-top: 1rem;
+    color: var(--c-pierre-claire);
+    font-size: 0.875rem;
+  }
+  .prose :global(h2) {
+    margin-top: 2.5rem;
+  }
+  .prose :global(.a-completer) {
+    padding: 0.1rem 0.4rem;
+    background: rgb(224 102 44 / 0.18);
+    font-size: 0.9em;
+  }
+</style>
