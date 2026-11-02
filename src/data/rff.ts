@@ -96,15 +96,53 @@ export const piliers: readonly Pilier[] = [
   },
 ];
 
+/**
+ * Première édition. Programme repris de l'affiche officielle « Programme RFF 2025 »
+ * et de l'affiche Set Setal transmises par la structure le 2 novembre 2026.
+ */
 export const edition2025 = {
   dates: '14 et 15 juin 2025',
   place: 'Digue de Rufisque',
   concept:
     'Un village culturel éphémère érigé directement sur la digue de Rufisque, pour combler le manque d’événements culturels majeurs dans la ville historique.',
+  formats: ['Expo', 'Jeux', 'Street food', 'Conférence', 'Concerts'],
   programme: [
     { k: 'Musique', v: 'La Loge des Poètes (rap et slam) et musiques actuelles et alternatives.' },
     { k: 'Patrimoine', v: 'Expositions « Rufisque, ville d’histoire ».' },
     { k: 'Communauté', v: 'Conférence sur la place des jeunes dans le développement communautaire, street food, pétanque et échecs.' },
+  ],
+  jours: [
+    {
+      date: '11 juin',
+      title: 'Set Setal',
+      text: 'Nettoyage citoyen de la digue de Rufisque, derrière l’église Sainte-Agnès, en partenariat avec la SONAGED.',
+      artists: [],
+    },
+    {
+      date: 'Samedi 14 juin',
+      title: 'La Loge des Poètes',
+      text: 'Le plateau rap et slam de Sunu Kaddu.',
+      artists: [
+        'PPS the Writah', 'Elzo Jamdong', 'Oothentik Zeus', 'Big DatX', 'Taijiscin', 'Dookapi', 'FoSirMeuz', 'Oliblez', 'BND',
+        'Mbaye La', 'Getma', 'MD Finger', 'DJ Nina', 'Samba Peuzzi', 'Gunmor', 'Nitdoff', 'Akbess', 'Karballah', 'FEE', 'Bura',
+        'Buurmag', 'Big Brain', 'Kalamou SB', 'Benny the Writah', 'Biibah Style', 'Big Point',
+      ],
+    },
+    {
+      date: 'Dimanche 15 juin',
+      title: 'Musiques actuelles et alternatives',
+      text: 'La scène MAA.',
+      artists: ['Ali Beta', 'Ibaaku', 'Satou Bamby', 'El Maestro', 'Annas', 'Dozart', 'Yankhoba', 'Zito', 'Chantal Barry', 'Yussu', 'Eljah', 'Alvine'],
+    },
+  ],
+  conference: {
+    title: 'Rôle et place des jeunes dans le développement communautaire',
+    speaker: 'Malal Almamy Talla (Fou Malade)',
+  },
+  exposition: 'Rufisque, ville d’histoire',
+  partners: [
+    'DGPU', 'Senelec', 'Fondation Sococim', 'Groupe Kirène', 'Faye Builder BTP', 'Kheude Business Group', 'Association Impact Sénégal',
+    'Sénégal Talents Campus', 'MBS Agence de publicité', 'Visit Rufisque', 'SONAGED',
   ],
 } as const;
 

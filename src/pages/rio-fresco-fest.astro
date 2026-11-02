@@ -2,9 +2,11 @@
 import { Image } from 'astro:assets';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import Button from '@/components/Button.astro';
+import Carousel from '@/components/Carousel.astro';
 import Gallery from '@/components/Gallery.astro';
 import Stats from '@/components/Stats.astro';
 import VideoEmbed from '@/components/VideoEmbed.astro';
+import logoRff2025 from '@/assets/brand/logo-rff-2025.png';
 import logoRff from '@/assets/brand/logo-rio-fresco-fest.png';
 import { photos } from '@/data/photos';
 import { rff2026Stats, rffPartners } from '@/data/site';
@@ -25,6 +27,25 @@ const gallery = [
   photos.rffDigue,
   photos.sceneDanse,
 ];
+
+const gallery2025 = [
+  { ...photos.rff25Aerien, large: true },
+  photos.rff25Tapis,
+  photos.rff25ExpoHistoire,
+  photos.rff25Moto,
+  photos.rff25Scene,
+  photos.rff25Percussions,
+  photos.rff25Deudeuche,
+  photos.rff25Voitures,
+  photos.rff25Djembe,
+  photos.rff25Artistes,
+  { ...photos.rff25Autorites, large: true },
+  photos.rff25Accueil,
+  photos.rff25Site,
+  photos.rff25SetSetal,
+];
+
+const loge2025 = [1, 2, 3, 4, 5, 6, 7, 8].map((i) => photos[`rff25Loge${i}` as `rff25Loge${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8}`]);
 
 const jsonLd = eventJsonLd(
   {
@@ -139,25 +160,70 @@ const jsonLd = eventJsonLd(
   </section>
 
   <section class="edition-2025 theme-nuit section" aria-labelledby="t-2025">
-    <div class="wrap e25-grid">
-      <figure data-reveal>
-        <Image src={photos.rffDigue.src} alt={photos.rffDigue.alt} widths={[480, 800, 1100]} sizes="(min-width: 56rem) 45vw, 100vw" />
-      </figure>
-      <div data-reveal>
+    <div class="wrap">
+      <div class="e25-tete" data-reveal>
+        <Image class="e25-logo" src={logoRff2025} alt="Logo du Rio Fresco Fest 2025" width={220} />
         <p class="surtitre">Première édition · {edition2025.dates}</p>
         <h2 id="t-2025" class="titre titre-h2">2025, sur la digue</h2>
         <p class="chapeau doux">{edition2025.concept}</p>
-        <dl class="e25">
+        <p class="e25-formats">{edition2025.formats.join(' · ')}</p>
+      </div>
+      <div class="e25-grid">
+        <figure class="e25-affiche" data-reveal>
+          <Image src={photos.rff25Affiche.src} alt={photos.rff25Affiche.alt} widths={[480, 800, 1200]} sizes="(min-width: 56rem) 38vw, 100vw" quality={85} />
+          <figcaption>Affiche officielle de l’édition 2025</figcaption>
+        </figure>
+        <div class="e25-programme">
+          <ol class="e25-jours">
+            {
+              edition2025.jours.map((j) => (
+                <li class="e25-jour" data-reveal>
+                  <p class="jour-date">{j.date}</p>
+                  <h3 class="titre titre-h3">{j.title}</h3>
+                  <p class="doux">{j.text}</p>
+                  {j.artists.length > 0 && (
+                    <ul class="artistes" aria-label={`Artistes : ${j.title}`}>
+                      {j.artists.map((n) => (
+                        <li>{n}</li>
+                      ))}
+                    </ul>
+                  )}
+                </li>
+              ))
+            }
+          </ol>
+          <dl class="e25" data-reveal>
+            <div>
+              <dt>Conférence</dt>
+              <dd>« {edition2025.conference.title} », avec {edition2025.conference.speaker}</dd>
+            </div>
+            <div>
+              <dt>Exposition</dt>
+              <dd>« {edition2025.exposition} »</dd>
+            </div>
+            <div>
+              <dt>Partenaires 2025</dt>
+              <dd>{edition2025.partners.join(' · ')}</dd>
+            </div>
+          </dl>
+          <a class="lien-fleche" href="/projets/rio-fresco-fest-2025">Fiche de l’édition 2025 <span aria-hidden="true">→</span></a>
+        </div>
+      </div>
+      <div class="e25-photos">
+        <h3 class="surtitre">Sur la scène de la Loge des Poètes</h3>
+        <Carousel label="Artistes de la Loge des Poètes 2025" itemWidth="clamp(13rem, 22vw, 18rem)">
           {
-            edition2025.programme.map((it) => (
-              <div>
-                <dt>{it.k}</dt>
-                <dd>{it.v}</dd>
-              </div>
+            loge2025.map((ph) => (
+              <figure class="loge">
+                <Image src={ph.src} alt={ph.alt} widths={[300, 560]} sizes="(min-width: 64rem) 22vw, 60vw" />
+              </figure>
             ))
           }
-        </dl>
-        <a class="lien-fleche" href="/projets/rio-fresco-fest-2025">Fiche de l’édition 2025 <span aria-hidden="true">→</span></a>
+        </Carousel>
+      </div>
+      <div class="e25-photos">
+        <h3 class="surtitre">Le village, du site brut à la fête</h3>
+        <Gallery items={gallery2025} label="Photos du Rio Fresco Fest 2025" />
       </div>
     </div>
   </section>
@@ -461,22 +527,69 @@ const jsonLd = eventJsonLd(
     --accent: var(--c-orange-profond);
   }
 
+  .e25-tete {
+    max-width: 50rem;
+    margin-bottom: clamp(2.5rem, 2rem + 2vw, 4rem);
+  }
+  .e25-tete .chapeau {
+    margin-block: 1.25rem 1rem;
+  }
+  .e25-formats {
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--c-orange);
+  }
   .e25-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr);
     gap: 3rem clamp(2rem, 1rem + 4vw, 5rem);
-    align-items: center;
+    align-items: start;
   }
-  .e25-grid figure {
+  .e25-affiche {
+    position: sticky;
+    top: 6rem;
     margin: 0;
   }
-  .e25-grid :global(img) {
+  .e25-affiche :global(img) {
+    display: block;
     width: 100%;
-    aspect-ratio: 4 / 3;
-    object-fit: cover;
+    height: auto;
   }
-  .e25-grid .chapeau {
-    margin-block: 1.25rem 1.5rem;
+  .e25-affiche figcaption {
+    margin-top: 0.75rem;
+    font-size: 0.8125rem;
+    color: var(--soft);
+  }
+  .e25-jours {
+    display: grid;
+    gap: 2.25rem;
+    margin: 0 0 2.5rem;
+    padding: 0;
+    list-style: none;
+  }
+  .e25-jour {
+    display: grid;
+    gap: 0.5rem;
+    padding-left: 1.25rem;
+    border-left: 3px solid var(--c-orange);
+  }
+  .jour-date {
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--c-orange);
+  }
+  .artistes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.1rem;
+    margin: 0.5rem 0 0;
+    padding: 0;
+    list-style: none;
+    font-weight: 600;
   }
   .e25 {
     margin: 0 0 1.75rem;
@@ -492,6 +605,35 @@ const jsonLd = eventJsonLd(
   }
   .e25 dd {
     margin: 0.2rem 0 0;
+  }
+  .e25-logo {
+    width: min(13rem, 55%);
+    height: auto;
+    margin-bottom: 1.5rem;
+  }
+  .loge {
+    margin: 0;
+  }
+  .loge :global(img) {
+    display: block;
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    object-fit: cover;
+  }
+  .e25-photos {
+    margin-top: clamp(3.5rem, 2.5rem + 4vw, 6rem);
+  }
+  .e25-photos h3 {
+    margin-bottom: 1.25rem;
+  }
+  @media (max-width: 56rem) {
+    .e25-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .e25-affiche {
+      position: static;
+      max-width: 26rem;
+    }
   }
 
   .partenaires {
@@ -601,7 +743,6 @@ const jsonLd = eventJsonLd(
   @media (max-width: 56rem) {
     .vision-grid,
     .bilan-grid,
-    .e25-grid,
     .ray-grid,
     .hz {
       grid-template-columns: minmax(0, 1fr);
