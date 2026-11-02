@@ -3,73 +3,123 @@ import { Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import Button from '@/components/Button.astro';
+import Carousel from '@/components/Carousel.astro';
 import Marquee from '@/components/Marquee.astro';
+import ProjectCard from '@/components/ProjectCard.astro';
 import SectionHead from '@/components/SectionHead.astro';
 import Stats from '@/components/Stats.astro';
 import { blueprintStats, partners, rff2026Stats } from '@/data/site';
+import { cycle } from '@/data/impact';
 import { photos } from '@/data/photos';
 import { poles } from '@/data/poles';
 import logoRff from '@/assets/brand/logo-rio-fresco-fest.png';
 import logoSk from '@/assets/brand/logo-sunu-kaddu.png';
 import { sortNews } from '@/lib/content';
 
-const news = sortNews(await getCollection('actualites', ({ data }) => !data.draft)).slice(0, 3);
-const projets = await getCollection('projets');
-const pick = (id: string) => projets.find((p) => p.id === id);
-const sunuTape = pick('sunu-tape-vol-1');
-const onebeat = pick('onebeat-senegal');
-const art = pick('concours-art-scolaire-2024');
+const news = sortNews(await getCollection('actualites', ({ data }) => !data.draft));
+
+// Ordre éditorial du carrousel : les projets phares d'abord, puis le reste du portfolio.
+const ordre = ['rio-fresco-fest-2026', 'sunu-tape-vol-1', 'handischool-day', 'onebeat-senegal', 'loge-des-poetes', 'set-setal'];
+const projets = (await getCollection('projets')).sort((a, b) => {
+  const ia = ordre.indexOf(a.id);
+  const ib = ordre.indexOf(b.id);
+  return (ia === -1 ? ordre.length : ia) - (ib === -1 ? ordre.length : ib) || a.data.title.localeCompare(b.data.title, 'fr');
+});
+
+const etapes = [
+  { titre: cycle[0], href: '/activites#formation', lien: 'Nos formations', photo: photos.formation, texte: 'Apprentissage pratique aux métiers de l’audiovisuel, du son, du graphisme et de la communication digitale.' },
+  { titre: cycle[1], href: '/sunu-kaddu-music', lien: 'Le label', photo: photos.studio, texte: 'Le studio 360 Key I Am et le label Sunu Kaddu Music : composition, enregistrement, mixage, mastering.' },
+  { titre: cycle[2], href: '/rio-fresco-fest', lien: 'Le festival', photo: photos.rffFoule, texte: 'Rio Fresco Fest, Loge des Poètes, Rufisque en Live : des scènes pour les talents révélés.' },
+  { titre: cycle[3], href: '/impact', lien: 'Notre impact', photo: photos.setSetal, texte: 'Inclusion, éducation, réinsertion et environnement : la culture au service du territoire.' },
+] as const;
 ---
 
 <BaseLayout>
   <section class="hero" aria-labelledby="accroche">
-    <Image
-      src={photos.rffDanse.src}
-      alt={photos.rffDanse.alt}
-      widths={[640, 960, 1400]}
-      sizes="100vw"
-      loading="eager"
-      fetchpriority="high"
-      class="hero-img"
-    />
-    <div class="hero-shade" aria-hidden="true"></div>
-    <div class="hero-content wrap">
-      <p class="surtitre">Creative Hub · Rufisque, Sénégal · Depuis 2014</p>
-      <h1 id="accroche" class="titre titre-display">
-        Nous fabriquons les idées, révélons les talents et faisons <span class="accent">vibrer les territoires.</span>
-      </h1>
-      <div class="hero-actions">
-        <Button href="/a-propos">Découvrir La Fabrik</Button>
-        <Button href="/contact?objet=partenariat" variant="contour">Devenir partenaire</Button>
+    <div class="hero-lueur" aria-hidden="true"></div>
+    <div class="wrap hero-grid">
+      <div class="hero-texte">
+        <p class="surtitre">Creative Hub · Rufisque, Sénégal · Depuis 2014</p>
+        <h1 id="accroche" class="titre hero-titre">
+          Nous fabriquons les idées, révélons les talents et faisons <span class="accent">vibrer les territoires.</span>
+        </h1>
+        <p class="hero-chapeau">
+          Formation, production, événementiel, festivals et action communautaire&nbsp;: cinq pôles, une seule fabrique, au service
+          de la jeunesse de Rufisque.
+        </p>
+        <div class="hero-actions">
+          <Button href="/a-propos">Découvrir La Fabrik</Button>
+          <Button href="/contact?objet=partenariat" variant="contour">Devenir partenaire</Button>
+        </div>
       </div>
+      <figure class="hero-photo">
+        <Image
+          src={photos.rffDanse.src}
+          alt={photos.rffDanse.alt}
+          widths={[640, 960, 1415]}
+          sizes="(min-width: 64rem) 58vw, 100vw"
+          quality={85}
+          loading="eager"
+          fetchpriority="high"
+        />
+      </figure>
+    </div>
+    <div class="wrap">
+      <ul class="cartes" aria-label="Accès directs">
+        <li>
+          <a class="carte carte-or" href="/contact?objet=partenariat">
+            <span class="carte-meta">Rio Fresco Fest · Édition 2027</span>
+            <span class="carte-titre">Soutenir la prochaine édition</span>
+            <span class="carte-fleche" aria-hidden="true">→</span>
+          </a>
+        </li>
+        <li>
+          <a class="carte carte-papier" href="/sunu-kaddu-music#studio">
+            <span class="carte-meta">Studio Sunu Kaddu</span>
+            <span class="carte-titre">Enregistrer, mixer, masteriser</span>
+            <span class="carte-fleche" aria-hidden="true">→</span>
+          </a>
+        </li>
+        <li>
+          <a class="carte carte-ligne" href="/activites#formation">
+            <span class="carte-meta">Formation</span>
+            <span class="carte-titre">Apprendre les métiers de l’image et du son</span>
+            <span class="carte-fleche" aria-hidden="true">→</span>
+          </a>
+        </li>
+      </ul>
     </div>
   </section>
 
   <Marquee items={['Nul n’entre ici s’il n’est créatif', 'Formation', 'Production', 'Événementiel', 'Festivals', 'Communauté', 'Chaque pas raconte une histoire']} />
 
-  <section class="theme-papier section" aria-labelledby="qui">
-    <div class="wrap qui">
-      <div data-reveal>
-        <p class="surtitre">Qui sommes-nous</p>
-        <h2 id="qui" class="titre titre-h2">Plus qu’un studio&nbsp;: un moteur de transformation.</h2>
-      </div>
-      <div class="qui-texte" data-reveal>
-        <p class="chapeau">
-          SKM La Fabrik est une plateforme créative basée à Rufisque, qui allie production multimédia, formation et services
-          audiovisuels. Son objectif&nbsp;: professionnaliser les jeunes dans les métiers des arts, de la production, de
-          l’audiovisuel et de la communication digitale, tout en répondant aux besoins en contenus des structures locales.
-        </p>
-        <blockquote>
-          <p class="citation">
-            « Nous avons créé SKM La Fabrik pour donner aux jeunes de Rufisque les outils de leur autonomie artistique et
-            professionnelle. »
-          </p>
-          <footer>PPS the Writah, fondateur et directeur artistique</footer>
-        </blockquote>
-        <a class="lien-fleche" href="/a-propos">Notre histoire <span aria-hidden="true">→</span></a>
-      </div>
-    </div>
+  <section class="theme-papier section manifeste" aria-labelledby="qui">
     <div class="wrap">
+      <p class="index" data-reveal><span>01</span> Manifeste</p>
+      <h2 id="qui" class="manifeste-texte" data-reveal>
+        Plus qu’un studio, <mark>un moteur de transformation.</mark> Nous formons les jeunes de Rufisque aux métiers des arts, de
+        l’audiovisuel et du digital, nous produisons leurs œuvres et nous les portons sur scène. <mark>Nul n’entre ici s’il
+        n’est créatif.</mark>
+      </h2>
+      <div class="manifeste-bas">
+        <div class="manifeste-photo" data-reveal>
+          <Image src={photos.communaute.src} alt={photos.communaute.alt} widths={[480, 800, 987]} sizes="(min-width: 56rem) 40vw, 100vw" quality={85} />
+        </div>
+        <div class="manifeste-carte" data-reveal>
+          <blockquote>
+            <p class="citation">
+              « Nous avons créé SKM La Fabrik pour donner aux jeunes de Rufisque les outils de leur autonomie artistique et
+              professionnelle. »
+            </p>
+            <footer>PPS the Writah, fondateur et directeur artistique</footer>
+          </blockquote>
+          <p>
+            Une plateforme créative qui allie production multimédia, formation et services audiovisuels, tout en répondant aux
+            besoins en contenus des structures locales.
+          </p>
+          <a class="lien-fleche" href="/a-propos">Notre histoire <span aria-hidden="true">→</span></a>
+        </div>
+      </div>
       <Stats data={blueprintStats} limit={4} />
     </div>
   </section>
@@ -96,57 +146,38 @@ const art = pick('concours-art-scolaire-2024');
 
   <section class="theme-anthracite section" aria-labelledby="realisations">
     <div class="wrap">
-      <SectionHead eyebrow="Projets & réalisations" title="Une décennie de bâtisseurs" id="realisations" link={{ href: '/projets', label: 'Voir le portfolio' }} />
-      <div class="mosaique">
-        <a class="tuile tuile-rff" href="/rio-fresco-fest" data-reveal>
-          <Image src={photos.rffFoule.src} alt="" widths={[480, 800]} sizes="(min-width: 64rem) 40vw, 100vw" />
-          <span class="tuile-texte">
-            <span class="meta meta-orange">Festival · 2025, 2026</span>
-            <span class="titre grand">Rio Fresco Fest</span>
-            <span class="sous">Un village culturel éphémère au cœur de la ville historique.</span>
-          </span>
-        </a>
-        {
-          sunuTape && (
-            <a class="tuile tuile-or" href={`/projets/${sunuTape.id}`} data-reveal>
-              <span class="meta">Production musicale · {sunuTape.data.period}</span>
-              <span>
-                <span class="titre grand">Sunu Tape</span>
-                <span class="sous">{sunuTape.data.summary}</span>
-              </span>
-            </a>
-          )
-        }
-        <a class="tuile tuile-photo" href="/projets/handischool-day" data-reveal>
-          <Image src={photos.handischool.src} alt="" widths={[400, 640]} sizes="(min-width: 64rem) 28vw, 100vw" />
-          <span class="tuile-texte">
-            <span class="meta">Inclusion</span>
-            <span class="titre moyen">Handischool Day</span>
-          </span>
-        </a>
-        {
-          onebeat && (
-            <a class="tuile tuile-photo" href={`/projets/${onebeat.id}`} data-reveal>
-              <Image src={photos.formation.src} alt="" widths={[400, 640]} sizes="(min-width: 64rem) 28vw, 100vw" />
-              <span class="tuile-texte">
-                <span class="meta">Formation · {onebeat.data.period}</span>
-                <span class="titre moyen">OneBeat Sénégal</span>
-              </span>
-            </a>
-          )
-        }
-        {
-          art && (
-            <a class="tuile tuile-ligne" href={`/projets/${art.id}`} data-reveal>
-              <span class="meta">Éducation · {art.data.period}</span>
-              <span>
-                <span class="titre moyen">Concours d’art scolaire</span>
-                <span class="sous">{art.data.summary}</span>
-              </span>
-            </a>
-          )
-        }
+      <SectionHead eyebrow="Projets & réalisations" title="Une décennie de bâtisseurs" id="realisations" link={{ href: '/projets', label: 'Voir tout le portfolio' }} />
+      <div class="carrousel-projets">
+        <Carousel label="Projets de SKM La Fabrik" itemWidth="clamp(17rem, 30vw, 25rem)">
+          {projets.map((p) => <ProjectCard project={p} />)}
+        </Carousel>
       </div>
+    </div>
+  </section>
+
+  <section class="theme-papier section processus" aria-labelledby="processus">
+    <div class="wrap">
+      <div class="processus-tete" data-reveal>
+        <p class="index"><span>02</span> Notre méthode</p>
+        <h2 id="processus" class="titre titre-h2">Un cycle complet, du premier atelier à la scène.</h2>
+      </div>
+      <ol class="etapes">
+        {
+          etapes.map((e, i) => (
+            <li class="etape" data-reveal>
+              <div class="etape-photo">
+                <Image src={e.photo.src} alt="" widths={[360, 640]} sizes="(min-width: 64rem) 22vw, (min-width: 40rem) 45vw, 100vw" quality={85} />
+                <span class="etape-num" aria-hidden="true">0{i + 1}</span>
+              </div>
+              <h3 class="titre titre-h3">{e.titre}</h3>
+              <p>{e.texte}</p>
+              <a class="lien-fleche" href={e.href}>
+                {e.lien} <span aria-hidden="true">→</span>
+              </a>
+            </li>
+          ))
+        }
+      </ol>
     </div>
   </section>
 
@@ -198,7 +229,7 @@ const art = pick('concours-art-scolaire-2024');
 
   <section class="theme-sombre section" aria-labelledby="impact">
     <div class="wrap">
-      <SectionHead eyebrow="Impact communautaire" title="Former. Produire. Montrer. Réinvestir." id="impact">
+      <SectionHead eyebrow="Impact communautaire" title="La culture au service du territoire" id="impact">
         <p class="doux impact-intro">
           La culture comme moteur d’éducation, de développement et de solidarité, au service de la jeunesse, de l’inclusion et
           de l’environnement de Rufisque.
@@ -230,21 +261,21 @@ const art = pick('concours-art-scolaire-2024');
   <section class="theme-papier section" aria-labelledby="actus">
     <div class="wrap">
       <SectionHead title="Actualités &amp; événements" id="actus" link={{ href: '/actualites', label: 'Toutes les actualités' }} />
-      <ul class="news">
+      <Carousel label="Dernières actualités" tone="clair" itemWidth="clamp(17rem, 32vw, 27rem)">
         {
           news.map((n) => (
-            <li data-reveal>
+            <article class="news">
               <a href={`/actualites/${n.id}`}>
-                <Image src={n.data.cover} alt="" widths={[400, 640]} sizes="(min-width: 64rem) 30vw, 100vw" />
+                <Image src={n.data.cover} alt="" widths={[400, 640]} sizes="(min-width: 64rem) 32vw, 85vw" />
                 <span class="news-meta">
                   {n.data.type} · {n.data.period}
                 </span>
-                <span class="news-titre">{n.data.title}</span>
+                <h3 class="news-titre">{n.data.title}</h3>
               </a>
-            </li>
+            </article>
           ))
         }
-      </ul>
+      </Carousel>
     </div>
   </section>
 
@@ -259,38 +290,57 @@ const art = pick('concours-art-scolaire-2024');
 </BaseLayout>
 
 <style>
+  /* Respiration plus généreuse entre les sections de l'accueil */
+  .section {
+    padding-block: clamp(5rem, 3rem + 8vw, 9.5rem);
+  }
+
+  /* Hero : photo cadrée à droite, fondue dans le noir, titre qui la chevauche */
   .hero {
     position: relative;
-    display: flex;
-    align-items: flex-end;
-    min-height: min(52rem, calc(100svh - 4.75rem));
     overflow: hidden;
     isolation: isolate;
-  }
-  .hero-img {
-    position: absolute;
-    inset: 0;
-    z-index: -2;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center 35%;
-  }
-  .hero-shade {
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    background: linear-gradient(180deg, rgb(13 12 10 / 0.1) 0%, rgb(13 12 10 / 0.5) 45%, rgb(13 12 10 / 0.94) 100%);
-  }
-  .hero-content {
-    padding-block: 8rem clamp(2.5rem, 2rem + 2vw, 4rem);
+    padding-block: clamp(2rem, 1rem + 3vw, 4rem) clamp(3rem, 2rem + 3vw, 5rem);
+    background: var(--c-noir);
+    color: var(--c-papier);
     --accent: var(--c-or);
   }
-  .hero-content .surtitre {
-    margin-bottom: 1.25rem;
+  .hero-lueur {
+    position: absolute;
+    z-index: -1;
+    top: -28rem;
+    right: -22rem;
+    width: 72rem;
+    height: 72rem;
+    background: radial-gradient(closest-side, rgb(201 161 59 / 0.3), rgb(224 102 44 / 0.08) 55%, transparent 78%);
+    pointer-events: none;
   }
-  .hero h1 {
-    max-width: 74rem;
+  .hero-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+    align-items: center;
+  }
+  .hero-texte {
+    position: relative;
+    z-index: 1;
+    grid-column: 1;
+    grid-row: 1;
+    margin-right: -14rem;
+  }
+  .hero-texte .surtitre {
+    margin-bottom: 1.5rem;
+  }
+  .hero-titre {
+    font-size: clamp(2.75rem, 1.3rem + 4.6vw, 6.75rem);
+    line-height: 0.92;
+    text-wrap: balance;
+  }
+  .hero-chapeau {
+    max-width: 32rem;
+    margin-top: 1.75rem;
+    font-size: var(--t-lead);
+    line-height: 1.55;
+    color: var(--c-pierre-claire);
   }
   .hero-actions {
     display: flex;
@@ -298,20 +348,182 @@ const art = pick('concours-art-scolaire-2024');
     gap: 0.75rem;
     margin-top: 2.25rem;
   }
+  .hero-photo {
+    grid-column: 2;
+    grid-row: 1;
+    margin: 0;
+  }
+  .hero-photo :global(img) {
+    display: block;
+    width: 100%;
+    height: clamp(26rem, 66svh, 42rem);
+    object-fit: cover;
+    object-position: 60% 35%;
+    -webkit-mask-image:
+      linear-gradient(90deg, transparent 0, #000 42%),
+      linear-gradient(180deg, transparent 0, #000 16%, #000 84%, transparent 100%);
+    -webkit-mask-composite: source-in;
+    mask-image:
+      linear-gradient(90deg, transparent 0, #000 42%),
+      linear-gradient(180deg, transparent 0, #000 16%, #000 84%, transparent 100%);
+    mask-composite: intersect;
+  }
+  .cartes {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    margin: clamp(2rem, 1rem + 2vw, 3.5rem) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .carte {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: auto 1fr;
+    gap: 1.25rem 1rem;
+    height: 100%;
+    min-height: 9.5rem;
+    padding: 1.5rem;
+    text-decoration: none;
+    transition:
+      background-color 0.2s,
+      border-color 0.2s;
+  }
+  .carte-meta {
+    grid-column: 1 / -1;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+  .carte-titre {
+    align-self: end;
+    font-family: var(--f-titre);
+    font-size: clamp(1.5rem, 1.2rem + 0.9vw, 2rem);
+    line-height: 1;
+    text-transform: uppercase;
+    text-wrap: balance;
+  }
+  .carte-fleche {
+    align-self: end;
+    font-size: 1.5rem;
+    line-height: 1;
+    transition: transform 0.3s var(--ease);
+  }
+  .carte:hover .carte-fleche {
+    transform: translateX(5px);
+  }
+  .carte-or {
+    background: var(--c-or);
+    color: var(--c-noir);
+  }
+  .carte-or:hover {
+    background: var(--c-or-vif);
+  }
+  .carte-papier {
+    background: var(--c-papier);
+    color: var(--c-encre);
+  }
+  .carte-papier:hover {
+    background: #fff;
+  }
+  .carte-ligne {
+    border: 1px solid var(--c-ligne-sombre);
+    color: var(--c-papier);
+  }
+  .carte-ligne .carte-meta {
+    color: var(--c-or);
+  }
+  .carte-ligne:hover {
+    border-color: var(--c-or);
+  }
+  @media (max-width: 64rem) {
+    .hero-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .hero-photo {
+      grid-column: 1;
+      grid-row: 1;
+      margin-inline: calc(var(--gutter) * -1);
+    }
+    .hero-photo :global(img) {
+      height: clamp(18rem, 52svh, 30rem);
+      -webkit-mask-image: linear-gradient(180deg, #000 50%, transparent 100%);
+      -webkit-mask-composite: source-over;
+      mask-image: linear-gradient(180deg, #000 50%, transparent 100%);
+      mask-composite: add;
+    }
+    .hero-texte {
+      grid-column: 1;
+      grid-row: 2;
+      margin: -5rem 0 0;
+    }
+  }
+  @media (max-width: 56rem) {
+    .cartes {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .carte {
+      min-height: 0;
+    }
+  }
 
-  .qui {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 28rem), 1fr));
-    gap: 2.5rem 4rem;
-    margin-bottom: 4.5rem;
+  /* Repères numérotés des sections éditoriales */
+  .index {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin-bottom: clamp(1.5rem, 1rem + 1.5vw, 2.5rem);
+    font-size: var(--t-micro);
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--soft);
   }
-  .qui .surtitre {
-    margin-bottom: 1.25rem;
+  .index span {
+    font-family: var(--f-titre);
+    font-size: 1.25rem;
+    letter-spacing: 0;
+    color: var(--accent);
   }
-  .qui-texte {
+
+  /* Manifeste */
+  .manifeste-texte {
+    max-width: 66rem;
+    font-family: var(--f-texte);
+    font-size: clamp(1.625rem, 1.05rem + 2.5vw, 3.5rem);
+    font-weight: 600;
+    line-height: 1.18;
+    letter-spacing: -0.015em;
+    text-wrap: pretty;
+  }
+  .manifeste-texte mark {
+    padding-inline: 0.05em;
+    background: linear-gradient(transparent 60%, var(--c-or) 60%, var(--c-or) 94%, transparent 94%);
+    color: inherit;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+  .manifeste-bas {
     display: grid;
-    gap: 1.75rem;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    align-items: end;
+    margin-block: clamp(3rem, 2rem + 4vw, 6rem) clamp(3.5rem, 2.5rem + 3vw, 5.5rem);
+  }
+  .manifeste-photo :global(img) {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+  }
+  .manifeste-carte {
+    position: relative;
+    display: grid;
+    gap: 1.5rem;
     justify-items: start;
+    margin: 0 0 -2.5rem -5rem;
+    padding: clamp(1.75rem, 1rem + 2vw, 3rem);
+    background: #fff;
   }
   blockquote {
     margin: 0;
@@ -320,6 +532,14 @@ const art = pick('concours-art-scolaire-2024');
     margin-top: 0.75rem;
     font-size: 0.875rem;
     color: var(--c-encre-douce);
+  }
+  @media (max-width: 56rem) {
+    .manifeste-bas {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .manifeste-carte {
+      margin: -3rem 1rem 0;
+    }
   }
 
   .poles {
@@ -383,110 +603,86 @@ const art = pick('concours-art-scolaire-2024');
     }
   }
 
-  .mosaique {
+  /* Carrousel des projets : cartes sur fond noir pour se détacher de l'anthracite */
+  .carrousel-projets {
+    --card-bg: var(--c-noir);
+  }
+
+  /* Processus en quatre étapes */
+  .processus-tete {
+    max-width: 50rem;
+    margin-bottom: clamp(3rem, 2rem + 3vw, 4.5rem);
+  }
+  .etapes {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    grid-auto-rows: minmax(15.5rem, auto);
-    gap: 1rem;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 2.5rem 1.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
   }
-  .tuile {
+  .etape {
+    display: grid;
+    gap: 0.9rem;
+    align-content: start;
+    justify-items: start;
+  }
+  .etape p {
+    color: var(--c-encre-douce);
+    line-height: 1.55;
+  }
+  .etape-photo {
     position: relative;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    overflow: hidden;
-    text-decoration: none;
-    padding: 1.75rem;
-  }
-  .tuile :global(img) {
-    position: absolute;
-    inset: 0;
     width: 100%;
-    height: 100%;
+  }
+  .etape-photo :global(img) {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 5;
     object-fit: cover;
-    transition: transform 0.9s var(--ease);
   }
-  .tuile:hover :global(img) {
-    transform: scale(1.04);
-  }
-  .tuile-rff,
-  .tuile-photo {
-    justify-content: flex-end;
-  }
-  .tuile-rff::after,
-  .tuile-photo::after {
-    content: '';
+  .etape-num {
     position: absolute;
-    inset: 0;
-    background: linear-gradient(180deg, rgb(0 0 0 / 0) 35%, rgb(0 0 0 / 0.85) 100%);
+    left: 0;
+    bottom: 0;
+    padding: 0.6rem 1rem 0 0;
+    background: var(--c-papier);
+    font-family: var(--f-titre);
+    font-size: 2.25rem;
+    line-height: 1;
+    color: var(--c-or-profond);
   }
-  .tuile-texte {
-    position: relative;
-    z-index: 1;
-    display: grid;
-    gap: 0.5rem;
-  }
-  .tuile-rff {
-    grid-row: span 2;
-    min-height: 32rem;
-  }
-  .tuile-or {
-    background: var(--c-or);
-    color: var(--c-noir);
-  }
-  .tuile-ligne {
-    border: 1px solid var(--c-ligne-sombre);
-  }
-  .tuile-ligne:hover {
-    border-color: var(--c-or);
-  }
-  .meta {
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--c-or);
-  }
-  .tuile-or .meta {
-    color: var(--c-noir);
-  }
-  .meta-orange {
-    color: var(--c-orange);
-  }
-  .titre.grand {
-    display: block;
-    font-size: clamp(2.5rem, 2rem + 2vw, 3.75rem);
-  }
-  .titre.moyen {
-    display: block;
-    font-size: clamp(1.75rem, 1.5rem + 1vw, 2.25rem);
-    line-height: 1.05;
-  }
-  .sous {
-    display: block;
-    margin-top: 0.6rem;
-    font-size: 0.9375rem;
-    line-height: 1.5;
-  }
-  .tuile-ligne .sous {
-    color: var(--c-pierre);
+  @media (min-width: 64rem) {
+    .etape:nth-child(even) {
+      margin-top: 3.5rem;
+    }
+    .etape:not(:last-child) .etape-photo::after {
+      content: '→';
+      position: absolute;
+      top: 50%;
+      right: -0.875rem;
+      z-index: 1;
+      display: grid;
+      place-items: center;
+      width: 2.5rem;
+      height: 2.5rem;
+      transform: translate(50%, -50%);
+      background: var(--c-or);
+      color: var(--c-noir);
+      font-weight: 700;
+    }
   }
   @media (max-width: 64rem) {
-    .mosaique {
+    .etapes {
       grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-    .tuile-rff {
-      grid-column: span 2;
-      grid-row: span 1;
-      min-height: 26rem;
     }
   }
   @media (max-width: 40rem) {
-    .mosaique {
+    .etapes {
       grid-template-columns: minmax(0, 1fr);
     }
-    .tuile-rff {
-      grid-column: auto;
+    .etape-photo :global(img) {
+      aspect-ratio: 3 / 2;
     }
   }
 
@@ -603,12 +799,7 @@ const art = pick('concours-art-scolaire-2024');
   }
 
   .news {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
-    gap: 2.5rem;
-    margin: 0;
-    padding: 0;
-    list-style: none;
+    height: 100%;
   }
   .news a {
     display: grid;
@@ -628,6 +819,7 @@ const art = pick('concours-art-scolaire-2024');
     color: var(--c-or-profond);
   }
   .news-titre {
+    margin: 0;
     font-size: 1.35rem;
     font-weight: 700;
     line-height: 1.3;
