@@ -1,95 +1,147 @@
 ---
 import { Image } from 'astro:assets';
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import SectionHead from '@/components/SectionHead.astro';
 import Button from '@/components/Button.astro';
+import Carousel from '@/components/Carousel.astro';
 import { team } from '@/data/site';
 import { photos } from '@/data/photos';
 import { timeline, values, cycle } from '@/data/histoire';
+
+// Les deux tournants de l'histoire, mis en avant dans la frise.
+const tournants = ['2014', '2024'];
 ---
 
 <BaseLayout
   title="À propos"
   description="L’histoire de SKM La Fabrik, de Sunu Kaddu en 2014 au Creative Hub de Rufisque : vision, mission, valeurs, modèle et équipe dirigeante."
+  overlayHeader
 >
-  <section class="intro wrap" aria-labelledby="titre-page">
-    <p class="surtitre">À propos · De Sunu Kaddu à La Fabrik</p>
-    <h1 id="titre-page" class="titre titre-display">Nul n’entre ici<br />s’il n’est <span class="accent">créatif.</span></h1>
-    <div class="intro-cols">
-      <p class="chapeau">
-        Cette devise n’est pas qu’un slogan&nbsp;: c’est le standard d’excellence de La Fabrik. Nous bâtissons un
-        environnement où la culture urbaine rencontre l’exigence professionnelle absolue.
-      </p>
-      <p class="doux">
-        Depuis sa création en 2014 par l’artiste PPS the Writah, Sunu Kaddu s’est imposé comme un acteur majeur des cultures
-        urbaines à Rufisque et au Sénégal. En 2024, la structure devient SKM La Fabrik&nbsp;: un véritable pôle de production
-        audiovisuelle, de formation et d’innovation.
-      </p>
+  <section class="hero" aria-labelledby="titre-page">
+    <figure class="hero-photo">
+      <Image
+        src={photos.studio.src}
+        alt={photos.studio.alt}
+        widths={[640, 960, 1280]}
+        sizes="100vw"
+        quality={85}
+        loading="eager"
+        fetchpriority="high"
+      />
+    </figure>
+    <div class="hero-lueur" aria-hidden="true"></div>
+    <div class="wrap hero-contenu">
+      <p class="surtitre">À propos · De Sunu Kaddu à La Fabrik</p>
+      <h1 id="titre-page" class="titre hero-titre">Nul n’entre ici <br />s’il n’est <span class="accent">créatif.</span></h1>
+      <div class="hero-bas">
+        <p class="hero-chapeau">
+          Depuis sa création en 2014 par l’artiste PPS the Writah, Sunu Kaddu s’est imposé comme un acteur majeur des cultures
+          urbaines à Rufisque et au Sénégal.
+        </p>
+        <p class="hero-legende">Studio Key I Am · Cité Senelec, Rufisque</p>
+      </div>
     </div>
   </section>
 
-  <figure class="bandeau-photo">
-    <Image src={photos.studio.src} alt={photos.studio.alt} widths={[640, 1000, 1400]} sizes="100vw" />
-    <figcaption class="wrap">Studio Key I Am, Cité Senelec, Rufisque.</figcaption>
-  </figure>
-
-  <section class="theme-papier section" aria-labelledby="chrono">
+  <section class="theme-papier section" aria-labelledby="devise">
     <div class="wrap">
-      <SectionHead eyebrow="Chronologie" title="Chaque pas raconte une histoire" id="chrono" />
-      <ol class="timeline">
-        {
-          timeline.map((s) => (
-            <li data-reveal>
-              <p class="annee titre">{s.year}</p>
-              <div>
+      <p class="index" data-reveal><span>01</span> La devise</p>
+      <h2 id="devise" class="manifeste-texte" data-reveal>
+        Cette devise n’est pas qu’un slogan&nbsp;: <mark>c’est le standard d’excellence de La Fabrik.</mark> Nous bâtissons un
+        environnement où <mark>la culture urbaine rencontre l’exigence professionnelle absolue.</mark>
+      </h2>
+      <div class="devise-bas">
+        <div class="devise-photo" data-reveal>
+          <Image src={photos.formation.src} alt={photos.formation.alt} widths={[480, 800, 1162]} sizes="(min-width: 56rem) 50vw, 100vw" quality={85} />
+        </div>
+        <div class="devise-texte" data-reveal>
+          <p class="chapeau">
+            En 2024, la structure devient SKM La Fabrik&nbsp;: un véritable pôle de production audiovisuelle, de formation et
+            d’innovation.
+          </p>
+          <p class="doux">
+            L’évolution du marché culturel vers le numérique impose une transition. Le savoir-faire se transmet&nbsp;: les jeunes
+            formés en 2013 font aujourd’hui vivre le studio.
+          </p>
+          <a class="lien-fleche" href="#chrono">Notre histoire <span aria-hidden="true">→</span></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="theme-sombre section frise-section" aria-labelledby="chrono">
+    <div class="frise-lueur" aria-hidden="true"></div>
+    <div class="wrap">
+      <div class="tete-ligne" data-reveal>
+        <div>
+          <p class="index"><span>02</span> Chronologie</p>
+          <h2 id="chrono" class="titre titre-h2">Chaque pas raconte une histoire</h2>
+        </div>
+        <p class="doux tete-chapeau">De la première session OneBeat en 2013 à Héritages &amp; Horizons en 2026.</p>
+      </div>
+      <div class="frise" data-reveal>
+        <Carousel label="Chronologie de SKM La Fabrik" itemWidth="clamp(16.5rem, 27vw, 23rem)">
+          {
+            timeline.map((s) => (
+              <article class:list={['etape', { tournant: tournants.includes(s.year) }]}>
+                <p class="annee titre">{s.year}</p>
                 <h3>{s.title}</h3>
                 <p class="doux">{s.text}</p>
-              </div>
-            </li>
-          ))
-        }
-      </ol>
+              </article>
+            ))
+          }
+        </Carousel>
+      </div>
     </div>
   </section>
 
-  <section class="theme-sombre section" aria-labelledby="vision">
-    <div class="wrap vm">
-      <div data-reveal>
-        <p class="surtitre">Vision</p>
-        <h2 id="vision" class="titre titre-h3">La jeunesse, moteur de son territoire</h2>
-        <p class="doux">
-          Les jeunes ont la capacité d’analyser leurs propres réalités et de porter les changements socio-économiques dont
-          leurs communautés ont besoin. Rufisque, troisième ville historique du Sénégal, déborde de jeunesse ambitieuse mais
-          manque d’infrastructures culturelles et de parcours de carrière structurés.
-        </p>
-      </div>
-      <div data-reveal>
-        <p class="surtitre">Mission</p>
-        <h2 class="titre titre-h3">Offrir un cadre structuré à cette vitalité</h2>
-        <p class="doux">
-          Professionnaliser les jeunes dans les métiers des arts, de la production, de l’audiovisuel et de la communication
-          digitale, tout en répondant aux besoins en contenus des structures locales.
-        </p>
-      </div>
-      <blockquote data-reveal>
-        <p class="citation">
-          « C’est plus qu’un studio&nbsp;: c’est un moteur de transformation, enraciné dans notre ville, au service de la
-          jeunesse et de la culture. »
-        </p>
-        <footer>PPS the Writah</footer>
-      </blockquote>
-    </div>
-  </section>
-
-  <section class="theme-anthracite section" aria-labelledby="valeurs">
+  <section class="theme-anthracite section vision" aria-labelledby="vision">
     <div class="wrap">
-      <SectionHead title="Nos valeurs" id="valeurs" />
+      <p class="index" data-reveal><span>03</span> Vision &amp; mission</p>
+      <div class="vm">
+        <div class="vm-bloc" data-reveal>
+          <p class="surtitre">Vision</p>
+          <h2 id="vision" class="titre titre-h3">La jeunesse, moteur de son territoire</h2>
+          <p class="doux">
+            Les jeunes ont la capacité d’analyser leurs propres réalités et de porter les changements socio-économiques dont
+            leurs communautés ont besoin. Rufisque, troisième ville historique du Sénégal, déborde de jeunesse ambitieuse mais
+            manque d’infrastructures culturelles et de parcours de carrière structurés.
+          </p>
+        </div>
+        <div class="vm-bloc" data-reveal>
+          <p class="surtitre">Mission</p>
+          <h2 class="titre titre-h3">Offrir un cadre structuré à cette vitalité</h2>
+          <p class="doux">
+            Professionnaliser les jeunes dans les métiers des arts, de la production, de l’audiovisuel et de la communication
+            digitale, tout en répondant aux besoins en contenus des structures locales.
+          </p>
+        </div>
+      </div>
+      <figure class="grande-citation" data-reveal>
+        <blockquote>
+          <p class="citation">
+            « C’est plus qu’un studio&nbsp;: c’est un moteur de transformation, enraciné dans notre ville, au service de la
+            jeunesse et de la culture. »
+          </p>
+        </blockquote>
+        <figcaption>PPS the Writah, fondateur et directeur artistique</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="theme-sombre section" aria-labelledby="valeurs">
+    <div class="wrap">
+      <div data-reveal>
+        <p class="index"><span>04</span> Ce qui nous tient</p>
+        <h2 id="valeurs" class="titre titre-h2">Nos valeurs</h2>
+      </div>
       <dl class="valeurs">
         {
           values.map((v, i) => (
             <div data-reveal>
               <dt>
-                <span class="n">{String(i + 1).padStart(2, '0')}</span>
+                <span class="n" aria-hidden="true">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
                 <span class="titre">{v.title}</span>
               </dt>
               <dd class="doux">{v.text}</dd>
@@ -102,15 +154,25 @@ import { timeline, values, cycle } from '@/data/histoire';
 
   <section class="theme-papier section" aria-labelledby="modele">
     <div class="wrap">
-      <SectionHead eyebrow="Notre modèle" title="Un écosystème circulaire" id="modele" />
+      <div class="tete-ligne" data-reveal>
+        <div>
+          <p class="index"><span>05</span> Notre modèle</p>
+          <h2 id="modele" class="titre titre-h2">Un écosystème circulaire</h2>
+        </div>
+        <p class="doux tete-chapeau">
+          Autonomie financière par la vente de services, réinvestie pour financer les prochaines cohortes de formation.
+        </p>
+      </div>
       <ol class="cycle">
         {
           cycle.map((c, i) => (
             <li class:list={{ boucle: i === cycle.length - 1 }} data-reveal>
-              <span class="titre n">{i + 1}</span>
-              <h3>{c.title}</h3>
+              <span class="titre n" aria-hidden="true">
+                0{i + 1}
+              </span>
               <p class="tag">{c.tag}</p>
-              <p>{c.text}</p>
+              <h3 class="titre">{c.title}</h3>
+              <p class="cycle-texte">{c.text}</p>
             </li>
           ))
         }
@@ -120,190 +182,360 @@ import { timeline, values, cycle } from '@/data/histoire';
 
   <section class="theme-sombre section" aria-labelledby="equipe">
     <div class="wrap">
-      <SectionHead eyebrow="Les architectes" title="L’équipe dirigeante" id="equipe" />
+      <div class="tete-ligne" data-reveal>
+        <div>
+          <p class="index"><span>06</span> Les architectes</p>
+          <h2 id="equipe" class="titre titre-h2">L’équipe dirigeante</h2>
+        </div>
+      </div>
       <ul class="equipe">
         {
           team.map((m) => (
             <li data-reveal>
-              <h3 class="titre titre-h3">{m.name}</h3>
-              {m.fullName && <p class="full">{m.fullName}</p>}
               <p class="role">{m.role}</p>
+              <h3 class="titre nom">{m.name}</h3>
+              {m.fullName && <p class="full">{m.fullName}</p>}
               <p class="scope">{m.scope}</p>
-              <p class="doux">{m.bio}</p>
+              <p class="doux bio">{m.bio}</p>
             </li>
           ))
         }
       </ul>
-      <div class="rejoindre">
-        <p>Vous souhaitez travailler avec l’équipe&nbsp;?</p>
-        <Button href="/contact">Nous écrire</Button>
+      <div class="rejoindre" data-reveal>
+        <p class="titre rejoindre-titre">Vous souhaitez travailler avec l’équipe&nbsp;?</p>
+        <div class="rejoindre-actions">
+          <Button href="/contact">Nous écrire</Button>
+          <Button href="/contact?objet=partenariat" variant="contour">Devenir partenaire</Button>
+        </div>
       </div>
     </div>
   </section>
 </BaseLayout>
 
 <style>
-  .intro {
-    padding-block: clamp(4rem, 3rem + 4vw, 6.5rem) clamp(3rem, 2rem + 3vw, 4.5rem);
+  .section {
+    padding-block: clamp(5rem, 3rem + 8vw, 9.5rem);
   }
-  .intro .surtitre {
-    margin-bottom: 1.25rem;
-  }
-  .intro-cols {
+
+  /* Hero éditorial : photo pleine largeur assombrie, titre posé en bas */
+  .hero {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr));
-    gap: 1.5rem 3rem;
-    margin-top: 3rem;
+    align-items: end;
+    min-height: clamp(36rem, 92svh, 56rem);
+    padding-block: calc(4.75rem + 3rem) clamp(3rem, 2rem + 3vw, 5rem);
+    background: var(--c-noir);
+    color: var(--c-papier);
+    --accent: var(--c-or);
   }
-  .intro .doux {
-    color: var(--c-pierre);
-    font-size: 1.0625rem;
+  .hero-photo {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    margin: 0;
   }
-  .bandeau-photo :global(img) {
+  .hero-photo :global(img) {
     width: 100%;
-    height: clamp(18rem, 40vw, 36rem);
+    height: 100%;
     object-fit: cover;
+    object-position: 50% 40%;
+    opacity: 0.55;
+    -webkit-mask-image: linear-gradient(180deg, #000 30%, transparent 100%);
+    mask-image: linear-gradient(180deg, #000 30%, transparent 100%);
   }
-  figcaption {
-    padding-block: 0.75rem;
-    font-size: 0.8125rem;
+  .hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+      linear-gradient(90deg, rgb(13 12 10 / 0.85) 0, rgb(13 12 10 / 0.35) 70%),
+      linear-gradient(180deg, rgb(13 12 10 / 0.6) 0, transparent 30%);
+  }
+  .hero-lueur {
+    position: absolute;
+    z-index: 0;
+    left: -24rem;
+    bottom: -32rem;
+    width: 64rem;
+    height: 64rem;
+    background: radial-gradient(closest-side, rgb(201 161 59 / 0.22), transparent 75%);
+    pointer-events: none;
+  }
+  .hero-contenu {
+    position: relative;
+    z-index: 1;
+  }
+  .hero-contenu .surtitre {
+    margin-bottom: 1.5rem;
+  }
+  .hero-titre {
+    font-size: clamp(3.25rem, 1.4rem + 7.4vw, 10rem);
+    line-height: 0.88;
+  }
+  .hero-bas {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: end;
+    gap: 1.5rem 3rem;
+    margin-top: clamp(2rem, 1rem + 2vw, 3rem);
+    padding-top: 1.5rem;
+    border-top: 1px solid rgb(243 238 228 / 0.2);
+  }
+  .hero-chapeau {
+    max-width: 38rem;
+    font-size: var(--t-lead);
+    line-height: 1.55;
+    color: var(--c-pierre-claire);
+  }
+  .hero-legende {
+    font-size: var(--t-micro);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
     color: var(--c-pierre);
   }
 
-  .timeline {
+  /* Repères numérotés (repris de l'accueil) */
+  .index {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin-bottom: clamp(1.5rem, 1rem + 1.5vw, 2.5rem);
+    font-size: var(--t-micro);
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--soft);
+  }
+  .index span {
+    font-family: var(--f-titre);
+    font-size: 1.25rem;
+    letter-spacing: 0;
+    color: var(--accent);
+  }
+  .tete-ligne {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: end;
+    gap: 1.5rem 3rem;
+    margin-bottom: clamp(2.5rem, 1.5rem + 3vw, 4rem);
+  }
+  .tete-chapeau {
+    max-width: 26rem;
+  }
+
+  /* 01 · Devise */
+  .manifeste-texte {
+    max-width: 66rem;
+    font-family: var(--f-texte);
+    font-size: clamp(1.625rem, 1.05rem + 2.5vw, 3.5rem);
+    font-weight: 600;
+    line-height: 1.18;
+    letter-spacing: -0.015em;
+    text-wrap: pretty;
+  }
+  .manifeste-texte mark {
+    padding-inline: 0.05em;
+    background: linear-gradient(transparent 60%, var(--c-or) 60%, var(--c-or) 94%, transparent 94%);
+    color: inherit;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+  .devise-bas {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: clamp(2rem, 1rem + 4vw, 5rem);
+    align-items: end;
+    margin-top: clamp(3rem, 2rem + 4vw, 6rem);
+  }
+  .devise-photo :global(img) {
+    display: block;
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+  }
+  .devise-texte {
+    display: grid;
+    gap: 1.5rem;
+    justify-items: start;
+    max-width: 32rem;
+    padding-bottom: 0.5rem;
+  }
+  @media (max-width: 56rem) {
+    .devise-bas {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  /* 02 · Frise */
+  .frise-section {
     position: relative;
-    margin: 0;
-    padding: 0;
-    list-style: none;
+    overflow: hidden;
+    isolation: isolate;
   }
-  .timeline::before {
-    content: '';
+  .frise-lueur {
     position: absolute;
-    top: 0.5rem;
-    bottom: 0.5rem;
-    left: 0;
-    width: 2px;
-    background: var(--c-encre);
+    z-index: -1;
+    top: -20rem;
+    right: -24rem;
+    width: 60rem;
+    height: 60rem;
+    background: radial-gradient(closest-side, rgb(201 161 59 / 0.16), transparent 75%);
+    pointer-events: none;
   }
-  .timeline li {
+  .etape {
     position: relative;
     display: grid;
-    grid-template-columns: minmax(9rem, 14rem) minmax(0, 46rem);
-    gap: 0.5rem 3rem;
-    padding: 0 0 3rem 2.5rem;
+    align-content: start;
+    gap: 0.9rem;
+    height: 100%;
+    padding: 2.25rem 1.5rem 0 0;
   }
-  .timeline li::before {
+  .etape::before {
     content: '';
     position: absolute;
-    left: -7px;
-    top: 0.85rem;
-    width: 16px;
-    height: 16px;
-    background: var(--c-papier);
-    border: 2px solid var(--c-encre);
+    top: 0;
+    left: 0;
+    right: -1.5rem;
+    height: 1px;
+    background: var(--c-ligne-sombre);
   }
-  .timeline li:nth-child(even)::before {
+  .etape:last-child::before {
+    right: 0;
+  }
+  .etape::after {
+    content: '';
+    position: absolute;
+    top: -6px;
+    left: 0;
+    width: 13px;
+    height: 13px;
+    background: var(--c-noir);
+    border: 1px solid var(--c-pierre);
+  }
+  .tournant::after {
     background: var(--c-or);
     border-color: var(--c-or);
   }
   .annee {
-    font-size: clamp(2.25rem, 1.8rem + 1.6vw, 3.25rem);
-    line-height: 1;
+    font-size: clamp(3rem, 2.2rem + 2.6vw, 5rem);
+    line-height: 0.9;
+    color: var(--c-papier);
   }
-  .timeline h3 {
-    font-size: 1.3rem;
-    margin-bottom: 0.5rem;
+  .tournant .annee {
+    color: var(--c-or);
   }
-  @media (max-width: 40rem) {
-    .timeline li {
-      grid-template-columns: 1fr;
-      padding-left: 1.75rem;
-    }
+  .etape h3 {
+    font-size: 1.2rem;
+    line-height: 1.3;
+  }
+  .etape .doux {
+    font-size: 0.9375rem;
+    line-height: 1.6;
   }
 
+  /* 03 · Vision */
   .vm {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
-    gap: 3rem;
-    align-items: start;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+    gap: 3rem clamp(2rem, 1rem + 4vw, 6rem);
   }
-  .vm .surtitre {
-    margin-bottom: 1rem;
+  .vm-bloc {
+    display: grid;
+    gap: 1.25rem;
+    align-content: start;
+    padding-top: 1.5rem;
+    border-top: 2px solid var(--c-or);
   }
-  .vm h2 {
-    margin-bottom: 1.25rem;
+  .grande-citation {
+    max-width: 58rem;
+    margin: clamp(4rem, 2.5rem + 5vw, 7rem) 0 0 auto;
+    padding-left: clamp(1.25rem, 0.5rem + 2vw, 2.5rem);
+    border-left: 2px solid var(--c-or);
   }
   blockquote {
     margin: 0;
-    padding: 2rem;
-    border: 1px solid var(--c-or);
   }
-  blockquote footer {
-    margin-top: 1rem;
-    font-size: 0.875rem;
+  .grande-citation .citation {
+    font-size: clamp(1.75rem, 1.2rem + 2.2vw, 3.25rem);
+    line-height: 1.2;
+  }
+  .grande-citation figcaption {
+    margin-top: 1.25rem;
+    font-size: var(--t-micro);
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
     color: var(--c-or);
   }
 
+  /* 04 · Valeurs */
   .valeurs {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
-    margin: 0;
+    margin: clamp(2.5rem, 1.5rem + 3vw, 4rem) 0 0;
     border-top: 1px solid var(--line);
   }
   .valeurs > div {
-    padding: 1.75rem 1.5rem 1.75rem 0;
+    padding: 2rem 1.5rem 2rem 0;
     border-bottom: 1px solid var(--line);
   }
   .valeurs dt {
     display: grid;
-    gap: 0.75rem;
-    margin-bottom: 0.75rem;
+    gap: 1rem;
+    margin-bottom: 1rem;
   }
   .valeurs .n {
     font-family: var(--f-titre);
+    font-size: 1.25rem;
     color: var(--c-or);
   }
   .valeurs dt .titre {
-    font-size: 1.9rem;
+    font-size: clamp(1.5rem, 1.1rem + 0.9vw, 1.875rem);
+    overflow-wrap: anywhere;
   }
   .valeurs dd {
     margin: 0;
     font-size: 0.9375rem;
   }
 
+  /* 05 · Modèle */
   .cycle {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 1rem;
     margin: 0;
     padding: 0;
     list-style: none;
-    counter-reset: none;
   }
   .cycle li {
     display: grid;
     align-content: start;
-    gap: 0.5rem;
-    padding: 1.75rem;
+    gap: 0.75rem;
+    padding: clamp(1.5rem, 1rem + 1vw, 2.25rem);
     background: #fff;
   }
   .cycle .n {
-    font-size: 3.5rem;
-    line-height: 1;
-    color: var(--c-or);
-  }
-  .cycle h3 {
-    margin-top: 0.75rem;
-    font-size: 1.25rem;
+    font-size: clamp(3.5rem, 2.5rem + 3vw, 5.5rem);
+    line-height: 0.85;
+    color: var(--c-or-profond);
   }
   .cycle .tag {
+    margin-top: 1.5rem;
     font-size: 0.75rem;
     font-weight: 700;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--c-or-profond);
   }
-  .cycle li p:last-child {
+  .cycle h3 {
+    font-size: 1.75rem;
+  }
+  .cycle-texte {
     font-size: 0.9375rem;
     color: var(--c-encre-douce);
   }
@@ -311,45 +543,65 @@ import { timeline, values, cycle } from '@/data/histoire';
     background: var(--c-encre);
     color: var(--c-papier);
   }
+  .cycle .boucle .n,
   .cycle .boucle .tag {
     color: var(--c-or);
   }
-  .cycle .boucle p:last-child {
+  .cycle .boucle .cycle-texte {
     color: var(--c-pierre-claire);
   }
+  @media (max-width: 64rem) {
+    .cycle {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 34rem) {
+    .cycle {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
 
+  /* 06 · Équipe : cartes typographiques, sans portrait */
   .equipe {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
-    gap: 0;
+    gap: 1rem;
     margin: 0;
     padding: 0;
     list-style: none;
-    border-top: 1px solid var(--line);
   }
   .equipe li {
     display: grid;
     align-content: start;
-    gap: 0.4rem;
-    padding: 2rem 1.75rem 2rem 0;
-    border-bottom: 1px solid var(--line);
+    gap: 0.5rem;
+    padding: clamp(1.5rem, 1rem + 1vw, 2rem);
+    border: 1px solid var(--line);
+    border-top: 2px solid var(--c-or);
+    transition: border-color 0.2s;
+  }
+  .equipe li:hover {
+    border-color: var(--c-or);
+  }
+  .role {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--c-or);
+  }
+  .nom {
+    margin-top: 1.25rem;
+    font-size: clamp(1.75rem, 1.4rem + 1vw, 2.25rem);
   }
   .full {
     font-size: 0.875rem;
     color: var(--c-pierre);
   }
-  .role {
-    margin-top: 0.75rem;
-    font-size: 0.8125rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--c-or);
-  }
   .scope {
+    margin-top: 0.75rem;
     font-weight: 600;
   }
-  .equipe .doux {
+  .bio {
     font-size: 0.9375rem;
   }
   .rejoindre {
@@ -357,8 +609,18 @@ import { timeline, values, cycle } from '@/data/histoire';
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: 1rem;
-    margin-top: 3rem;
-    font-size: 1.125rem;
+    gap: 1.5rem 2rem;
+    margin-top: clamp(3rem, 2rem + 3vw, 5rem);
+    padding-top: 2rem;
+    border-top: 1px solid var(--line);
+  }
+  .rejoindre-titre {
+    font-size: clamp(1.5rem, 1.2rem + 1vw, 2.25rem);
+    max-width: 34rem;
+  }
+  .rejoindre-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
   }
 </style>

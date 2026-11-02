@@ -2,59 +2,107 @@
 import { Image } from 'astro:assets';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import Button from '@/components/Button.astro';
-import PageIntro from '@/components/PageIntro.astro';
-import SectionHead from '@/components/SectionHead.astro';
 import { poles } from '@/data/poles';
 import { offresEntreprises, tarifsSource } from '@/data/offres';
+import { contactObjects, isContactObject } from '@/lib/contact';
 
-const themes = ['theme-sombre', 'theme-papier', 'theme-anthracite', 'theme-sombre', 'theme-papier'] as const;
+// Un thème par pôle : le pôle festivals reprend l'identité nuit du Rio Fresco Fest.
+const themes = ['theme-papier', 'theme-sombre', 'theme-nuit', 'theme-papier', 'theme-anthracite'] as const;
+
+// Pour chaque pôle, l'appel à l'action principal mène au formulaire de contact
+// (objet prérempli) ; l'autre lien reste en lien secondaire.
+const scenes = poles.map((p, i) => {
+  const liens = [p.cta, p.cta2];
+  const contact = liens.find((c) => c.href.startsWith('/contact')) ?? { label: 'Nous écrire', href: '/contact' };
+  const autre = liens.find((c) => c !== contact) ?? p.cta;
+  const objet = new URL(contact.href, 'https://skm.invalid').searchParams.get('objet');
+  const objetLabel = isContactObject(objet) ? contactObjects[objet].label : contactObjects.contact.label;
+  return { ...p, theme: themes[i % themes.length], inverse: i % 2 === 1, contact, autre, objetLabel };
+});
 ---
 
 <BaseLayout
   title="Nos activités"
   description="Formation, événementiel, festivals, production musicale et activités communautaires : les cinq pôles de SKM La Fabrik à Rufisque."
+  overlayHeader
 >
-  <PageIntro
-    eyebrow="Nos activités · Le moteur"
-    title={'Cinq pôles,<br />une même <span class="accent">exigence.</span>'}
-    lead="Former les talents, produire des contenus de haute qualité, faire vivre la scène et réinvestir dans la communauté : chaque pôle nourrit les autres."
-  >
-    <nav class="sommaire" aria-label="Les cinq pôles">
-      {
-        poles.map((p) => (
-          <a href={`#${p.id}`}>
-            <span>{p.num}</span> {p.title}
-          </a>
-        ))
-      }
-    </nav>
-  </PageIntro>
+  <section class="hero" aria-labelledby="titre-page">
+    <div class="hero-lueur" aria-hidden="true"></div>
+    <div class="wrap">
+      <div class="hero-tete">
+        <div>
+          <p class="surtitre">Nos activités · Le moteur</p>
+          <h1 id="titre-page" class="titre hero-titre">Cinq pôles, <br />une même <span class="accent">exigence.</span></h1>
+        </div>
+        <p class="hero-chapeau">
+          Former les talents, produire des contenus de haute qualité, faire vivre la scène et réinvestir dans la communauté&nbsp;:
+          chaque pôle nourrit les autres.
+        </p>
+      </div>
+      <nav aria-label="Les cinq pôles">
+        <ol class="sommaire">
+          {
+            poles.map((p) => (
+              <li>
+                <a href={`#${p.id}`}>
+                  <Image src={p.photo.src} alt="" widths={[240, 400]} sizes="(min-width: 56rem) 18vw, 5rem" class="sommaire-photo" />
+                  <span class="sommaire-num">{p.num}</span>
+                  <span class="sommaire-titre">{p.title}</span>
+                  <span class="sommaire-fleche" aria-hidden="true">
+                    ↓
+                  </span>
+                </a>
+              </li>
+            ))
+          }
+        </ol>
+      </nav>
+    </div>
+  </section>
 
   {
-    poles.map((p, i) => (
-      <section id={p.id} class:list={['pole', 'section', themes[i]]} aria-labelledby={`t-${p.id}`}>
-        <div class:list={['wrap', 'pole-grid', { inverse: i % 2 === 1 }]}>
-          <figure class="pole-photo" data-reveal>
-            <Image src={p.photo.src} alt={p.photo.alt} widths={[480, 800, 1100]} sizes="(min-width: 64rem) 46vw, 100vw" />
-            <span class="titre num" aria-hidden="true">{p.num}</span>
-          </figure>
-          <div class="pole-texte" data-reveal>
-            <p class="surtitre">{p.kicker}</p>
-            <h2 id={`t-${p.id}`} class="titre titre-h2">{p.title}</h2>
-            <p class="chapeau doux">{p.text}</p>
-            <dl>
-              {p.items.map((it) => (
-                <div>
-                  <dt>{it.k}</dt>
-                  <dd class="doux">{it.v}</dd>
+    scenes.map((p) => (
+      <section id={p.id} class:list={['pole', p.theme, { inverse: p.inverse }]} aria-labelledby={`t-${p.id}`}>
+        <div class="wrap">
+          <header class="pole-tete" data-reveal>
+            <span class="titre pole-num" aria-hidden="true">
+              {p.num}
+            </span>
+            <div>
+              <p class="index">{p.kicker}</p>
+              <h2 id={`t-${p.id}`} class="titre titre-h2">
+                {p.title}
+              </h2>
+            </div>
+          </header>
+          <div class="pole-grid">
+            <figure class="pole-photo" data-reveal>
+              <Image src={p.photo.src} alt={p.photo.alt} widths={[480, 800, 1100]} sizes="(min-width: 56rem) 50vw, 100vw" quality={85} />
+            </figure>
+            <div class="pole-texte" data-reveal>
+              <p class="chapeau">{p.text}</p>
+              <dl class="services">
+                {p.items.map((it, j) => (
+                  <div>
+                    <dt>
+                      <span class="services-n" aria-hidden="true">
+                        {String(j + 1).padStart(2, '0')}
+                      </span>
+                      {it.k}
+                    </dt>
+                    <dd class="doux">{it.v}</dd>
+                  </div>
+                ))}
+              </dl>
+              <div class="pole-cta">
+                <p class="pole-cta-meta">Votre demande · {p.objetLabel}</p>
+                <div class="pole-cta-actions">
+                  <Button href={p.contact.href}>{p.contact.label}</Button>
+                  <a class="lien-fleche" href={p.autre.href}>
+                    {p.autre.label} <span aria-hidden="true">→</span>
+                  </a>
                 </div>
-              ))}
-            </dl>
-            <div class="ctas">
-              <Button href={p.cta.href}>{p.cta.label}</Button>
-              <a class="lien-fleche" href={p.cta2.href}>
-                {p.cta2.label} <span aria-hidden="true">→</span>
-              </a>
+              </div>
             </div>
           </div>
         </div>
@@ -62,19 +110,25 @@ const themes = ['theme-sombre', 'theme-papier', 'theme-anthracite', 'theme-sombr
     ))
   }
 
-  <section class="theme-blanc section" aria-labelledby="offre">
+  <section class="theme-blanc section offre-section" aria-labelledby="t-offre" id="offre">
     <div class="wrap">
-      <SectionHead eyebrow="Creative solutions · Entreprises & institutions" title="L’offre commerciale" id="offre">
+      <div class="tete-ligne" data-reveal>
+        <div>
+          <p class="index"><span>06</span> Creative solutions · Entreprises &amp; institutions</p>
+          <h2 id="t-offre" class="titre titre-h2">L’offre commerciale</h2>
+        </div>
         <p class="doux offre-intro">
           Pour les structures publiques, ONG, startups et entreprises qui souhaitent communiquer efficacement sur leurs projets
           et leurs impacts.
         </p>
-      </SectionHead>
+      </div>
       <div class="offres">
         {
           offresEntreprises.map((o) => (
             <section class:list={['offre', { premium: o.highlight }]} aria-labelledby={`o-${o.id}`} data-reveal>
-              <h3 id={`o-${o.id}`} class="titre">{o.name}</h3>
+              <h3 id={`o-${o.id}`} class="titre">
+                {o.name}
+              </h3>
               <p class="pitch">{o.pitch}</p>
               <table>
                 <caption class="sr-only">Prestations de la formule {o.name}, en francs CFA</caption>
@@ -100,38 +154,285 @@ const themes = ['theme-sombre', 'theme-papier', 'theme-anthracite', 'theme-sombr
 </BaseLayout>
 
 <style>
-  .sommaire {
+  .section {
+    padding-block: clamp(5rem, 3rem + 8vw, 9.5rem);
+  }
+
+  /* Repères numérotés (repris de l'accueil) */
+  .index {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-top: 2.5rem;
+    align-items: baseline;
+    gap: 0.25rem 0.75rem;
+    margin-bottom: clamp(1rem, 0.75rem + 1vw, 1.75rem);
+    font-size: var(--t-micro);
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--soft);
+  }
+  .index span {
+    font-family: var(--f-titre);
+    font-size: 1.25rem;
+    letter-spacing: 0;
+    color: var(--accent);
+  }
+  .tete-ligne {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: end;
+    gap: 1.5rem 3rem;
+    margin-bottom: clamp(2.5rem, 1.5rem + 3vw, 4rem);
+  }
+
+  /* Hero : titre et sommaire illustré des cinq pôles */
+  .hero {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    padding-block: calc(4.75rem + clamp(3rem, 2rem + 4vw, 6rem)) clamp(3rem, 2rem + 3vw, 5rem);
+    background: var(--c-noir);
+    color: var(--c-papier);
+    --accent: var(--c-or);
+  }
+  .hero-lueur {
+    position: absolute;
+    z-index: -1;
+    top: -30rem;
+    left: 50%;
+    width: 80rem;
+    height: 64rem;
+    transform: translateX(-50%);
+    background: radial-gradient(closest-side, rgb(201 161 59 / 0.22), rgb(224 102 44 / 0.06) 55%, transparent 78%);
+    pointer-events: none;
+  }
+  .hero-tete {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    align-items: end;
+    gap: 2rem 4rem;
+  }
+  .hero-tete .surtitre {
+    margin-bottom: 1.5rem;
+  }
+  .hero-titre {
+    font-size: clamp(3rem, 1.4rem + 5.6vw, 8rem);
+    line-height: 0.9;
+  }
+  .hero-chapeau {
+    max-width: 30rem;
+    font-size: var(--t-lead);
+    line-height: 1.55;
+    color: var(--c-pierre-claire);
+  }
+  .sommaire {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 1rem;
+    margin: clamp(3rem, 2rem + 3vw, 5rem) 0 0;
+    padding: 0;
+    list-style: none;
   }
   .sommaire a {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    min-height: 2.75rem;
-    padding: 0 1.1rem;
-    border: 1px solid var(--c-ligne-sombre);
-    font-size: 0.875rem;
-    font-weight: 600;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: 0.75rem 0.6rem;
+    height: 100%;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--c-ligne-sombre);
     text-decoration: none;
-    transition: border-color 0.2s;
+    transition: border-color 0.3s;
   }
-  .sommaire a:hover {
+  .sommaire a:hover,
+  .sommaire a:focus-visible {
     border-color: var(--c-or);
   }
-  .sommaire span {
+  .sommaire a :global(.sommaire-photo) {
+    grid-column: 1 / -1;
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    filter: grayscale(0.7) brightness(0.8);
+    transition: filter 0.4s;
+  }
+  .sommaire a:hover :global(.sommaire-photo),
+  .sommaire a:focus-visible :global(.sommaire-photo) {
+    filter: none;
+  }
+  .sommaire-num {
+    font-family: var(--f-titre);
+    font-size: 1.125rem;
     color: var(--c-or);
+  }
+  .sommaire-titre {
+    font-family: var(--f-titre);
+    font-size: clamp(1.125rem, 0.9rem + 0.6vw, 1.5rem);
+    line-height: 1;
+    text-transform: uppercase;
+  }
+  .sommaire-fleche {
+    color: var(--c-or);
+    transition: transform 0.3s var(--ease);
+  }
+  .sommaire a:hover .sommaire-fleche {
+    transform: translateY(3px);
+  }
+  @media (max-width: 56rem) {
+    .hero-tete {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .sommaire {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 0;
+      border-top: 1px solid var(--c-ligne-sombre);
+    }
+    .sommaire a {
+      grid-template-columns: 4.5rem auto minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 1rem;
+      padding-block: 0.75rem;
+    }
+    .sommaire a :global(.sommaire-photo) {
+      grid-column: auto;
+      width: 4.5rem;
+      aspect-ratio: 3 / 2;
+    }
+  }
+
+  /* Pôles : numéro géant, photo fondue, texte et services */
+  .pole {
+    position: relative;
+    overflow: hidden;
+    padding-block: clamp(5rem, 3rem + 8vw, 9.5rem);
+    scroll-margin-top: 4.75rem;
+  }
+  .pole-tete {
+    display: flex;
+    align-items: end;
+    gap: clamp(1rem, 0.5rem + 2vw, 2.5rem);
+    margin-bottom: clamp(2rem, 1rem + 3vw, 4rem);
+  }
+  .pole-num {
+    flex: none;
+    font-size: clamp(6.5rem, 3rem + 14vw, 17rem);
+    line-height: 0.78;
+    color: var(--accent);
+  }
+  .pole-tete .titre-h2 {
+    padding-bottom: 0.1em;
   }
   .pole-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: clamp(2rem, 1rem + 4vw, 5rem);
-    align-items: center;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    gap: clamp(2rem, 1rem + 4vw, 5.5rem);
+    align-items: start;
+  }
+  .inverse .pole-tete {
+    flex-direction: row-reverse;
+    justify-content: space-between;
   }
   .inverse .pole-photo {
     order: 2;
+  }
+  .pole-photo {
+    position: relative;
+    margin: 0;
+  }
+  .pole-photo :global(img) {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+  }
+  .theme-sombre .pole-photo :global(img),
+  .theme-nuit .pole-photo :global(img),
+  .theme-anthracite .pole-photo :global(img) {
+    -webkit-mask-image: linear-gradient(180deg, #000 70%, transparent 100%);
+    mask-image: linear-gradient(180deg, #000 70%, transparent 100%);
+  }
+  .theme-sombre::before,
+  .theme-nuit::before,
+  .theme-anthracite::before {
+    content: '';
+    position: absolute;
+    z-index: 0;
+    top: -16rem;
+    right: -20rem;
+    width: 56rem;
+    height: 56rem;
+    background: radial-gradient(closest-side, rgb(201 161 59 / 0.12), transparent 75%);
+    pointer-events: none;
+  }
+  .theme-nuit::before {
+    background: radial-gradient(closest-side, rgb(244 123 32 / 0.16), transparent 75%);
+  }
+  .inverse::before {
+    right: auto;
+    left: -20rem;
+  }
+  .pole .wrap {
+    position: relative;
+    z-index: 1;
+  }
+  .pole-texte {
+    display: grid;
+    gap: 2rem;
+    align-content: start;
+  }
+  .services {
+    margin: 0;
+    border-top: 1px solid var(--line);
+  }
+  .services > div {
+    display: grid;
+    grid-template-columns: minmax(0, 13rem) minmax(0, 1fr);
+    gap: 0.25rem 1.5rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .services dt {
+    display: flex;
+    gap: 0.75rem;
+    font-weight: 700;
+  }
+  .services-n {
+    font-family: var(--f-titre);
+    font-weight: 400;
+    color: var(--accent);
+  }
+  .services dd {
+    margin: 0;
+    font-size: 0.9375rem;
+  }
+  .pole-cta {
+    display: grid;
+    gap: 1rem;
+    padding: clamp(1.25rem, 1rem + 1vw, 1.75rem);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--accent);
+  }
+  .pole-cta-meta {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--soft);
+  }
+  .pole-cta-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem 1.75rem;
+  }
+  .theme-papier .pole-cta :global(.btn-plein) {
+    --btn-bg: var(--c-encre);
+    --btn-ink: var(--c-papier);
+    --btn-bg-hover: var(--c-noir);
+  }
+  .theme-nuit .pole-cta :global(.btn-plein) {
+    --btn-ink: var(--c-nuit);
   }
   @media (max-width: 56rem) {
     .pole-grid {
@@ -140,70 +441,35 @@ const themes = ['theme-sombre', 'theme-papier', 'theme-anthracite', 'theme-sombr
     .inverse .pole-photo {
       order: 0;
     }
-  }
-  .pole-photo {
-    position: relative;
-  }
-  .pole-photo :global(img) {
-    width: 100%;
-    aspect-ratio: 4 / 5;
-    object-fit: cover;
-  }
-  .num {
-    position: absolute;
-    top: 0;
-    left: 0;
-    padding: 0.4rem 0.9rem;
-    background: var(--accent);
-    color: var(--c-noir);
-    font-size: 1.75rem;
-  }
-  .theme-papier .num {
-    background: var(--c-encre);
-    color: var(--c-or);
-  }
-  .pole-texte {
-    display: grid;
-    gap: 1.5rem;
-  }
-  .theme-anthracite {
-    --accent: var(--c-terracotta);
-  }
-  dl {
-    margin: 0;
-    border-top: 1px solid var(--line);
-  }
-  dl > div {
-    display: grid;
-    grid-template-columns: minmax(10rem, 14rem) minmax(0, 1fr);
-    gap: 0.25rem 1.25rem;
-    padding: 0.9rem 0;
-    border-bottom: 1px solid var(--line);
-  }
-  dt {
-    font-weight: 700;
-  }
-  dd {
-    margin: 0;
-  }
-  @media (max-width: 34rem) {
-    dl > div {
-      grid-template-columns: 1fr;
+    .inverse .pole-tete {
+      flex-direction: row;
+      justify-content: flex-start;
+    }
+    .pole-photo :global(img) {
+      aspect-ratio: 3 / 2;
     }
   }
-  .ctas {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 1rem 1.75rem;
-    margin-top: 0.5rem;
-  }
-  .theme-papier .ctas :global(.btn-plein) {
-    --btn-bg: var(--c-encre);
-    --btn-ink: var(--c-papier);
-    --btn-bg-hover: var(--c-noir);
+  @media (max-width: 34rem) {
+    .pole-tete {
+      flex-direction: column;
+      align-items: start;
+      gap: 1rem;
+    }
+    .inverse .pole-tete {
+      flex-direction: column;
+    }
+    .pole-num {
+      font-size: 6rem;
+    }
+    .services > div {
+      grid-template-columns: minmax(0, 1fr);
+    }
   }
 
+  /* Offre commerciale */
+  .offre-section {
+    scroll-margin-top: 4.75rem;
+  }
   .offre-intro {
     max-width: 30rem;
   }
@@ -216,11 +482,12 @@ const themes = ['theme-sombre', 'theme-papier', 'theme-anthracite', 'theme-sombr
     display: grid;
     align-content: start;
     gap: 1rem;
-    padding: 2rem;
+    padding: clamp(1.5rem, 1rem + 1.5vw, 2.25rem);
     background: var(--c-papier);
+    border-top: 2px solid var(--c-or);
   }
   .offre h3 {
-    font-size: 2.25rem;
+    font-size: clamp(1.875rem, 1.5rem + 1vw, 2.5rem);
   }
   .pitch {
     font-size: 0.9375rem;
@@ -229,6 +496,9 @@ const themes = ['theme-sombre', 'theme-papier', 'theme-anthracite', 'theme-sombr
   .premium {
     background: var(--c-encre);
     color: var(--c-papier);
+  }
+  .premium h3 {
+    color: var(--c-or);
   }
   .premium .pitch {
     color: var(--c-pierre-claire);
@@ -266,5 +536,8 @@ const themes = ['theme-sombre', 'theme-papier', 'theme-anthracite', 'theme-sombr
     gap: 1rem;
     margin-top: 2rem;
     font-size: 0.8125rem;
+  }
+  .offre-pied .doux {
+    max-width: 44rem;
   }
 </style>
