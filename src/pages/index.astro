@@ -57,7 +57,7 @@ const etapes = [
           src={photos.rffDanse.src}
           alt={photos.rffDanse.alt}
           widths={[640, 960, 1280, 1415, 1600, 1920]}
-          sizes="(min-width: 64rem) 58vw, 100vw"
+          sizes="100vw"
           quality={85}
           loading="eager"
           fetchpriority="high"
@@ -846,16 +846,43 @@ const etapes = [
     -webkit-mask-image: linear-gradient(180deg, #000 55%, transparent 100%);
     mask-image: linear-gradient(180deg, #000 55%, transparent 100%);
   }
+  /* Ordinateur : la photo couvre tout l'écran d'ouverture, le texte passe dessus */
   @media (min-width: 64.01rem) {
+    .hero-grid {
+      grid-template-columns: minmax(0, 1fr);
+      min-height: calc(100svh - 4.75rem - 9rem);
+      align-items: center;
+    }
+    .hero-texte {
+      max-width: min(42rem, 46%);
+      text-shadow: 0 2px 24px rgb(13 12 10 / 0.45);
+    }
+    .hero-photo {
+      position: absolute;
+      inset: 0 0 auto 16%;
+      height: max(100svh, 40rem);
+      z-index: -1;
+      grid-column: auto;
+      grid-row: auto;
+    }
+    .hero-photo::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, var(--c-noir) 0, rgb(13 12 10 / 0.7) 22%, rgb(13 12 10 / 0.15) 48%, rgb(13 12 10 / 0) 66%),
+        linear-gradient(180deg, rgb(13 12 10 / 0.55) 0, rgb(13 12 10 / 0) 22%, rgb(13 12 10 / 0) 58%, var(--c-noir) 100%);
+    }
     .hero-photo :global(img) {
-      -webkit-mask-image:
-        linear-gradient(90deg, transparent 0, #000 38%),
-        linear-gradient(180deg, transparent 0, #000 14%, #000 86%, transparent 100%);
-      -webkit-mask-composite: source-in;
-      mask-image:
-        linear-gradient(90deg, transparent 0, #000 38%),
-        linear-gradient(180deg, transparent 0, #000 14%, #000 86%, transparent 100%);
-      mask-composite: intersect;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: 50% 35%;
+      -webkit-mask-image: none;
+      mask-image: none;
+    }
+    .hero-lueur {
+      display: none;
     }
   }
 </style>
