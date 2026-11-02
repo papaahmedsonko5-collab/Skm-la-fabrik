@@ -1,0 +1,125 @@
+---
+/**
+ * Vignette du portfolio (liste des projets et projets liés) : photo verticale
+ * cadrée, numéro de série, catégorie et période. Sans photo, une affiche
+ * typographique prend le relais.
+ */
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  project: CollectionEntry<'projets'>;
+  /** Numéro affiché en repère (01, 02…). */
+  num?: number;
+  headingLevel?: 'h2' | 'h3';
+}
+const { project, num, headingLevel = 'h3' } = Astro.props;
+const { title, category, period, summary, cover, coverAlt } = project.data;
+const Tag = headingLevel;
+---
+
+<article class="vignette" data-category={category}>
+  <a href={`/projets/${project.id}`}>
+    <div class="media">
+      {
+        cover ? (
+          <Image src={cover} alt={coverAlt ?? ''} widths={[400, 640, 900]} sizes="(min-width: 64rem) 30vw, (min-width: 40rem) 45vw, 100vw" />
+        ) : (
+          <span class="affiche" aria-hidden="true">
+            {title}
+          </span>
+        )
+      }
+      {num !== undefined && <span class="num" aria-hidden="true">{String(num).padStart(2, '0')}</span>}
+    </div>
+    <p class="meta">{category} · {period}</p>
+    <Tag class="titre nom">{title}</Tag>
+    <p class="resume">{summary}</p>
+  </a>
+</article>
+
+<style>
+  .vignette {
+    height: 100%;
+  }
+  a {
+    display: grid;
+    align-content: start;
+    gap: 0.6rem;
+    height: 100%;
+    text-decoration: none;
+  }
+  .media {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+    background: var(--c-anthracite-2);
+  }
+  .media :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: saturate(0.85);
+    transition:
+      transform 0.8s var(--ease),
+      filter 0.5s;
+  }
+  a:hover .media :global(img) {
+    transform: scale(1.04);
+    filter: none;
+  }
+  .affiche {
+    display: flex;
+    align-items: flex-end;
+    width: 100%;
+    height: 100%;
+    padding: 1.5rem;
+    background: var(--c-or);
+    color: var(--c-noir);
+    font-family: var(--f-titre);
+    font-size: clamp(2.25rem, 1.8rem + 1.6vw, 3.25rem);
+    line-height: 0.92;
+    text-transform: uppercase;
+    overflow-wrap: anywhere;
+  }
+  .vignette[data-category='Productions musicales'] .affiche {
+    background: var(--c-terracotta);
+  }
+  .vignette[data-category='Formations'] .affiche,
+  .vignette[data-category='Initiatives communautaires'] .affiche {
+    background: var(--c-papier);
+    color: var(--c-encre);
+  }
+  .num {
+    position: absolute;
+    left: 0;
+    top: 0;
+    padding: 0.5rem 0.85rem;
+    background: var(--c-noir);
+    font-family: var(--f-titre);
+    font-size: 1.25rem;
+    line-height: 1;
+    color: var(--c-or);
+  }
+  .meta {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent, var(--c-or));
+  }
+  .nom {
+    font-size: clamp(1.5rem, 1.3rem + 0.6vw, 1.875rem);
+    line-height: 1;
+    transition: color 0.3s;
+  }
+  a:hover .nom {
+    color: var(--accent, var(--c-or));
+  }
+  .resume {
+    font-size: 0.9375rem;
+    line-height: 1.55;
+    color: var(--soft, var(--c-pierre));
+  }
+</style>

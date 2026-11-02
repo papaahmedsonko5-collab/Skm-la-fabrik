@@ -1,47 +1,133 @@
 ---
+import { Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import PageIntro from '@/components/PageIntro.astro';
-import ProjectCard from '@/components/ProjectCard.astro';
+import PortfolioVignette from '@/components/PortfolioVignette.astro';
 import { projectCategories } from '@/content.config';
 import { sortProjects } from '@/lib/content';
 
 const projets = sortProjects(await getCollection('projets'));
 const counts = new Map(projectCategories.map((c) => [c, projets.filter((p) => p.data.category === c).length]));
+
+// Projets phares mis en grand : le festival mis en avant, puis la formation fondatrice.
+const idsPhares = ['rio-fresco-fest-2026', 'onebeat-senegal'];
+const phares = idsPhares.flatMap((id) => projets.filter((p) => p.id === id && p.data.cover));
+
+/*
+ * Filtre sans JavaScript : des boutons radio et le sélecteur :has() masquent
+ * les projets des autres catégories. Le script ne fait que synchroniser
+ * l'adresse (?categorie=…) et annoncer le nombre de résultats.
+ */
+const filtreCss = projectCategories
+  .map((c, i) => `.portfolio:has(#filtre-${i + 1}:checked) [data-projects] > li:not([data-category="${c}"]) { display: none; }`)
+  .join('\n');
 ---
 
 <BaseLayout
   title="Nos projets"
   description="Festivals, événements, productions musicales, formations et initiatives communautaires : le portfolio des réalisations documentées de SKM La Fabrik et Sunu Kaddu."
 >
-  <PageIntro
-    eyebrow="Portfolio · Réalisations documentées"
-    title={'Nos <span class="accent">projets</span>'}
-    lead="Une sélection des projets portés par Sunu Kaddu et SKM La Fabrik depuis 2013, à Rufisque et au-delà."
-  >
-    <div class="filtres" role="group" aria-label="Filtrer par catégorie" data-filters hidden>
-      <button type="button" aria-pressed="true" data-filter="">Tous <span>({projets.length})</span></button>
-      {
-        projectCategories.map((c) => (
-          <button type="button" aria-pressed="false" data-filter={c}>
-            {c} <span>({counts.get(c)})</span>
-          </button>
-        ))
-      }
-    </div>
-  </PageIntro>
+  <style is:inline set:html={filtreCss} />
 
-  <section class="wrap liste" aria-label="Liste des projets">
-    <p class="sr-only" aria-live="polite" data-filter-status></p>
-    <ul class="grille" data-projects>
-      {
-        projets.map((p) => (
-          <li data-category={p.data.category}>
-            <ProjectCard project={p} headingLevel="h2" />
-          </li>
-        ))
-      }
-    </ul>
+  <section class="theme-sombre intro" aria-labelledby="titre-page">
+    <div class="intro-lueur" aria-hidden="true"></div>
+    <div class="wrap intro-grid">
+      <div>
+        <p class="surtitre">Portfolio · Réalisations documentées</p>
+        <h1 id="titre-page" class="titre intro-titre">Nos <span class="accent">projets</span></h1>
+      </div>
+      <div class="intro-texte">
+        <p class="chapeau doux">Une sélection des projets portés par Sunu Kaddu et SKM La Fabrik depuis 2013, à Rufisque et au-delà.</p>
+        <ul class="categories" aria-label="Répartition par catégorie">
+          {
+            projectCategories.map((c) => (
+              <li>
+                <span>{c}</span> <span class="compte">{counts.get(c)}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  {
+    phares.length > 0 && (
+      <section class="theme-sombre phares" aria-labelledby="t-phares">
+        <div class="wrap">
+          <h2 id="t-phares" class="index">
+            <span>01</span> Projets phares
+          </h2>
+          <ul class="phares-grille">
+            {phares.map((p, i) => (
+              <li class:list={['phare', { 'phare-large': i === 0 }]} data-reveal>
+                <a href={`/projets/${p.id}`}>
+                  {p.data.cover && (
+                    <Image
+                      src={p.data.cover}
+                      alt={p.data.coverAlt ?? ''}
+                      widths={i === 0 ? [640, 1000, 1400] : [480, 800]}
+                      sizes={i === 0 ? '(min-width: 64rem) 62vw, 100vw' : '(min-width: 64rem) 36vw, 100vw'}
+                      quality={85}
+                      loading={i === 0 ? 'eager' : 'lazy'}
+                    />
+                  )}
+                  <div class="phare-texte">
+                    <p class="phare-meta">
+                      {p.data.category} · {p.data.period}
+                    </p>
+                    <h3 class="titre phare-titre">{p.data.title}</h3>
+                    <p class="phare-resume">{p.data.summary}</p>
+                    <span class="phare-fleche" aria-hidden="true">
+                      →
+                    </span>
+                  </div>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+    )
+  }
+
+  <section class="theme-anthracite section portfolio" aria-labelledby="t-portfolio">
+    <div class="wrap">
+      <div class="portfolio-tete">
+        <div>
+          <p class="index"><span>02</span> Tout le portfolio</p>
+          <h2 id="t-portfolio" class="titre titre-h2">Une décennie de réalisations</h2>
+        </div>
+        <fieldset class="filtres" data-filters>
+          <legend class="sr-only">Filtrer par catégorie</legend>
+          <label>
+            <input type="radio" name="categorie" id="filtre-0" value="" checked />
+            <span>Tous <span class="n">({projets.length})</span></span>
+          </label>
+          {
+            projectCategories.map((c, i) => (
+              <label>
+                <input type="radio" name="categorie" id={`filtre-${i + 1}`} value={c} />
+                <span>
+                  {c} <span class="n">({counts.get(c)})</span>
+                </span>
+              </label>
+            ))
+          }
+        </fieldset>
+      </div>
+
+      <p class="sr-only" aria-live="polite" data-filter-status></p>
+      <ul class="grille" data-projects>
+        {
+          projets.map((p, i) => (
+            <li data-category={p.data.category}>
+              <PortfolioVignette project={p} num={i + 1} headingLevel="h3" />
+            </li>
+          ))
+        }
+      </ul>
+    </div>
   </section>
 </BaseLayout>
 
@@ -51,17 +137,10 @@ const counts = new Map(projectCategories.map((c) => [c, projets.filter((p) => p.
   const status = document.querySelector<HTMLElement>('[data-filter-status]');
 
   if (group) {
-    group.hidden = false;
-    const buttons = Array.from(group.querySelectorAll<HTMLButtonElement>('[data-filter]'));
+    const radios = Array.from(group.querySelectorAll<HTMLInputElement>('input[name="categorie"]'));
 
     const apply = (category: string, updateUrl: boolean) => {
-      let visible = 0;
-      for (const li of items) {
-        const show = category === '' || li.dataset['category'] === category;
-        li.hidden = !show;
-        if (show) visible++;
-      }
-      for (const b of buttons) b.setAttribute('aria-pressed', String((b.dataset['filter'] ?? '') === category));
+      const visible = items.filter((li) => category === '' || li.dataset['category'] === category).length;
       if (status) status.textContent = `${visible} projet${visible > 1 ? 's' : ''} affiché${visible > 1 ? 's' : ''}`;
       if (updateUrl) {
         const url = new URL(window.location.href);
@@ -71,61 +150,271 @@ const counts = new Map(projectCategories.map((c) => [c, projets.filter((p) => p.
       }
     };
 
-    buttons.forEach((b) => b.addEventListener('click', () => apply(b.dataset['filter'] ?? '', true)));
+    radios.forEach((r) => r.addEventListener('change', () => r.checked && apply(r.value, true)));
 
     const initial = new URLSearchParams(window.location.search).get('categorie') ?? '';
-    if (buttons.some((b) => b.dataset['filter'] === initial)) apply(initial, false);
+    const match = radios.find((r) => r.value === initial);
+    if (initial && match) {
+      match.checked = true;
+      apply(initial, false);
+    }
   }
 </script>
 
 <style>
-  .filtres {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-top: 2.5rem;
+  .section {
+    padding-block: clamp(5rem, 3rem + 8vw, 9.5rem);
   }
-  .filtres[hidden] {
-    display: none;
+
+  /* Ouverture : grand titre, lueur dorée discrète */
+  .intro {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    padding-block: clamp(4rem, 3rem + 5vw, 8rem) clamp(3rem, 2rem + 3vw, 5rem);
   }
-  .filtres button {
-    min-height: 2.75rem;
-    padding: 0 1.1rem;
-    border: 1px solid var(--c-ligne-sombre);
-    background: transparent;
-    font-size: 0.875rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition:
-      background-color 0.2s,
-      border-color 0.2s;
+  .intro-lueur {
+    position: absolute;
+    z-index: -1;
+    top: -30rem;
+    left: -24rem;
+    width: 70rem;
+    height: 70rem;
+    background: radial-gradient(closest-side, rgb(201 161 59 / 0.22), rgb(224 102 44 / 0.06) 55%, transparent 78%);
+    pointer-events: none;
   }
-  .filtres button span {
-    opacity: 0.7;
-  }
-  .filtres button:hover {
-    border-color: var(--c-or);
-  }
-  .filtres button[aria-pressed='true'] {
-    background: var(--c-or);
-    border-color: var(--c-or);
-    color: var(--c-noir);
-  }
-  .liste {
-    padding-bottom: var(--section-y);
-  }
-  .grille {
+  .intro-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+    gap: 2.5rem 4rem;
+    align-items: end;
+  }
+  .intro .surtitre {
+    margin-bottom: 1.25rem;
+  }
+  .intro-titre {
+    font-size: var(--t-display);
+    line-height: 0.88;
+  }
+  .intro-texte {
+    display: grid;
+    gap: 2rem;
+  }
+  .categories {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--line);
+  }
+  .categories li {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-block: 0.7rem;
+    border-bottom: 1px solid var(--line);
+    font-size: var(--t-small);
+    font-weight: 600;
+  }
+  .compte {
+    font-family: var(--f-titre);
+    font-weight: 400;
+    font-size: 1.25rem;
+    line-height: 1;
+    color: var(--c-or);
+  }
+  @media (max-width: 56rem) {
+    .intro-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  /* Repères numérotés (repris de l'accueil) */
+  .index {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin-bottom: clamp(1.5rem, 1rem + 1.5vw, 2.5rem);
+    font-size: var(--t-micro);
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--soft);
+  }
+  .index span {
+    font-family: var(--f-titre);
+    font-size: 1.25rem;
+    letter-spacing: 0;
+    color: var(--accent);
+  }
+
+  /* Projets phares : grandes images cinématographiques */
+  .phares {
+    padding-bottom: clamp(4rem, 3rem + 5vw, 7.5rem);
+  }
+  .phares-grille {
+    display: grid;
+    grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
     gap: 1rem;
     margin: 0;
     padding: 0;
     list-style: none;
   }
-  .grille li[hidden] {
-    display: none;
+  .phare a {
+    position: relative;
+    display: grid;
+    height: 100%;
+    min-height: clamp(26rem, 60svh, 40rem);
+    overflow: hidden;
+    text-decoration: none;
+    background: var(--c-anthracite);
+  }
+  .phare :global(img) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 1s var(--ease);
+  }
+  .phare a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgb(13 12 10 / 0) 30%, rgb(13 12 10 / 0.6) 60%, var(--c-noir) 100%);
+  }
+  .phare a:hover :global(img) {
+    transform: scale(1.03);
+  }
+  .phare-texte {
+    position: relative;
+    z-index: 1;
+    align-self: end;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.75rem 1.5rem;
+    padding: clamp(1.5rem, 1rem + 2vw, 2.75rem);
+  }
+  .phare-meta,
+  .phare-titre,
+  .phare-resume {
+    grid-column: 1;
+  }
+  .phare-meta {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--c-or);
+  }
+  .phare-titre {
+    font-size: clamp(2.25rem, 1.5rem + 2.6vw, 4rem);
+    line-height: 0.95;
+  }
+  .phare-large .phare-titre {
+    font-size: clamp(2.5rem, 1.4rem + 4vw, 5.5rem);
+  }
+  .phare-resume {
+    max-width: 34rem;
+    color: var(--c-pierre-claire);
+    line-height: 1.5;
+  }
+  .phare-fleche {
+    grid-column: 2;
+    grid-row: 1 / span 3;
+    align-self: end;
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    background: var(--c-or);
+    color: var(--c-noir);
+    font-size: 1.25rem;
+    font-weight: 700;
+    transition: transform 0.3s var(--ease);
+  }
+  .phare a:hover .phare-fleche {
+    transform: translateX(4px);
+  }
+  @media (max-width: 64rem) {
+    .phares-grille {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .phare a {
+      min-height: clamp(22rem, 70svh, 32rem);
+    }
+  }
+
+  /* Portfolio filtrable */
+  .portfolio-tete {
+    display: grid;
+    gap: 2rem;
+    margin-bottom: clamp(2.5rem, 2rem + 2vw, 4rem);
+  }
+  .filtres {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+  .filtres label {
+    position: relative;
+    display: inline-flex;
+  }
+  .filtres input {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+  .filtres label > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    min-height: 2.75rem;
+    padding: 0 1.1rem;
+    border: 1px solid var(--c-ligne-sombre);
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition:
+      background-color 0.2s,
+      border-color 0.2s;
+    pointer-events: none;
+  }
+  .filtres .n {
+    opacity: 0.7;
+  }
+  .filtres label:hover > span {
+    border-color: var(--c-or);
+  }
+  .filtres input:checked + span {
+    background: var(--c-or);
+    border-color: var(--c-or);
+    color: var(--c-noir);
+  }
+  .filtres input:focus-visible + span {
+    box-shadow: var(--focus);
+  }
+  .grille {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
+    gap: 3rem 1.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
   }
   .grille li {
     display: grid;
+  }
+  @media (min-width: 64rem) {
+    .portfolio-tete {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+      align-items: end;
+    }
+    .filtres {
+      justify-content: flex-end;
+    }
   }
 </style>
