@@ -1,4 +1,5 @@
-import { defineCollection, z } from 'astro:content';
+import { defineCollection } from 'astro:content';
+import { z } from 'astro/zod';
 import { glob } from 'astro/loaders';
 
 export const projectCategories = [
@@ -13,7 +14,7 @@ export const newsTypes = ['Actualité', 'Annonce', 'Reportage', 'Événement'] a
 
 const video = z.object({
   title: z.string(),
-  url: z.string().url(),
+  url: z.url({ protocol: /^https$/ }),
 });
 
 const projets = defineCollection({
