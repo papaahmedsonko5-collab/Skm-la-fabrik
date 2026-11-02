@@ -2,6 +2,7 @@
 import { Image } from 'astro:assets';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import Button from '@/components/Button.astro';
+import Carousel from '@/components/Carousel.astro';
 import VideoEmbed from '@/components/VideoEmbed.astro';
 import logoSk from '@/assets/brand/logo-sunu-kaddu.png';
 import { photos } from '@/data/photos';
@@ -10,52 +11,98 @@ import { offresArtistes, tarifsSource } from '@/data/offres';
 import { rff } from '@/data/rff';
 
 const pad = (n: number) => String(n).padStart(2, '0');
+
+// Sommaire du hero : chaque entrée renvoie à une section numérotée de la page.
+const sommaire = [
+  { num: '03', titre: 'Face A · Face B', meta: 'Le catalogue', href: '#t-catalogue' },
+  { num: '05', titre: 'Sunu Tape', meta: 'Compilation, 23 titres', href: '#t-tape' },
+  { num: '06', titre: 'Le studio', meta: 'Les formules', href: '#studio' },
+] as const;
+
+const loge = [photos.rff25Loge1, photos.rff25Loge2, photos.rff25Loge4, photos.rff25Loge5, photos.rff25Loge6, photos.rff25Loge7, photos.rff25Loge8];
 ---
 
 <BaseLayout
+  overlayHeader
   title="Sunu Kaddu Music"
   description="Sunu Kaddu Music, le label fondé par PPS the Writah à Rufisque : studio Key I Am, productions, scènes, artistes de la Sunu Tape et formules studio pour les artistes."
 >
-  <section class="hero theme-sombre" aria-labelledby="titre-page">
-    <div class="wrap hero-grid">
+  <section class="hero" aria-labelledby="titre-page">
+    <div class="hero-lueur" aria-hidden="true"></div>
+    <figure class="hero-photo">
+      <Image
+        src={photos.rff25Loge3.src}
+        alt={photos.rff25Loge3.alt}
+        widths={[480, 838]}
+        sizes="(min-width: 64rem) 46vw, 100vw"
+        quality={85}
+        loading="eager"
+        fetchpriority="high"
+      />
+    </figure>
+    <div class="wrap hero-contenu">
       <div class="hero-texte">
-        <p class="surtitre">Le label · Depuis 2014</p>
-        <h1 id="titre-page" class="titre titre-display">Sunu<br />Kaddu<br /><span class="accent">Music</span></h1>
+        <p class="surtitre">Le label · Rufisque · Depuis 2014</p>
+        <h1 id="titre-page" class="titre hero-titre">
+          <span>Sunu</span> <span>Kaddu</span> <span class="accent">Music</span>
+        </h1>
         <p class="sens citation">{label.meaning}</p>
+        <p class="services">Composition · Enregistrement · Mixage · Mastering · Habillage sonore · Voix off</p>
         <div class="ctas">
           <Button href="/contact?objet=production">Produire un titre</Button>
-          <a class="lien-fleche" href="#studio">Les formules studio <span aria-hidden="true">→</span></a>
+          <Button href="#studio" variant="contour">Les formules studio</Button>
         </div>
       </div>
-      <figure class="hero-photo">
-        <Image src={photos.studio.src} alt={photos.studio.alt} widths={[480, 800, 1200]} sizes="(min-width: 56rem) 45vw, 100vw" loading="eager" fetchpriority="high" />
-        <div class="macaron">
-          <Image src={logoSk} alt="Logo Sunu Kaddu" width={120} loading="eager" />
-        </div>
-      </figure>
+      <ol class="sommaire" aria-label="Sur cette page">
+        {
+          sommaire.map((s) => (
+            <li>
+              <a href={s.href}>
+                <span class="sommaire-num">{s.num}</span>
+                <span class="sommaire-titre">{s.titre}</span>
+                <span class="sommaire-meta">{s.meta}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ol>
     </div>
   </section>
 
-  <section class="vision theme-papier section" aria-labelledby="t-vision">
-    <div class="wrap vision-grid">
-      <h2 id="t-vision" class="titre titre-h2" data-reveal>La vision d’un leader&nbsp;: PPS the Writah</h2>
-      <div class="vision-texte" data-reveal>
-        <p class="chapeau">{label.vision}</p>
-        <p>{label.mission}</p>
-      </div>
-    </div>
-  </section>
-
-  <section class="heritage theme-sombre section" aria-labelledby="t-heritage">
+  <section class="theme-papier section vision" aria-labelledby="t-vision">
     <div class="wrap">
-      <p class="surtitre">Formation & technologie</p>
-      <h2 id="t-heritage" class="titre titre-h2">Un centre d’excellence technique</h2>
+      <p class="index" data-reveal><span>01</span> La vision d’un leader&nbsp;: PPS the Writah</p>
+      <h2 id="t-vision" class="grande-phrase" data-reveal>
+        PPS fonde Sunu Kaddu, un espace conçu pour <mark>légitimer la créativité</mark> d’une jeunesse{' '}
+        <mark>souvent ignorée par les structures formelles.</mark>
+      </h2>
+      <div class="vision-bas">
+        <figure class="vision-photo" data-reveal>
+          <Image src={photos.studio.src} alt={photos.studio.alt} widths={[480, 800, 1280]} sizes="(min-width: 56rem) 52vw, 100vw" quality={85} />
+        </figure>
+        <div class="vision-carte" data-reveal>
+          <Image src={logoSk} alt="Logo Sunu Kaddu" width={96} height={96} class="vision-logo" />
+          <p>{label.vision}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="theme-anthracite section heritage" aria-labelledby="t-heritage">
+    <div class="wrap">
+      <div class="heritage-tete" data-reveal>
+        <p class="index"><span>02</span> Formation &amp; technologie</p>
+        <h2 id="t-heritage" class="titre titre-h2">Un centre d’excellence technique</h2>
+      </div>
       <ol class="frise">
         {
           heritage.map((h) => (
             <li data-reveal>
-              <span class="titre an">{h.year}</span>
-              <h3>{h.title}</h3>
+              <span class="titre an" aria-hidden="true">{h.year}</span>
+              <h3>
+                <span class="sr-only">{h.year} : </span>
+                {h.title}
+              </h3>
               <p class="doux">{h.text}</p>
             </li>
           ))
@@ -64,91 +111,133 @@ const pad = (n: number) => String(n).padStart(2, '0');
     </div>
   </section>
 
-  <section class="catalogue section" aria-labelledby="t-catalogue">
-    <div class="wrap cat-grid">
-      <div class="cat-col" data-reveal>
-        <p class="surtitre">Face A</p>
-        <h2 id="t-catalogue" class="titre titre-h2">Productions majeures</h2>
-        <ol class="tracklist">
-          {
-            productions.map((p, i) => (
-              <li>
-                <span class="n">{pad(i + 1)}</span>
-                <span class="t">{p.title}</span>
-                <span class="k">{p.kind}</span>
-              </li>
-            ))
-          }
-        </ol>
+  <section class="theme-sombre section catalogue" aria-labelledby="t-catalogue">
+    <div class="wrap">
+      <div class="catalogue-tete" data-reveal>
+        <p class="index"><span>03</span> Le catalogue</p>
+        <h2 id="t-catalogue" class="titre titre-h2">Productions majeures &amp; scènes emblématiques</h2>
       </div>
-      <div class="cat-col" data-reveal>
-        <p class="surtitre">Face B</p>
-        <h2 class="titre titre-h2">Scènes emblématiques</h2>
-        <ol class="tracklist">
-          {
-            scenes.map((s, i) => (
-              <li>
-                <span class="n">{pad(i + 1)}</span>
-                <span class="t">{s.name}</span>
-                <span class="k">{s.place}</span>
-              </li>
-            ))
-          }
-        </ol>
-        <p class="liens">
-          <a class="lien-fleche" href="/projets/xaatim-ak-kallama">Xaatim ak Kallama <span aria-hidden="true">→</span></a>
-          <a class="lien-fleche" href="/projets/loge-des-poetes">La Loge des Poètes <span aria-hidden="true">→</span></a>
-          <a class="lien-fleche" href="/projets?categorie=Productions%20musicales">Toutes les productions <span aria-hidden="true">→</span></a>
-        </p>
+      <div class="faces">
+        <div class="face" data-reveal>
+          <div class="face-tete">
+            <span class="face-lettre titre" aria-hidden="true">A</span>
+            <div>
+              <p class="face-meta">Face A</p>
+              <h3 class="titre face-titre">Productions majeures</h3>
+            </div>
+          </div>
+          <ol class="tracklist">
+            {
+              productions.map((p, i) => (
+                <li>
+                  <span class="n" aria-hidden="true">A{pad(i + 1)}</span>
+                  <span class="t">{p.title}</span>
+                  <span class="k">{p.kind}</span>
+                </li>
+              ))
+            }
+          </ol>
+        </div>
+        <div class="face" data-reveal>
+          <div class="face-tete">
+            <span class="face-lettre titre" aria-hidden="true">B</span>
+            <div>
+              <p class="face-meta">Face B</p>
+              <h3 class="titre face-titre">Scènes emblématiques</h3>
+            </div>
+          </div>
+          <ol class="tracklist">
+            {
+              scenes.map((s, i) => (
+                <li>
+                  <span class="n" aria-hidden="true">B{pad(i + 1)}</span>
+                  <span class="t">{s.name}</span>
+                  <span class="k">{s.place}</span>
+                </li>
+              ))
+            }
+          </ol>
+          <p class="liens">
+            <a class="lien-fleche" href="/projets/xaatim-ak-kallama">Xaatim ak Kallama <span aria-hidden="true">→</span></a>
+            <a class="lien-fleche" href="/projets/loge-des-poetes">La Loge des Poètes <span aria-hidden="true">→</span></a>
+            <a class="lien-fleche" href="/projets?categorie=Productions%20musicales">Toutes les productions <span aria-hidden="true">→</span></a>
+          </p>
+        </div>
       </div>
     </div>
   </section>
 
-  <section class="ecouter theme-anthracite section" aria-labelledby="t-ecouter">
-    <div class="wrap ecouter-grid">
-      <div data-reveal>
-        <p class="surtitre">Voir & écouter</p>
-        <h2 id="t-ecouter" class="titre titre-h2">Sur scène</h2>
-        <p class="doux">
-          La playlist officielle du Rio Fresco Fest 2026 documente les cinq jours du festival, dont le plateau de la Loge des Poètes.
-        </p>
-        <p class="doux petit">Les liens d’écoute officiels du catalogue (Audiomack, plateformes de streaming) seront ajoutés dès leur confirmation par le label.</p>
+  <section class="theme-papier section ecouter" aria-labelledby="t-ecouter">
+    <div class="wrap">
+      <div class="ecouter-grid">
+        <div class="ecouter-texte" data-reveal>
+          <p class="index"><span>04</span> Voir &amp; écouter</p>
+          <h2 id="t-ecouter" class="titre titre-h2">Sur scène</h2>
+          <p class="chapeau">
+            La playlist officielle du Rio Fresco Fest 2026 documente les cinq jours du festival, dont le plateau de la Loge des Poètes.
+          </p>
+          <p class="doux petit">Les liens d’écoute officiels du catalogue (Audiomack, plateformes de streaming) seront ajoutés dès leur confirmation par le label.</p>
+        </div>
+        <div class="ecouter-video" data-reveal>
+          <VideoEmbed playlist={rff.playlistId} title="Playlist officielle du Rio Fresco Fest 2026" poster={photos.scene1.src} />
+        </div>
       </div>
-      <VideoEmbed playlist={rff.playlistId} title="Playlist officielle du Rio Fresco Fest 2026" poster={photos.scene1.src} />
+      <div class="loge" data-reveal>
+        <p class="loge-legende surtitre">La Loge des Poètes · Rio Fresco Fest 2025</p>
+        <Carousel label="Photos de la Loge des Poètes" tone="clair" itemWidth="clamp(13rem, 22vw, 18rem)">
+          {
+            loge.map((ph) => (
+              <figure class="loge-photo">
+                <Image src={ph.src} alt={ph.alt} widths={[320, 560]} sizes="(min-width: 64rem) 22vw, 60vw" />
+              </figure>
+            ))
+          }
+        </Carousel>
+      </div>
     </div>
   </section>
 
-  <section class="sunutape theme-papier section" aria-labelledby="t-tape">
-    <div class="wrap tape-grid">
-      <div data-reveal>
-        <p class="surtitre">Compilation · 2015</p>
-        <h2 id="t-tape" class="titre titre-h2">Les voix de la Sunu Tape</h2>
-        <p class="doux">
-          Pour le premier anniversaire de Key I Am, le label a offert une compilation gratuite de 23 titres. Elle a mis en lumière des artistes
-          de Rufisque, Thiès, Dakar, Bargny et des zones rurales, de Keur Ndiaye Lo à Sangalkam.
-        </p>
-        <a class="lien-fleche" href="/projets/sunu-tape-vol-1">La fiche de la compilation <span aria-hidden="true">→</span></a>
+  <section class="section sunutape" aria-labelledby="t-tape">
+    <div class="wrap">
+      <div class="tape-tete" data-reveal>
+        <div>
+          <p class="index"><span>05</span> Compilation · 2015</p>
+          <h2 id="t-tape" class="titre titre-h2">Les voix de la Sunu Tape</h2>
+        </div>
+        <div class="tape-texte">
+          <p>
+            Pour le premier anniversaire de Key I Am, le label a offert une compilation gratuite de 23 titres. Elle a mis en lumière des artistes
+            de Rufisque, Thiès, Dakar, Bargny et des zones rurales, de Keur Ndiaye Lo à Sangalkam.
+          </p>
+          <a class="lien-fleche" href="/projets/sunu-tape-vol-1">La fiche de la compilation <span aria-hidden="true">→</span></a>
+        </div>
       </div>
-      <ul class="artistes" aria-label="Artistes de la Sunu Tape Vol. 1">
+      <ul class="mur" aria-label="Artistes de la Sunu Tape Vol. 1" data-reveal>
         {sunuTapeArtists.map((a) => <li>{a}</li>)}
       </ul>
     </div>
   </section>
 
-  <section id="studio" class="studio theme-sombre section" aria-labelledby="t-studio">
+  <section id="studio" class="theme-sombre section studio" aria-labelledby="t-studio">
+    <div class="studio-lueur" aria-hidden="true"></div>
     <div class="wrap">
-      <header class="studio-head" data-reveal>
+      <header class="studio-tete" data-reveal>
         <div>
-          <p class="surtitre">Studio 360° · Artistes & créatifs</p>
+          <p class="index"><span>06</span> Studio 360° · Artistes &amp; créatifs</p>
           <h2 id="t-studio" class="titre titre-h2">Les formules studio</h2>
         </div>
         <p class="doux">Création, mixage, mastering et promotion des talents locaux, au sein de SKM La Fabrik.</p>
       </header>
       <div class="offres">
         {
-          offresArtistes.map((o) => (
+          offresArtistes.map((o, i) => (
             <section class:list={['offre', { phare: o.highlight }]} aria-labelledby={`f-${o.id}`} data-reveal>
-              <h3 id={`f-${o.id}`} class="titre">{o.name}</h3>
+              <p class="offre-num" aria-hidden="true">
+                {pad(i + 1)}
+              </p>
+              <h3 id={`f-${o.id}`} class="titre">
+                {o.name}
+              </h3>
               <p class="pitch">{o.pitch}</p>
               <table>
                 <caption class="sr-only">Formule {o.name}, prix en francs CFA</caption>
@@ -174,209 +263,569 @@ const pad = (n: number) => String(n).padStart(2, '0');
 </BaseLayout>
 
 <style>
-  .hero-grid {
+  .section {
+    padding-block: clamp(5rem, 3rem + 8vw, 9.5rem);
+  }
+
+  /* Repères numérotés (repris de l'accueil) */
+  .index {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin-bottom: clamp(1.5rem, 1rem + 1.5vw, 2.5rem);
+    font-size: var(--t-micro);
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--soft);
+  }
+  .index span {
+    font-family: var(--f-titre);
+    font-size: 1.25rem;
+    letter-spacing: 0;
+    color: var(--accent);
+  }
+
+  /* Hero : noir de salle de concert, photo de scène fondue, lueur or et terracotta */
+  .hero {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: 3rem clamp(2rem, 1rem + 4vw, 5rem);
-    align-items: center;
-    padding-block: clamp(3.5rem, 2rem + 4vw, 6rem);
+    align-items: end;
+    min-height: min(100svh, 56rem);
+    padding-block: calc(4.75rem + clamp(3rem, 2rem + 4vw, 6rem)) clamp(2.5rem, 2rem + 2vw, 4rem);
+    background: var(--c-noir);
+    color: var(--c-papier);
+    --accent: var(--c-or);
+    --soft: var(--c-pierre);
+  }
+  .hero-lueur {
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    background:
+      radial-gradient(48rem 40rem at 78% 30%, rgb(201 161 59 / 0.22), transparent 70%),
+      radial-gradient(40rem 30rem at 10% 100%, rgb(224 102 44 / 0.16), transparent 70%);
+    pointer-events: none;
+  }
+  .hero-photo {
+    position: absolute;
+    z-index: -1;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: min(52%, 46rem);
+    margin: 0;
+  }
+  .hero-photo :global(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 20%;
+    -webkit-mask-image:
+      linear-gradient(90deg, transparent 0, #000 45%),
+      linear-gradient(180deg, #000 60%, transparent 100%);
+    -webkit-mask-composite: source-in;
+    mask-image:
+      linear-gradient(90deg, transparent 0, #000 45%),
+      linear-gradient(180deg, #000 60%, transparent 100%);
+    mask-composite: intersect;
+  }
+  .hero-contenu {
+    display: grid;
+    gap: clamp(2.5rem, 2rem + 3vw, 4.5rem);
   }
   .hero-texte {
     display: grid;
+    justify-items: start;
     gap: 1.5rem;
+    max-width: 52rem;
+  }
+  .hero-titre {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: 0.22em;
+    font-size: clamp(3.75rem, 1.4rem + 9.5vw, 11rem);
+    line-height: 0.86;
+  }
+  .hero-titre span:last-child {
+    flex-basis: 100%;
   }
   .sens {
-    font-size: clamp(1.25rem, 1rem + 1vw, 1.75rem);
+    font-size: clamp(1.375rem, 1.1rem + 1.2vw, 2.125rem);
+    color: var(--c-terracotta);
+  }
+  .services {
+    max-width: 34rem;
+    font-size: var(--t-small);
+    line-height: 1.7;
+    letter-spacing: 0.04em;
     color: var(--c-pierre-claire);
   }
   .ctas {
     display: flex;
     flex-wrap: wrap;
-    align-items: center;
-    gap: 1rem 1.75rem;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
   }
-  .hero-photo {
-    position: relative;
+  .sommaire {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--c-ligne-sombre);
+  }
+  .sommaire li + li {
+    border-left: 1px solid var(--c-ligne-sombre);
+  }
+  .sommaire a {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.15rem 1rem;
+    align-items: baseline;
+    min-height: 2.75rem;
+    padding: 1.25rem 1.25rem 0.25rem;
+    text-decoration: none;
+    transition: background-color 0.25s;
+  }
+  .sommaire li:first-child a {
+    padding-left: 0;
+  }
+  .sommaire a:hover {
+    background: rgb(255 255 255 / 0.04);
+  }
+  .sommaire-num {
+    grid-row: span 2;
+    font-family: var(--f-titre);
+    font-size: 1.25rem;
+    color: var(--c-or);
+  }
+  .sommaire-titre {
+    font-family: var(--f-titre);
+    font-size: clamp(1.25rem, 1rem + 0.8vw, 1.75rem);
+    line-height: 1.05;
+    text-transform: uppercase;
+    transition: color 0.25s;
+  }
+  .sommaire a:hover .sommaire-titre {
+    color: var(--c-or);
+  }
+  .sommaire-meta {
+    font-size: var(--t-micro);
+    color: var(--c-pierre);
+  }
+  @media (max-width: 64rem) {
+    .hero {
+      min-height: 0;
+      padding-top: 0;
+    }
+    .hero-photo {
+      position: relative;
+      z-index: auto;
+      grid-row: 1;
+      width: 100%;
+      height: clamp(22rem, 62svh, 34rem);
+    }
+    .hero-photo :global(img) {
+      object-position: 50% 25%;
+      -webkit-mask-image: linear-gradient(180deg, #000 45%, transparent 100%);
+      -webkit-mask-composite: source-over;
+      mask-image: linear-gradient(180deg, #000 45%, transparent 100%);
+      mask-composite: add;
+    }
+    .hero-contenu {
+      grid-row: 2;
+      margin-top: -7rem;
+    }
+  }
+  @media (max-width: 40rem) {
+    .sommaire {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .sommaire li + li {
+      border-left: 0;
+      border-top: 1px solid var(--c-ligne-sombre);
+    }
+    .sommaire a,
+    .sommaire li:first-child a {
+      padding: 0.9rem 0;
+    }
+  }
+
+  /* 01 · Vision : grande phrase surlignée */
+  .grande-phrase {
+    max-width: 66rem;
+    font-family: var(--f-texte);
+    font-size: clamp(1.625rem, 1.05rem + 2.5vw, 3.5rem);
+    font-weight: 600;
+    line-height: 1.18;
+    letter-spacing: -0.015em;
+    text-wrap: pretty;
+  }
+  .grande-phrase mark {
+    padding-inline: 0.05em;
+    background: linear-gradient(transparent 60%, var(--c-or) 60%, var(--c-or) 94%, transparent 94%);
+    color: inherit;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+  .vision-bas {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    align-items: end;
+    margin-top: clamp(3rem, 2rem + 4vw, 6rem);
+  }
+  .vision-photo {
     margin: 0;
   }
-  .hero-photo > :global(img) {
+  .vision-photo :global(img) {
+    display: block;
     width: 100%;
-    aspect-ratio: 4 / 5;
+    aspect-ratio: 4 / 3;
     object-fit: cover;
   }
-  .macaron {
-    position: absolute;
-    left: -1.5rem;
-    bottom: -1.5rem;
-    display: grid;
-    place-items: center;
-    width: 8.5rem;
-    height: 8.5rem;
-    border-radius: 50%;
-    background: var(--c-papier);
-  }
-  .macaron :global(img) {
-    width: 6.5rem;
-    height: auto;
-  }
-
-  .vision-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
-    gap: 2rem clamp(2rem, 1rem + 4vw, 6rem);
-  }
-  .vision-texte {
+  .vision-carte {
+    position: relative;
     display: grid;
     gap: 1.25rem;
+    justify-items: start;
+    margin: 0 0 -2.5rem -5rem;
+    padding: clamp(1.75rem, 1rem + 2vw, 3rem);
+    background: var(--c-noir);
+    color: var(--c-papier);
+    --soft: var(--c-pierre-claire);
+    line-height: 1.6;
+  }
+  .vision-logo {
+    width: 4.5rem;
+    height: 4.5rem;
+    padding: 0.4rem;
+    background: var(--c-papier);
+  }
+  @media (max-width: 56rem) {
+    .vision-bas {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .vision-carte {
+      margin: -3rem 1rem 0;
+    }
   }
 
+  /* 02 · Héritage : années géantes */
+  .heritage-tete {
+    max-width: 50rem;
+    margin-bottom: clamp(2.5rem, 2rem + 3vw, 4.5rem);
+  }
   .frise {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 2rem;
-    margin: 3rem 0 0;
+    gap: 2.5rem clamp(1.5rem, 1rem + 2vw, 3rem);
+    margin: 0;
     padding: 0;
     list-style: none;
   }
   .frise li {
     display: grid;
     align-content: start;
-    gap: 0.6rem;
+    gap: 0.75rem;
     padding-top: 1.25rem;
     border-top: 1px solid var(--c-or);
   }
   .an {
-    font-size: clamp(3rem, 2rem + 3vw, 4.5rem);
-    line-height: 1;
+    font-size: clamp(4rem, 2.5rem + 5vw, 7.5rem);
+    line-height: 0.9;
     color: var(--c-or);
+  }
+  .frise li:nth-child(2) .an {
+    color: var(--c-terracotta);
   }
   .frise h3 {
-    font-size: 1.125rem;
+    font-size: 1.25rem;
     font-weight: 700;
   }
+  .frise p {
+    line-height: 1.6;
+  }
+  @media (max-width: 56rem) {
+    .frise {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  @media (min-width: 56rem) {
+    .frise li:nth-child(2) {
+      margin-top: 3rem;
+    }
+    .frise li:nth-child(3) {
+      margin-top: 6rem;
+    }
+  }
 
-  .catalogue {
-    background: var(--c-noir);
-    color: var(--c-papier);
+  /* 03 · Catalogue : pochette de vinyle Face A / Face B */
+  .catalogue-tete {
+    max-width: 56rem;
+    margin-bottom: clamp(2.5rem, 2rem + 3vw, 4.5rem);
   }
-  .catalogue .surtitre {
-    color: var(--c-or);
-  }
-  .cat-grid {
+  .faces {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 3rem clamp(2rem, 1rem + 4vw, 6rem);
+    gap: 3.5rem clamp(2rem, 1rem + 4vw, 6rem);
+  }
+  .face-tete {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 2px solid var(--c-papier);
+  }
+  .face-lettre {
+    display: grid;
+    place-items: center;
+    width: 4.5rem;
+    height: 4.5rem;
+    flex: none;
+    font-size: 3rem;
+    line-height: 1;
+    background: var(--c-terracotta);
+    color: var(--c-noir);
+  }
+  .face:nth-child(2) .face-lettre {
+    background: var(--c-or);
+  }
+  .face-meta {
+    font-size: var(--t-micro);
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--c-pierre);
+  }
+  .face-titre {
+    font-size: var(--t-h3);
   }
   .tracklist {
-    margin: 2rem 0 0;
+    margin: 0;
     padding: 0;
     list-style: none;
-    counter-reset: none;
   }
   .tracklist li {
     display: grid;
-    grid-template-columns: 2.5rem minmax(0, 1fr) auto;
+    grid-template-columns: 3rem minmax(0, 1fr) auto;
     gap: 1rem;
     align-items: baseline;
-    padding: 0.85rem 0;
+    padding: 1rem 0;
     border-bottom: 1px solid var(--c-ligne-sombre);
+    transition: background-color 0.25s;
+  }
+  .tracklist li:hover {
+    background: rgb(255 255 255 / 0.03);
   }
   .n {
     font-variant-numeric: tabular-nums;
-    color: var(--c-or);
     font-weight: 700;
-    font-size: 0.875rem;
+    font-size: 0.8125rem;
+    letter-spacing: 0.08em;
+    color: var(--c-or);
+  }
+  .face:first-child .n {
+    color: var(--c-terracotta);
   }
   .t {
     font-weight: 600;
-    font-size: 1.0625rem;
+    font-size: clamp(1.0625rem, 1rem + 0.3vw, 1.25rem);
   }
   .k {
     font-size: 0.8125rem;
-    color: var(--c-pierre-claire);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--c-pierre);
     text-align: right;
   }
   .liens {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.75rem 1.75rem;
+    gap: 0.5rem 1.75rem;
     margin-top: 2rem;
   }
+  @media (max-width: 56rem) {
+    .faces {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  @media (max-width: 30rem) {
+    .tracklist li {
+      grid-template-columns: 2.75rem minmax(0, 1fr);
+      row-gap: 0.2rem;
+    }
+    .k {
+      grid-column: 2;
+      text-align: left;
+    }
+  }
 
+  /* 04 · Sur scène */
   .ecouter-grid {
     display: grid;
-    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    grid-template-columns: minmax(0, 0.75fr) minmax(0, 1.25fr);
     gap: 2.5rem clamp(2rem, 1rem + 4vw, 5rem);
     align-items: center;
   }
-  .ecouter-grid h2 {
+  .ecouter-texte h2 {
     margin-bottom: 1.25rem;
   }
   .petit {
-    margin-top: 1rem;
+    margin-top: 1.25rem;
     font-size: 0.875rem;
   }
+  .ecouter-video {
+    --accent: var(--c-or);
+  }
+  .loge {
+    margin-top: clamp(3.5rem, 2.5rem + 3vw, 5.5rem);
+  }
+  .loge-legende {
+    margin-bottom: -2.25rem;
+    padding-right: 7.5rem;
+    min-height: 3rem;
+    display: flex;
+    align-items: center;
+  }
+  .loge-photo {
+    margin: 0;
+  }
+  .loge-photo :global(img) {
+    display: block;
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    object-fit: cover;
+  }
+  @media (max-width: 56rem) {
+    .ecouter-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
 
-  .tape-grid {
+  /* 05 · Sunu Tape : mur de noms sur terracotta */
+  .sunutape {
+    background: var(--c-terracotta);
+    color: var(--c-noir);
+    --accent: var(--c-noir);
+    --soft: var(--c-noir);
+  }
+  .tape-tete {
     display: grid;
-    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
-    gap: 2.5rem clamp(2rem, 1rem + 4vw, 5rem);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.8fr);
+    gap: 1.5rem clamp(2rem, 1rem + 4vw, 5rem);
+    align-items: end;
+    margin-bottom: clamp(2.5rem, 2rem + 3vw, 4.5rem);
   }
-  .tape-grid .doux {
-    margin-block: 1.25rem 1.5rem;
+  .tape-texte {
+    display: grid;
+    gap: 1.25rem;
+    justify-items: start;
+    line-height: 1.6;
   }
-  .artistes {
+  .mur {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.35rem 1.25rem;
+    align-items: baseline;
+    gap: 0.1em 0;
     margin: 0;
-    padding: 0;
+    padding: clamp(1.5rem, 1rem + 2vw, 2.5rem) 0 0;
     list-style: none;
+    border-top: 2px solid var(--c-noir);
     font-family: var(--f-titre);
-    font-size: clamp(1.5rem, 1.1rem + 1.4vw, 2.25rem);
-    line-height: 1.2;
+    font-size: clamp(1.75rem, 0.9rem + 3.6vw, 4.5rem);
+    line-height: 1.08;
     text-transform: uppercase;
   }
-  .artistes li:nth-child(3n + 2) {
-    color: var(--c-or-profond);
+  .mur li:not(:last-child)::after {
+    content: '/';
+    margin-inline: 0.28em;
+    color: var(--c-papier);
+  }
+  .mur li:nth-child(3n + 2) {
+    font-family: var(--f-citation);
+    font-style: italic;
+    text-transform: none;
+    letter-spacing: -0.01em;
+  }
+  @media (max-width: 56rem) {
+    .tape-tete {
+      grid-template-columns: minmax(0, 1fr);
+    }
   }
 
-  .studio-head {
+  /* 06 · Studio */
+  .studio {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .studio-lueur {
+    position: absolute;
+    z-index: -1;
+    top: -20rem;
+    left: -18rem;
+    width: 60rem;
+    height: 60rem;
+    background: radial-gradient(closest-side, rgb(201 161 59 / 0.18), transparent 75%);
+    pointer-events: none;
+  }
+  .studio-tete {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
     align-items: end;
     gap: 1rem 3rem;
-    margin-bottom: 2.5rem;
+    margin-bottom: clamp(2.5rem, 2rem + 2vw, 3.5rem);
   }
-  .studio-head .doux {
+  .studio-tete .doux {
     max-width: 26rem;
   }
   .offres {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
-    gap: 1px;
-    background: var(--c-ligne-sombre);
-    border: 1px solid var(--c-ligne-sombre);
+    gap: 1rem;
+    align-items: start;
   }
   .offre {
     display: grid;
     align-content: start;
     gap: 1rem;
     padding: 1.75rem;
+    border: 1px solid var(--c-ligne-sombre);
     background: var(--c-noir);
+    transition: border-color 0.25s;
   }
-  .offre.phare {
-    background: var(--c-anthracite);
-    box-shadow: inset 0 3px 0 var(--c-or);
+  .offre:hover {
+    border-color: var(--c-or);
+  }
+  .offre-num {
+    font-family: var(--f-titre);
+    font-size: 1.125rem;
+    color: var(--c-terracotta);
   }
   .offre h3 {
     font-size: 1.875rem;
+    line-height: 1;
     color: var(--c-or);
   }
   .pitch {
     font-size: 0.9375rem;
+    line-height: 1.55;
     color: var(--c-pierre-claire);
+  }
+  .offre.phare {
+    border-color: var(--c-or);
+    background: var(--c-or);
+    color: var(--c-noir);
+  }
+  .offre.phare h3,
+  .offre.phare .offre-num,
+  .offre.phare .pitch {
+    color: var(--c-noir);
   }
   table {
     width: 100%;
@@ -388,6 +837,10 @@ const pad = (n: number) => String(n).padStart(2, '0');
     padding: 0.7rem 0;
     border-top: 1px solid var(--c-ligne-sombre);
     vertical-align: top;
+  }
+  .phare th,
+  .phare td {
+    border-top-color: rgb(13 12 10 / 0.25);
   }
   th {
     text-align: left;
@@ -404,36 +857,11 @@ const pad = (n: number) => String(n).padStart(2, '0');
     flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
-    gap: 1rem;
-    margin-top: 2rem;
+    gap: 1.25rem;
+    margin-top: 2.5rem;
     font-size: 0.8125rem;
   }
-
-  @media (max-width: 56rem) {
-    .hero-grid,
-    .vision-grid,
-    .frise,
-    .cat-grid,
-    .ecouter-grid,
-    .tape-grid {
-      grid-template-columns: minmax(0, 1fr);
-    }
-    .macaron {
-      left: 1rem;
-      width: 7rem;
-      height: 7rem;
-    }
-    .macaron :global(img) {
-      width: 5.25rem;
-    }
-  }
-  @media (max-width: 30rem) {
-    .tracklist li {
-      grid-template-columns: 2rem minmax(0, 1fr);
-    }
-    .k {
-      grid-column: 2;
-      text-align: left;
-    }
+  .studio-pied .doux {
+    max-width: 40rem;
   }
 </style>
