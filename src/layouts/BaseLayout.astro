@@ -10,7 +10,7 @@ export interface Props {
   title?: string;
   description?: string;
   /** Image Open Graph absolue ou relative au site (1200×630 conseillé). */
-  image?: string;
+  image?: string | undefined;
   tone?: 'fabrik' | 'rff';
   /** Données structurées supplémentaires propres à la page. */
   jsonLd?: Record<string, unknown> | Record<string, unknown>[];

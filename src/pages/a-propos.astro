@@ -1,0 +1,364 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import SectionHead from '@/components/SectionHead.astro';
+import Button from '@/components/Button.astro';
+import { team } from '@/data/site';
+import { photos } from '@/data/photos';
+import { timeline, values, cycle } from '@/data/histoire';
+---
+
+<BaseLayout
+  title="À propos"
+  description="L’histoire de SKM La Fabrik, de Sunu Kaddu en 2014 au Creative Hub de Rufisque : vision, mission, valeurs, modèle et équipe dirigeante."
+>
+  <section class="intro wrap" aria-labelledby="titre-page">
+    <p class="surtitre">À propos · De Sunu Kaddu à La Fabrik</p>
+    <h1 id="titre-page" class="titre titre-display">Nul n’entre ici<br />s’il n’est <span class="accent">créatif.</span></h1>
+    <div class="intro-cols">
+      <p class="chapeau">
+        Cette devise n’est pas qu’un slogan&nbsp;: c’est le standard d’excellence de La Fabrik. Nous bâtissons un
+        environnement où la culture urbaine rencontre l’exigence professionnelle absolue.
+      </p>
+      <p class="doux">
+        Depuis sa création en 2014 par l’artiste PPS the Writah, Sunu Kaddu s’est imposé comme un acteur majeur des cultures
+        urbaines à Rufisque et au Sénégal. En 2024, la structure devient SKM La Fabrik&nbsp;: un véritable pôle de production
+        audiovisuelle, de formation et d’innovation.
+      </p>
+    </div>
+  </section>
+
+  <figure class="bandeau-photo">
+    <Image src={photos.studio.src} alt={photos.studio.alt} widths={[640, 1000, 1400]} sizes="100vw" />
+    <figcaption class="wrap">Studio Key I Am, Cité Senelec, Rufisque.</figcaption>
+  </figure>
+
+  <section class="theme-papier section" aria-labelledby="chrono">
+    <div class="wrap">
+      <SectionHead eyebrow="Chronologie" title="Chaque pas raconte une histoire" id="chrono" />
+      <ol class="timeline">
+        {
+          timeline.map((s) => (
+            <li data-reveal>
+              <p class="annee titre">{s.year}</p>
+              <div>
+                <h3>{s.title}</h3>
+                <p class="doux">{s.text}</p>
+              </div>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <section class="theme-sombre section" aria-labelledby="vision">
+    <div class="wrap vm">
+      <div data-reveal>
+        <p class="surtitre">Vision</p>
+        <h2 id="vision" class="titre titre-h3">La jeunesse, moteur de son territoire</h2>
+        <p class="doux">
+          Les jeunes ont la capacité d’analyser leurs propres réalités et de porter les changements socio-économiques dont
+          leurs communautés ont besoin. Rufisque, troisième ville historique du Sénégal, déborde de jeunesse ambitieuse mais
+          manque d’infrastructures culturelles et de parcours de carrière structurés.
+        </p>
+      </div>
+      <div data-reveal>
+        <p class="surtitre">Mission</p>
+        <h2 class="titre titre-h3">Offrir un cadre structuré à cette vitalité</h2>
+        <p class="doux">
+          Professionnaliser les jeunes dans les métiers des arts, de la production, de l’audiovisuel et de la communication
+          digitale, tout en répondant aux besoins en contenus des structures locales.
+        </p>
+      </div>
+      <blockquote data-reveal>
+        <p class="citation">
+          « C’est plus qu’un studio&nbsp;: c’est un moteur de transformation, enraciné dans notre ville, au service de la
+          jeunesse et de la culture. »
+        </p>
+        <footer>PPS the Writah</footer>
+      </blockquote>
+    </div>
+  </section>
+
+  <section class="theme-anthracite section" aria-labelledby="valeurs">
+    <div class="wrap">
+      <SectionHead title="Nos valeurs" id="valeurs" />
+      <dl class="valeurs">
+        {
+          values.map((v, i) => (
+            <div data-reveal>
+              <dt>
+                <span class="n">{String(i + 1).padStart(2, '0')}</span>
+                <span class="titre">{v.title}</span>
+              </dt>
+              <dd class="doux">{v.text}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+  </section>
+
+  <section class="theme-papier section" aria-labelledby="modele">
+    <div class="wrap">
+      <SectionHead eyebrow="Notre modèle" title="Un écosystème circulaire" id="modele" />
+      <ol class="cycle">
+        {
+          cycle.map((c, i) => (
+            <li class:list={{ boucle: i === cycle.length - 1 }} data-reveal>
+              <span class="titre n">{i + 1}</span>
+              <h3>{c.title}</h3>
+              <p class="tag">{c.tag}</p>
+              <p>{c.text}</p>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <section class="theme-sombre section" aria-labelledby="equipe">
+    <div class="wrap">
+      <SectionHead eyebrow="Les architectes" title="L’équipe dirigeante" id="equipe" />
+      <ul class="equipe">
+        {
+          team.map((m) => (
+            <li data-reveal>
+              <h3 class="titre titre-h3">{m.name}</h3>
+              {m.fullName && <p class="full">{m.fullName}</p>}
+              <p class="role">{m.role}</p>
+              <p class="scope">{m.scope}</p>
+              <p class="doux">{m.bio}</p>
+            </li>
+          ))
+        }
+      </ul>
+      <div class="rejoindre">
+        <p>Vous souhaitez travailler avec l’équipe&nbsp;?</p>
+        <Button href="/contact">Nous écrire</Button>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .intro {
+    padding-block: clamp(4rem, 3rem + 4vw, 6.5rem) clamp(3rem, 2rem + 3vw, 4.5rem);
+  }
+  .intro .surtitre {
+    margin-bottom: 1.25rem;
+  }
+  .intro-cols {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr));
+    gap: 1.5rem 3rem;
+    margin-top: 3rem;
+  }
+  .intro .doux {
+    color: var(--c-pierre);
+    font-size: 1.0625rem;
+  }
+  .bandeau-photo :global(img) {
+    width: 100%;
+    height: clamp(18rem, 40vw, 36rem);
+    object-fit: cover;
+  }
+  figcaption {
+    padding-block: 0.75rem;
+    font-size: 0.8125rem;
+    color: var(--c-pierre);
+  }
+
+  .timeline {
+    position: relative;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    top: 0.5rem;
+    bottom: 0.5rem;
+    left: 0;
+    width: 2px;
+    background: var(--c-encre);
+  }
+  .timeline li {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(9rem, 14rem) minmax(0, 46rem);
+    gap: 0.5rem 3rem;
+    padding: 0 0 3rem 2.5rem;
+  }
+  .timeline li::before {
+    content: '';
+    position: absolute;
+    left: -7px;
+    top: 0.85rem;
+    width: 16px;
+    height: 16px;
+    background: var(--c-papier);
+    border: 2px solid var(--c-encre);
+  }
+  .timeline li:nth-child(even)::before {
+    background: var(--c-or);
+    border-color: var(--c-or);
+  }
+  .annee {
+    font-size: clamp(2.25rem, 1.8rem + 1.6vw, 3.25rem);
+    line-height: 1;
+  }
+  .timeline h3 {
+    font-size: 1.3rem;
+    margin-bottom: 0.5rem;
+  }
+  @media (max-width: 40rem) {
+    .timeline li {
+      grid-template-columns: 1fr;
+      padding-left: 1.75rem;
+    }
+  }
+
+  .vm {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+    gap: 3rem;
+    align-items: start;
+  }
+  .vm .surtitre {
+    margin-bottom: 1rem;
+  }
+  .vm h2 {
+    margin-bottom: 1.25rem;
+  }
+  blockquote {
+    margin: 0;
+    padding: 2rem;
+    border: 1px solid var(--c-or);
+  }
+  blockquote footer {
+    margin-top: 1rem;
+    font-size: 0.875rem;
+    color: var(--c-or);
+  }
+
+  .valeurs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+    margin: 0;
+    border-top: 1px solid var(--line);
+  }
+  .valeurs > div {
+    padding: 1.75rem 1.5rem 1.75rem 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .valeurs dt {
+    display: grid;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+  .valeurs .n {
+    font-family: var(--f-titre);
+    color: var(--c-or);
+  }
+  .valeurs dt .titre {
+    font-size: 1.9rem;
+  }
+  .valeurs dd {
+    margin: 0;
+    font-size: 0.9375rem;
+  }
+
+  .cycle {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+    gap: 1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: none;
+  }
+  .cycle li {
+    display: grid;
+    align-content: start;
+    gap: 0.5rem;
+    padding: 1.75rem;
+    background: #fff;
+  }
+  .cycle .n {
+    font-size: 3.5rem;
+    line-height: 1;
+    color: var(--c-or);
+  }
+  .cycle h3 {
+    margin-top: 0.75rem;
+    font-size: 1.25rem;
+  }
+  .cycle .tag {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--c-or-profond);
+  }
+  .cycle li p:last-child {
+    font-size: 0.9375rem;
+    color: var(--c-encre-douce);
+  }
+  .cycle .boucle {
+    background: var(--c-encre);
+    color: var(--c-papier);
+  }
+  .cycle .boucle .tag {
+    color: var(--c-or);
+  }
+  .cycle .boucle p:last-child {
+    color: var(--c-pierre-claire);
+  }
+
+  .equipe {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+    gap: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--line);
+  }
+  .equipe li {
+    display: grid;
+    align-content: start;
+    gap: 0.4rem;
+    padding: 2rem 1.75rem 2rem 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .full {
+    font-size: 0.875rem;
+    color: var(--c-pierre);
+  }
+  .role {
+    margin-top: 0.75rem;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--c-or);
+  }
+  .scope {
+    font-weight: 600;
+  }
+  .equipe .doux {
+    font-size: 0.9375rem;
+  }
+  .rejoindre {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 3rem;
+    font-size: 1.125rem;
+  }
+</style>
