@@ -1,0 +1,261 @@
+---
+import { Image } from 'astro:assets';
+import logo from '@/assets/brand/logo-skm-la-fabrik.png';
+import { mainNav } from '@/data/site';
+import { isActive } from '@/lib/nav';
+
+interface Props {
+  tone?: 'fabrik' | 'rff';
+}
+const { tone = 'fabrik' } = Astro.props;
+const path = Astro.url.pathname;
+---
+
+<header class="header" data-tone={tone}>
+  <div class="bar wrap">
+    <a class="brand" href="/" aria-label="SKM La Fabrik, accueil">
+      <Image src={logo} alt="" width={64} height={64} loading="eager" fetchpriority="high" class="logo" />
+      <span class="brand-text" aria-hidden="true">Creative Hub<br />Rufisque · Sénégal</span>
+    </a>
+
+    <button
+      class="toggle"
+      type="button"
+      aria-expanded="false"
+      aria-controls="menu-principal"
+      data-menu-toggle
+    >
+      <span class="toggle-label" data-label-closed="Menu" data-label-open="Fermer">Menu</span>
+      <span class="toggle-icon" aria-hidden="true"><span></span><span></span></span>
+    </button>
+
+    <nav id="menu-principal" class="nav" aria-label="Navigation principale" data-menu>
+      <ul>
+        {
+          mainNav.map((item) => (
+            <li>
+              <a href={item.href} aria-current={isActive(path, item.href) ? 'page' : undefined}>
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+      <a class="cta" href="/contact" aria-current={isActive(path, '/contact') ? 'page' : undefined}>Nous contacter</a>
+    </nav>
+  </div>
+</header>
+
+<script>
+  const toggle = document.querySelector<HTMLButtonElement>('[data-menu-toggle]');
+  const menu = document.querySelector<HTMLElement>('[data-menu]');
+  if (toggle && menu) {
+    const label = toggle.querySelector<HTMLElement>('.toggle-label');
+    const setOpen = (open: boolean) => {
+      toggle.setAttribute('aria-expanded', String(open));
+      menu.classList.toggle('is-open', open);
+      document.body.classList.toggle('menu-open', open);
+      if (label) label.textContent = (open ? label.dataset['labelOpen'] : label.dataset['labelClosed']) ?? '';
+    };
+    toggle.addEventListener('click', () => setOpen(toggle.getAttribute('aria-expanded') !== 'true'));
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && toggle.getAttribute('aria-expanded') === 'true') {
+        setOpen(false);
+        toggle.focus();
+      }
+    });
+    window.matchMedia('(min-width: 75rem)').addEventListener('change', (e) => {
+      if (e.matches) setOpen(false);
+    });
+  }
+</script>
+
+<style>
+  .header {
+    --h-bg: var(--c-noir);
+    --h-accent: var(--c-or);
+    --h-line: rgb(201 161 59 / 0.22);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: var(--h-bg);
+    border-bottom: 1px solid var(--h-line);
+    color: var(--c-papier);
+  }
+  .header[data-tone='rff'] {
+    --h-bg: var(--c-nuit);
+    --h-accent: var(--c-orange);
+    --h-line: rgb(244 123 32 / 0.25);
+  }
+  .bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    min-height: 4.75rem;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
+    flex: 0 0 auto;
+  }
+  .logo {
+    width: 3.5rem;
+    height: 3.5rem;
+    object-fit: contain;
+  }
+  .brand-text {
+    font-size: 0.6875rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    line-height: 1.4;
+    color: var(--c-pierre);
+  }
+  .nav {
+    display: flex;
+    align-items: center;
+    gap: 1.75rem;
+  }
+  .nav ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 1.4rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .nav a {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: #e9e3d7;
+    transition: color 0.2s;
+  }
+  .nav ul a::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0.45rem;
+    height: 2px;
+    background: var(--h-accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s var(--ease);
+  }
+  .nav ul a:hover::after,
+  .nav ul a[aria-current='page']::after {
+    transform: scaleX(1);
+  }
+  .nav a[aria-current='page'] {
+    color: var(--h-accent);
+  }
+  .nav .cta {
+    padding: 0 1.25rem;
+    background: var(--h-accent);
+    color: var(--h-bg);
+    font-weight: 700;
+    transition: background 0.2s;
+  }
+  .nav .cta:hover {
+    background: #fff;
+  }
+  .nav .cta[aria-current='page'] {
+    color: var(--h-bg);
+    background: #fff;
+  }
+  .toggle {
+    display: none;
+  }
+
+  @media (max-width: 74.99rem) {
+    .brand-text {
+      display: none;
+    }
+    .toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      min-height: 2.75rem;
+      padding: 0 0.9rem;
+      border: 1px solid var(--c-ligne-sombre);
+      background: transparent;
+      font-size: 0.8125rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+    .toggle-icon {
+      display: grid;
+      gap: 5px;
+      width: 18px;
+    }
+    .toggle-icon span {
+      height: 2px;
+      background: currentColor;
+      transition: transform 0.3s var(--ease);
+    }
+    .toggle[aria-expanded='true'] .toggle-icon span:first-child {
+      transform: translateY(3.5px) rotate(45deg);
+    }
+    .toggle[aria-expanded='true'] .toggle-icon span:last-child {
+      transform: translateY(-3.5px) rotate(-45deg);
+    }
+    .nav {
+      position: fixed;
+      inset: 4.75rem 0 0;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 1.5rem;
+      padding: 1rem var(--gutter) 2rem;
+      background: var(--h-bg);
+      overflow-y: auto;
+      visibility: hidden;
+      opacity: 0;
+      transform: translateY(-8px);
+      transition:
+        opacity 0.25s var(--ease),
+        transform 0.25s var(--ease),
+        visibility 0s linear 0.25s;
+    }
+    .nav.is-open {
+      visibility: visible;
+      opacity: 1;
+      transform: none;
+      transition:
+        opacity 0.25s var(--ease),
+        transform 0.25s var(--ease);
+    }
+    .nav ul {
+      flex-direction: column;
+    }
+    .nav ul a {
+      width: 100%;
+      min-height: 3.5rem;
+      border-bottom: 1px solid var(--c-anthracite-2);
+      font-family: var(--f-titre);
+      font-weight: 400;
+      font-size: 1.75rem;
+      letter-spacing: 0.01em;
+    }
+    .nav ul a::after {
+      display: none;
+    }
+    .nav .cta {
+      justify-content: center;
+      min-height: 3.25rem;
+    }
+  }
+  :global(body.menu-open) {
+    overflow: hidden;
+  }
+</style>

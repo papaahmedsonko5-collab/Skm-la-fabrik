@@ -1,0 +1,665 @@
+---
+import { Image } from 'astro:assets';
+import { getCollection } from 'astro:content';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Button from '@/components/Button.astro';
+import Marquee from '@/components/Marquee.astro';
+import SectionHead from '@/components/SectionHead.astro';
+import Stats from '@/components/Stats.astro';
+import { blueprintStats, partners, rff2026Stats } from '@/data/site';
+import { photos } from '@/data/photos';
+import { poles } from '@/data/poles';
+import logoRff from '@/assets/brand/logo-rio-fresco-fest.png';
+import logoSk from '@/assets/brand/logo-sunu-kaddu.png';
+import { sortNews } from '@/lib/content';
+
+const news = sortNews(await getCollection('actualites', ({ data }) => !data.draft)).slice(0, 3);
+const projets = await getCollection('projets');
+const pick = (id: string) => projets.find((p) => p.id === id);
+const sunuTape = pick('sunu-tape-vol-1');
+const onebeat = pick('onebeat-senegal');
+const art = pick('concours-art-scolaire-2024');
+---
+
+<BaseLayout>
+  <section class="hero" aria-labelledby="accroche">
+    <Image
+      src={photos.rffDanse.src}
+      alt={photos.rffDanse.alt}
+      widths={[640, 960, 1400]}
+      sizes="100vw"
+      loading="eager"
+      fetchpriority="high"
+      class="hero-img"
+    />
+    <div class="hero-shade" aria-hidden="true"></div>
+    <div class="hero-content wrap">
+      <p class="surtitre">Creative Hub · Rufisque, Sénégal · Depuis 2014</p>
+      <h1 id="accroche" class="titre titre-display">
+        Nous fabriquons les idées, révélons les talents et faisons <span class="accent">vibrer les territoires.</span>
+      </h1>
+      <div class="hero-actions">
+        <Button href="/a-propos">Découvrir La Fabrik</Button>
+        <Button href="/contact?objet=partenariat" variant="contour">Devenir partenaire</Button>
+      </div>
+    </div>
+  </section>
+
+  <Marquee items={['Nul n’entre ici s’il n’est créatif', 'Formation', 'Production', 'Événementiel', 'Festivals', 'Communauté', 'Chaque pas raconte une histoire']} />
+
+  <section class="theme-papier section" aria-labelledby="qui">
+    <div class="wrap qui">
+      <div data-reveal>
+        <p class="surtitre">Qui sommes-nous</p>
+        <h2 id="qui" class="titre titre-h2">Plus qu’un studio&nbsp;: un moteur de transformation.</h2>
+      </div>
+      <div class="qui-texte" data-reveal>
+        <p class="chapeau">
+          SKM La Fabrik est une plateforme créative basée à Rufisque, qui allie production multimédia, formation et services
+          audiovisuels. Son objectif&nbsp;: professionnaliser les jeunes dans les métiers des arts, de la production, de
+          l’audiovisuel et de la communication digitale, tout en répondant aux besoins en contenus des structures locales.
+        </p>
+        <blockquote>
+          <p class="citation">
+            « Nous avons créé SKM La Fabrik pour donner aux jeunes de Rufisque les outils de leur autonomie artistique et
+            professionnelle. »
+          </p>
+          <footer>PPS the Writah, fondateur et directeur artistique</footer>
+        </blockquote>
+        <a class="lien-fleche" href="/a-propos">Notre histoire <span aria-hidden="true">→</span></a>
+      </div>
+    </div>
+    <div class="wrap">
+      <Stats data={blueprintStats} limit={4} />
+    </div>
+  </section>
+
+  <section class="theme-sombre section" aria-labelledby="poles">
+    <div class="wrap">
+      <SectionHead eyebrow="Nos cinq pôles" title="Ce que nous fabriquons" id="poles" link={{ href: '/activites', label: 'Toutes nos activités' }} />
+      <ol class="poles">
+        {
+          poles.map((p) => (
+            <li data-reveal>
+              <a href={`/activites#${p.id}`}>
+                <span class="num">{p.num}</span>
+                <span class="titre nom">{p.title}</span>
+                <span class="desc">{p.short}</span>
+                <Image src={p.photo.src} alt="" widths={[200, 320]} sizes="10rem" class="vignette" />
+              </a>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <section class="theme-anthracite section" aria-labelledby="realisations">
+    <div class="wrap">
+      <SectionHead eyebrow="Projets & réalisations" title="Une décennie de bâtisseurs" id="realisations" link={{ href: '/projets', label: 'Voir le portfolio' }} />
+      <div class="mosaique">
+        <a class="tuile tuile-rff" href="/rio-fresco-fest" data-reveal>
+          <Image src={photos.rffFoule.src} alt="" widths={[480, 800]} sizes="(min-width: 64rem) 40vw, 100vw" />
+          <span class="tuile-texte">
+            <span class="meta meta-orange">Festival · 2025, 2026</span>
+            <span class="titre grand">Rio Fresco Fest</span>
+            <span class="sous">Un village culturel éphémère au cœur de la ville historique.</span>
+          </span>
+        </a>
+        {
+          sunuTape && (
+            <a class="tuile tuile-or" href={`/projets/${sunuTape.id}`} data-reveal>
+              <span class="meta">Production musicale · {sunuTape.data.period}</span>
+              <span>
+                <span class="titre grand">Sunu Tape</span>
+                <span class="sous">{sunuTape.data.summary}</span>
+              </span>
+            </a>
+          )
+        }
+        <a class="tuile tuile-photo" href="/projets/handischool-day" data-reveal>
+          <Image src={photos.handischool.src} alt="" widths={[400, 640]} sizes="(min-width: 64rem) 28vw, 100vw" />
+          <span class="tuile-texte">
+            <span class="meta">Inclusion</span>
+            <span class="titre moyen">Handischool Day</span>
+          </span>
+        </a>
+        {
+          onebeat && (
+            <a class="tuile tuile-photo" href={`/projets/${onebeat.id}`} data-reveal>
+              <Image src={photos.formation.src} alt="" widths={[400, 640]} sizes="(min-width: 64rem) 28vw, 100vw" />
+              <span class="tuile-texte">
+                <span class="meta">Formation · {onebeat.data.period}</span>
+                <span class="titre moyen">OneBeat Sénégal</span>
+              </span>
+            </a>
+          )
+        }
+        {
+          art && (
+            <a class="tuile tuile-ligne" href={`/projets/${art.id}`} data-reveal>
+              <span class="meta">Éducation · {art.data.period}</span>
+              <span>
+                <span class="titre moyen">Concours d’art scolaire</span>
+                <span class="sous">{art.data.summary}</span>
+              </span>
+            </a>
+          )
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="theme-nuit section rff" aria-labelledby="rff">
+    <div class="wrap rff-grid">
+      <div class="rff-texte" data-reveal>
+        <Image src={logoRff} alt="Rio Fresco Fest Rufisque" width={320} class="rff-logo" />
+        <h2 id="rff" class="titre titre-h2">Héritages &amp; Horizons&nbsp;: bâtir ensemble l’avenir de Rufisque</h2>
+        <p class="doux">
+          Le projet phare de Sunu Kaddu&nbsp;: un festival annuel qui transforme Rufisque en village éphémère. Street food,
+          conférences, concerts, mode, street art et jeux intergénérationnels.
+        </p>
+        <p class="rff-date">Édition 2026 · 10 au 14 juin · Boulodrome, Rufisque</p>
+        <div class="hero-actions">
+          <Button href="/rio-fresco-fest" style="--btn-ink: var(--c-nuit)">Découvrir le festival</Button>
+          <Button href="/contact?objet=partenariat" variant="contour">Soutenir l’édition 2027</Button>
+        </div>
+      </div>
+      <div class="rff-visuel" data-reveal>
+        <Image src={photos.rffDigue.src} alt={photos.rffDigue.alt} widths={[480, 800, 1100]} sizes="(min-width: 64rem) 45vw, 100vw" />
+        <div style="--stat-color: var(--c-orange)">
+          <Stats data={rff2026Stats} size="moyen" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="theme-papier section" aria-labelledby="label">
+    <div class="wrap label">
+      <div class="label-visuel" data-reveal>
+        <Image src={photos.studio.src} alt={photos.studio.alt} widths={[480, 800]} sizes="(min-width: 64rem) 42vw, 100vw" />
+        <div class="label-logo"><Image src={logoSk} alt="Sunu Kaddu" width={130} height={130} /></div>
+      </div>
+      <div class="label-texte" data-reveal>
+        <p class="surtitre">Le label · Sunu Kaddu Music</p>
+        <h2 id="label" class="titre titre-h2">« Notre Parole », en wolof.</h2>
+        <p class="chapeau">
+          Fondé par PPS the Writah, le label a marqué le hip-hop sénégalais&nbsp;: <em>Xaatim ak Kallama</em>, Meilleur Album
+          aux Galsen Hip Hop Awards 2015, la compilation <em>Sunu Tape</em>, et un studio 360 opérationnel depuis 2014.
+        </p>
+        <p class="services">Composition · Enregistrement · Mixage · Mastering · Habillage sonore · Voix off</p>
+        <div class="hero-actions">
+          <Button href="/sunu-kaddu-music" style="--btn-bg: var(--c-encre); --btn-ink: var(--c-papier); --btn-bg-hover: var(--c-noir)">Explorer le label</Button>
+          <Button href="/contact?objet=production" variant="contour" style="--btn-outline-hover: rgb(0 0 0 / 0.05)">Réserver le studio</Button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="theme-sombre section" aria-labelledby="impact">
+    <div class="wrap">
+      <SectionHead eyebrow="Impact communautaire" title="Former. Produire. Montrer. Réinvestir." id="impact">
+        <p class="doux impact-intro">
+          La culture comme moteur d’éducation, de développement et de solidarité, au service de la jeunesse, de l’inclusion et
+          de l’environnement de Rufisque.
+        </p>
+      </SectionHead>
+      <div class="actions">
+        {
+          [
+            { tag: 'Environnement', title: 'Set Setal', href: '/projets/set-setal', photo: photos.setSetal, text: 'Des centaines de jeunes mobilisés pour le nettoyage de la digue de Rufisque, avec la SONAGED.' },
+            { tag: 'Inclusion', title: 'Handischool Day', href: '/projets/handischool-day', photo: photos.handischool, text: 'Un studio mobile pour les enfants atteints de trisomie 21 à l’école Le Petit Prince, et un don de 8 ordinateurs.' },
+            { tag: 'Réinsertion', title: 'Fort B', href: '/projets/fort-b', photo: photos.fortB, text: 'Des ateliers d’écriture et d’expression pour des mineurs incarcérés, vers un retour dans la société.' },
+          ].map((a, i) => (
+            <a class:list={['action', { decale: i === 1 }]} href={a.href} data-reveal>
+              <Image src={a.photo.src} alt="" widths={[400, 640]} sizes="(min-width: 64rem) 30vw, 100vw" />
+              <span class="surtitre">{a.tag}</span>
+              <span class="titre titre-h3">{a.title}</span>
+              <span class="doux">{a.text}</span>
+            </a>
+          ))
+        }
+      </div>
+      <div class="odd">
+        <p>Objectifs de développement durable&nbsp;: <strong class="accent">ODD 4 · 8 · 10 · 11 · 17</strong></p>
+        <a class="lien-fleche" href="/impact">Notre impact <span aria-hidden="true">→</span></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="theme-papier section" aria-labelledby="actus">
+    <div class="wrap">
+      <SectionHead title="Actualités &amp; événements" id="actus" link={{ href: '/actualites', label: 'Toutes les actualités' }} />
+      <ul class="news">
+        {
+          news.map((n) => (
+            <li data-reveal>
+              <a href={`/actualites/${n.id}`}>
+                <Image src={n.data.cover} alt="" widths={[400, 640]} sizes="(min-width: 64rem) 30vw, 100vw" />
+                <span class="news-meta">
+                  {n.data.type} · {n.data.period}
+                </span>
+                <span class="news-titre">{n.data.title}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="theme-papier partenaires" aria-labelledby="partenaires">
+    <div class="wrap">
+      <h2 id="partenaires" class="surtitre">Ils nous ont fait confiance</h2>
+      <ul>
+        {partners.map((p) => <li>{p}</li>)}
+      </ul>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .hero {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    min-height: min(52rem, calc(100svh - 4.75rem));
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .hero-img {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 35%;
+  }
+  .hero-shade {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(180deg, rgb(13 12 10 / 0.1) 0%, rgb(13 12 10 / 0.5) 45%, rgb(13 12 10 / 0.94) 100%);
+  }
+  .hero-content {
+    padding-block: 8rem clamp(2.5rem, 2rem + 2vw, 4rem);
+    --accent: var(--c-or);
+  }
+  .hero-content .surtitre {
+    margin-bottom: 1.25rem;
+  }
+  .hero h1 {
+    max-width: 74rem;
+  }
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 2.25rem;
+  }
+
+  .qui {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 28rem), 1fr));
+    gap: 2.5rem 4rem;
+    margin-bottom: 4.5rem;
+  }
+  .qui .surtitre {
+    margin-bottom: 1.25rem;
+  }
+  .qui-texte {
+    display: grid;
+    gap: 1.75rem;
+    justify-items: start;
+  }
+  blockquote {
+    margin: 0;
+  }
+  blockquote footer {
+    margin-top: 0.75rem;
+    font-size: 0.875rem;
+    color: var(--c-encre-douce);
+  }
+
+  .poles {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: none;
+  }
+  .poles a {
+    display: grid;
+    grid-template-columns: 3rem minmax(0, 1fr) minmax(0, 1.1fr) 10rem;
+    align-items: center;
+    gap: 1rem 2.5rem;
+    padding-block: 1.75rem;
+    border-top: 1px solid var(--line);
+    text-decoration: none;
+    transition: background-color 0.3s;
+  }
+  .poles li:last-child a {
+    border-bottom: 1px solid var(--line);
+  }
+  .poles a:hover {
+    background: rgb(255 255 255 / 0.03);
+  }
+  .num {
+    font-family: var(--f-titre);
+    font-size: 1.375rem;
+    color: var(--c-or);
+  }
+  .nom {
+    font-size: clamp(2rem, 1.4rem + 2.6vw, 3.5rem);
+    line-height: 1;
+    transition: color 0.3s;
+  }
+  .poles a:hover .nom {
+    color: var(--c-or);
+  }
+  .desc {
+    color: var(--soft);
+    max-width: 30rem;
+  }
+  .vignette {
+    width: 10rem;
+    height: 6.5rem;
+    object-fit: cover;
+    filter: grayscale(0.6);
+    transition: filter 0.4s;
+  }
+  .poles a:hover .vignette {
+    filter: none;
+  }
+  @media (max-width: 56rem) {
+    .poles a {
+      grid-template-columns: 2.5rem minmax(0, 1fr);
+    }
+    .desc {
+      grid-column: 2;
+    }
+    .vignette {
+      display: none;
+    }
+  }
+
+  .mosaique {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-auto-rows: minmax(15.5rem, auto);
+    gap: 1rem;
+  }
+  .tuile {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+    text-decoration: none;
+    padding: 1.75rem;
+  }
+  .tuile :global(img) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.9s var(--ease);
+  }
+  .tuile:hover :global(img) {
+    transform: scale(1.04);
+  }
+  .tuile-rff,
+  .tuile-photo {
+    justify-content: flex-end;
+  }
+  .tuile-rff::after,
+  .tuile-photo::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgb(0 0 0 / 0) 35%, rgb(0 0 0 / 0.85) 100%);
+  }
+  .tuile-texte {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    gap: 0.5rem;
+  }
+  .tuile-rff {
+    grid-row: span 2;
+    min-height: 32rem;
+  }
+  .tuile-or {
+    background: var(--c-or);
+    color: var(--c-noir);
+  }
+  .tuile-ligne {
+    border: 1px solid var(--c-ligne-sombre);
+  }
+  .tuile-ligne:hover {
+    border-color: var(--c-or);
+  }
+  .meta {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--c-or);
+  }
+  .tuile-or .meta {
+    color: var(--c-noir);
+  }
+  .meta-orange {
+    color: var(--c-orange);
+  }
+  .titre.grand {
+    display: block;
+    font-size: clamp(2.5rem, 2rem + 2vw, 3.75rem);
+  }
+  .titre.moyen {
+    display: block;
+    font-size: clamp(1.75rem, 1.5rem + 1vw, 2.25rem);
+    line-height: 1.05;
+  }
+  .sous {
+    display: block;
+    margin-top: 0.6rem;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+  }
+  .tuile-ligne .sous {
+    color: var(--c-pierre);
+  }
+  @media (max-width: 64rem) {
+    .mosaique {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .tuile-rff {
+      grid-column: span 2;
+      grid-row: span 1;
+      min-height: 26rem;
+    }
+  }
+  @media (max-width: 40rem) {
+    .mosaique {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .tuile-rff {
+      grid-column: auto;
+    }
+  }
+
+  .rff-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 30rem), 1fr));
+    gap: 3.5rem;
+    align-items: center;
+  }
+  .rff-texte {
+    display: grid;
+    gap: 1.5rem;
+    justify-items: start;
+  }
+  .rff-logo {
+    width: min(20rem, 70%);
+    height: auto;
+  }
+  .rff-date {
+    font-size: 0.9375rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--c-orange);
+  }
+  .rff .hero-actions {
+    margin-top: 0;
+  }
+  .rff-visuel {
+    display: grid;
+    gap: 1.5rem;
+  }
+  .rff-visuel > :global(img) {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+  }
+
+  .label {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 26rem), 1fr));
+    gap: 3.5rem;
+    align-items: center;
+  }
+  .label-visuel {
+    position: relative;
+  }
+  .label-visuel > :global(img) {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+  }
+  .label-logo {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    padding: 1.25rem 1.5rem 0 0;
+    background: var(--c-papier);
+  }
+  .label-logo :global(img) {
+    width: 6.5rem;
+    height: 6.5rem;
+  }
+  .label-texte {
+    display: grid;
+    gap: 1.5rem;
+  }
+  .services {
+    font-size: 0.9375rem;
+    line-height: 1.8;
+    color: var(--c-encre-douce);
+  }
+  .label .hero-actions {
+    margin-top: 0;
+  }
+
+  .impact-intro {
+    max-width: 30rem;
+  }
+  .actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+    gap: 2.5rem 2rem;
+    align-items: start;
+  }
+  .action {
+    display: grid;
+    gap: 0.85rem;
+    text-decoration: none;
+  }
+  .action :global(img) {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+  }
+  .action:hover .titre {
+    color: var(--c-or);
+  }
+  @media (min-width: 64rem) {
+    .decale {
+      margin-top: 4rem;
+    }
+  }
+  .odd {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 3.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--line);
+    font-size: 0.9375rem;
+  }
+
+  .news {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+    gap: 2.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .news a {
+    display: grid;
+    gap: 0.85rem;
+    text-decoration: none;
+  }
+  .news :global(img) {
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+  }
+  .news-meta {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--c-or-profond);
+  }
+  .news-titre {
+    font-size: 1.35rem;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+  .news a:hover .news-titre {
+    text-decoration: underline;
+    text-decoration-color: var(--c-or);
+    text-underline-offset: 0.2em;
+  }
+
+  .partenaires {
+    padding-block: 4rem 5.5rem;
+    border-top: 1px solid var(--line);
+  }
+  .partenaires ul {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 12rem), 1fr));
+    margin: 1.75rem 0 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--line);
+    border-left: 1px solid var(--line);
+  }
+  .partenaires li {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 6rem;
+    padding: 1rem;
+    border-right: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    text-align: center;
+    font-weight: 700;
+  }
+</style>

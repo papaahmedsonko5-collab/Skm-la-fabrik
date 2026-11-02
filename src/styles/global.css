@@ -1,0 +1,318 @@
+/*
+ * SKM La Fabrik : jetons de design et styles de base.
+ * Les composants gardent leurs styles dans leurs fichiers .astro (styles scopés).
+ */
+@import '@fontsource/anton/latin-400.css';
+@import '@fontsource-variable/archivo/wght.css';
+@import '@fontsource/instrument-serif/latin-400-italic.css';
+
+:root {
+  /* Couleurs */
+  --c-noir: #0d0c0a;
+  --c-anthracite: #1a1815;
+  --c-anthracite-2: #2b2925;
+  --c-ligne-sombre: #3a3732;
+  --c-pierre: #a8a196;
+  --c-pierre-claire: #c9c2b6;
+  --c-papier: #f3eee4;
+  --c-papier-2: #e4ddd0;
+  --c-ligne-claire: #d9d1c2;
+  --c-encre: #1a1815;
+  --c-encre-douce: #5e574d;
+  --c-or: #c9a13b;
+  --c-or-vif: #e2be5e;
+  --c-or-profond: #7a5b12;
+  --c-terracotta: #e0662c;
+  --c-terracotta-profond: #a8431b;
+  --c-nuit: #0b1638;
+  --c-nuit-2: #111f4a;
+  --c-orange: #f47b20;
+  --c-orange-profond: #c4540a;
+  --c-bleu-pale: #d5dbec;
+  --c-bleu-gris: #aeb8d4;
+
+  /* Typographie */
+  --f-titre: 'Anton', 'Arial Narrow', Impact, sans-serif;
+  --f-texte: 'Archivo Variable', 'Archivo', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --f-citation: 'Instrument Serif', Georgia, serif;
+
+  --t-display: clamp(3.25rem, 2rem + 6.4vw, 9.25rem);
+  --t-h1: clamp(3rem, 1.9rem + 5.2vw, 7.5rem);
+  --t-h2: clamp(2.4rem, 1.7rem + 3.1vw, 4.75rem);
+  --t-h3: clamp(1.6rem, 1.3rem + 1.2vw, 2.4rem);
+  --t-lead: clamp(1.125rem, 1.05rem + 0.35vw, 1.3rem);
+  --t-body: 1.0625rem;
+  --t-small: 0.9375rem;
+  --t-micro: 0.8125rem;
+
+  /* Espacements */
+  --gutter: clamp(1rem, 0.5rem + 2.4vw, 2.5rem);
+  --section-y: clamp(4.5rem, 3rem + 6vw, 7.5rem);
+  --max: 85rem;
+
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --focus: 0 0 0 3px var(--c-noir), 0 0 0 5px var(--c-or);
+  color-scheme: dark light;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-behavior: smooth;
+  scroll-padding-top: 6rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--c-noir);
+  color: var(--c-papier);
+  font-family: var(--f-texte);
+  font-size: var(--t-body);
+  line-height: 1.6;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+img,
+svg,
+video {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+h1,
+h2,
+h3,
+h4,
+p,
+figure,
+blockquote,
+dl,
+dd {
+  margin: 0;
+}
+
+a {
+  color: inherit;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: none;
+  box-shadow: var(--focus);
+  border-radius: 1px;
+}
+
+::selection {
+  background: var(--c-or);
+  color: var(--c-noir);
+}
+
+/* Utilitaires de mise en page */
+.wrap {
+  width: 100%;
+  max-width: var(--max);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.section {
+  padding-block: var(--section-y);
+}
+
+.theme-sombre {
+  background: var(--c-noir);
+  color: var(--c-papier);
+  --accent: var(--c-or);
+  --soft: var(--c-pierre);
+  --line: var(--c-anthracite-2);
+}
+
+.theme-anthracite {
+  background: var(--c-anthracite);
+  color: var(--c-papier);
+  --accent: var(--c-or);
+  --soft: #b9b2a6;
+  --line: var(--c-ligne-sombre);
+}
+
+.theme-papier {
+  background: var(--c-papier);
+  color: var(--c-encre);
+  --accent: var(--c-or-profond);
+  --soft: var(--c-encre-douce);
+  --line: var(--c-ligne-claire);
+}
+
+.theme-nuit {
+  background: var(--c-nuit);
+  color: #fff;
+  --accent: var(--c-orange);
+  --soft: var(--c-bleu-pale);
+  --line: rgb(255 255 255 / 0.16);
+}
+
+.theme-blanc {
+  background: #fff;
+  color: var(--c-encre);
+  --accent: var(--c-or-profond);
+  --soft: var(--c-encre-douce);
+  --line: var(--c-papier-2);
+}
+
+/* Typographie éditoriale */
+.titre {
+  font-family: var(--f-titre);
+  font-weight: 400;
+  text-transform: uppercase;
+  line-height: 0.95;
+  letter-spacing: 0.005em;
+  text-wrap: balance;
+}
+
+.titre-display {
+  font-size: var(--t-display);
+  line-height: 0.9;
+}
+.titre-h1 {
+  font-size: var(--t-h1);
+  line-height: 0.92;
+}
+.titre-h2 {
+  font-size: var(--t-h2);
+}
+.titre-h3 {
+  font-size: var(--t-h3);
+  line-height: 1;
+}
+
+.surtitre {
+  font-size: var(--t-micro);
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent, var(--c-or));
+}
+
+.chapeau {
+  font-size: var(--t-lead);
+  line-height: 1.6;
+  max-width: 44rem;
+}
+
+.doux {
+  color: var(--soft);
+}
+
+.citation {
+  font-family: var(--f-citation);
+  font-style: italic;
+  font-size: clamp(1.5rem, 1.2rem + 1vw, 2rem);
+  line-height: 1.35;
+}
+
+.accent {
+  color: var(--accent, var(--c-or));
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Liens soulignés éditoriaux */
+.lien-fleche {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  font-weight: 700;
+  font-size: var(--t-small);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  background: linear-gradient(var(--accent, var(--c-or)), var(--accent, var(--c-or))) left calc(100% - 0.55rem) / 100% 2px no-repeat;
+  transition: background-size 0.35s var(--ease);
+}
+.lien-fleche:hover {
+  background-size: 40% 2px;
+}
+.lien-fleche span[aria-hidden] {
+  transition: transform 0.35s var(--ease);
+}
+.lien-fleche:hover span[aria-hidden] {
+  transform: translateX(4px);
+}
+
+/* Apparition douce au défilement (activée par un script léger) */
+.js [data-reveal] {
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 0.8s var(--ease),
+    transform 0.8s var(--ease);
+}
+.js [data-reveal].is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* Contenu Markdown */
+.prose {
+  max-width: 44rem;
+  font-size: 1.125rem;
+  line-height: 1.75;
+}
+.prose > * + * {
+  margin-top: 1.25em;
+}
+.prose h2 {
+  font-family: var(--f-titre);
+  font-weight: 400;
+  text-transform: uppercase;
+  font-size: clamp(1.75rem, 1.4rem + 1.4vw, 2.5rem);
+  line-height: 1.05;
+  margin-top: 2em;
+}
+.prose a {
+  color: var(--accent);
+  text-underline-offset: 0.2em;
+}
+.prose ul {
+  padding-left: 1.2em;
+}

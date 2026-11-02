@@ -1,0 +1,78 @@
+---
+import type { SourcedStats } from '@/data/site';
+
+interface Props {
+  data: SourcedStats;
+  /** Nombre maximum d'indicateurs affichés. */
+  limit?: number;
+  size?: 'grand' | 'moyen';
+}
+const { data, limit, size = 'grand' } = Astro.props;
+const items = limit ? data.items.slice(0, limit) : data.items;
+---
+
+<div class:list={['stats', size]} data-reveal>
+  <dl>
+    {
+      items.map((s) => (
+        <div class="stat">
+          <dt class="sr-only">{s.label}</dt>
+          <dd>
+            <span class="value" aria-hidden="true">{s.value}</span>
+            <span class="label">
+              <span class="sr-only">{s.value} </span>
+              {s.label}
+              {s.detail && <span class="detail"> {s.detail}</span>}
+            </span>
+          </dd>
+        </div>
+      ))
+    }
+  </dl>
+  <p class="source">
+    Source : {data.source}.{!data.validated && ' Données en cours de validation.'}
+  </p>
+</div>
+
+<style>
+  dl {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    margin: 0;
+    border-top: 2px solid currentColor;
+  }
+  .stat {
+    padding: 1.5rem 1.5rem 1.5rem 0;
+    border-bottom: 1px solid var(--line);
+  }
+  dd {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .value {
+    font-family: var(--f-titre);
+    font-size: clamp(3rem, 2.4rem + 2.4vw, 4.5rem);
+    line-height: 1;
+    color: var(--stat-color, inherit);
+  }
+  .moyen .value {
+    font-size: clamp(2.5rem, 2.1rem + 1.4vw, 3.25rem);
+  }
+  .label {
+    font-weight: 700;
+    font-size: 1rem;
+  }
+  .detail {
+    display: block;
+    font-weight: 400;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: var(--soft);
+  }
+  .source {
+    margin-top: 1rem;
+    font-size: 0.8125rem;
+    color: var(--soft);
+  }
+</style>

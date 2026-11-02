@@ -1,0 +1,29 @@
+---
+interface Props {
+  eyebrow: string;
+  /** Titre principal ; accepte un <span class="accent"> pour la mise en valeur. */
+  title: string;
+  lead?: string;
+}
+const { eyebrow, title, lead } = Astro.props;
+---
+
+<section class="intro wrap" aria-labelledby="titre-page">
+  <p class="surtitre">{eyebrow}</p>
+  <h1 id="titre-page" class="titre titre-h1" set:html={title} />
+  {lead && <p class="chapeau lead">{lead}</p>}
+  <slot />
+</section>
+
+<style>
+  .intro {
+    padding-block: clamp(4rem, 3rem + 4vw, 6.5rem) clamp(3rem, 2rem + 3vw, 4.5rem);
+  }
+  .surtitre {
+    margin-bottom: 1.25rem;
+  }
+  .lead {
+    margin-top: 2rem;
+    color: var(--soft, var(--c-pierre-claire));
+  }
+</style>

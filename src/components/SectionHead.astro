@@ -1,0 +1,45 @@
+---
+interface Props {
+  eyebrow?: string;
+  title: string;
+  /** Niveau du titre : h2 par défaut. */
+  level?: 'h1' | 'h2';
+  id?: string;
+  link?: { href: string; label: string };
+  size?: 'h1' | 'h2';
+}
+const { eyebrow, title, level = 'h2', id, link, size = level === 'h1' ? 'h1' : 'h2' } = Astro.props;
+const Tag = level;
+---
+
+<div class="head" data-reveal>
+  <div>
+    {eyebrow && <p class="surtitre">{eyebrow}</p>}
+    <Tag id={id} class:list={['titre', `titre-${size}`]} set:html={title} />
+  </div>
+  {
+    link && (
+      <a class="lien-fleche" href={link.href}>
+        {link.label} <span aria-hidden="true">→</span>
+      </a>
+    )
+  }
+  <slot />
+</div>
+
+<style>
+  .head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1.5rem 3rem;
+    margin-bottom: clamp(2rem, 1.5rem + 2vw, 3.25rem);
+  }
+  .surtitre {
+    margin-bottom: 1rem;
+  }
+  .head > div {
+    max-width: 62rem;
+  }
+</style>

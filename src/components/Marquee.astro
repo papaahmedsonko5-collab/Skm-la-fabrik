@@ -1,0 +1,50 @@
+---
+interface Props {
+  items: readonly string[];
+}
+const { items } = Astro.props;
+const line = items.join(' ✦ ');
+---
+
+<div class="marquee" role="presentation">
+  <p class="sr-only">{items.join('. ')}</p>
+  <div class="track" aria-hidden="true">
+    <span>{line} ✦&nbsp;</span>
+    <span>{line} ✦&nbsp;</span>
+  </div>
+</div>
+
+<style>
+  .marquee {
+    overflow: hidden;
+    background: var(--c-or);
+    color: var(--c-noir);
+  }
+  .track {
+    display: flex;
+    width: max-content;
+    animation: defile 40s linear infinite;
+  }
+  .marquee:hover .track {
+    animation-play-state: paused;
+  }
+  span {
+    padding: 0.45rem 0;
+    white-space: pre;
+    font-family: var(--f-titre);
+    font-size: 0.9375rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    word-spacing: 0.5em;
+  }
+  @keyframes defile {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .track {
+      animation: none;
+    }
+  }
+</style>

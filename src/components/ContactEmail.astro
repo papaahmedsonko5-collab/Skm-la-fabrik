@@ -1,0 +1,11 @@
+---
+import { site } from '@/data/site';
+
+/**
+ * Affiche l'adresse e-mail de la structure. Le lien `mailto:` n'est activé
+ * qu'une fois l'adresse confirmée comme officielle (`site.contact.emailConfirmed`).
+ */
+const { email, emailConfirmed } = site.contact;
+---
+
+{emailConfirmed ? <a href={`mailto:${email}`}>{email}</a> : <span>{email}</span>}

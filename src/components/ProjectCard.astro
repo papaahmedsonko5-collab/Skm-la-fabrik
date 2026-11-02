@@ -1,0 +1,100 @@
+---
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  project: CollectionEntry<'projets'>;
+  headingLevel?: 'h2' | 'h3';
+}
+const { project, headingLevel = 'h3' } = Astro.props;
+const { title, category, period, summary, cover, coverAlt } = project.data;
+const Tag = headingLevel;
+---
+
+<article class="card" data-category={category}>
+  <a href={`/projets/${project.id}`} class="link">
+    <div class="media">
+      {
+        cover ? (
+          <Image src={cover} alt={coverAlt ?? ''} widths={[400, 640, 900]} sizes="(min-width: 64rem) 30vw, (min-width: 40rem) 45vw, 100vw" />
+        ) : (
+          <span class="typo" aria-hidden="true">{title}</span>
+        )
+      }
+    </div>
+    <div class="body">
+      <p class="meta">{category} · {period}</p>
+      <Tag class="titre name">{title}</Tag>
+      <p class="summary">{summary}</p>
+    </div>
+  </a>
+</article>
+
+<style>
+  .card {
+    background: var(--card-bg, var(--c-anthracite));
+    color: var(--card-ink, var(--c-papier));
+  }
+  .link {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    text-decoration: none;
+  }
+  .media {
+    aspect-ratio: 3 / 2;
+    overflow: hidden;
+    background: var(--c-anthracite-2);
+  }
+  .media :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.8s var(--ease);
+  }
+  .link:hover .media :global(img) {
+    transform: scale(1.04);
+  }
+  .typo {
+    display: flex;
+    align-items: flex-end;
+    width: 100%;
+    height: 100%;
+    padding: 1.25rem;
+    background: var(--c-or);
+    color: var(--c-noir);
+    font-family: var(--f-titre);
+    font-size: clamp(2rem, 1.6rem + 1.5vw, 2.75rem);
+    line-height: 0.95;
+    text-transform: uppercase;
+  }
+  .card[data-category='Productions musicales'] .typo {
+    background: var(--c-terracotta);
+  }
+  .card[data-category='Formations'] .typo,
+  .card[data-category='Initiatives communautaires'] .typo {
+    background: var(--c-papier);
+  }
+  .body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 1.1rem 1.2rem 1.4rem;
+  }
+  .meta {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--c-or);
+  }
+  .name {
+    font-size: 1.5rem;
+    line-height: 1.05;
+  }
+  .summary {
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: var(--c-pierre);
+  }
+</style>

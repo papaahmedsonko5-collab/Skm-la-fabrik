@@ -1,0 +1,45 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+
+interface Props extends Omit<HTMLAttributes<'a'>, 'class'> {
+  href: string;
+  variant?: 'plein' | 'contour';
+  class?: string;
+}
+const { href, variant = 'plein', class: extra, ...rest } = Astro.props;
+---
+
+<a href={href} class:list={['btn', `btn-${variant}`, extra]} {...rest}><slot /></a>
+
+<style>
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 3.25rem;
+    padding: 0 1.75rem;
+    font-weight: 700;
+    font-size: 0.875rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    text-align: center;
+    transition:
+      background-color 0.2s,
+      color 0.2s,
+      border-color 0.2s;
+  }
+  .btn-plein {
+    background: var(--btn-bg, var(--accent, var(--c-or)));
+    color: var(--btn-ink, var(--c-noir));
+  }
+  .btn-plein:hover {
+    background: var(--btn-bg-hover, #fff);
+  }
+  .btn-contour {
+    border: 1px solid currentColor;
+  }
+  .btn-contour:hover {
+    background: var(--btn-outline-hover, rgb(255 255 255 / 0.08));
+  }
+</style>

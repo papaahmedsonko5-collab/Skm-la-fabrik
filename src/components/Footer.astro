@@ -1,0 +1,165 @@
+---
+import { Image } from 'astro:assets';
+import logo from '@/assets/brand/logo-skm-la-fabrik.png';
+import { site } from '@/data/site';
+import ContactEmail from './ContactEmail.astro';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="top">
+      <p class="titre motto">Chaque pas raconte <span class="accent">une histoire.</span></p>
+      <a class="btn" href="/contact">Construisons ensemble</a>
+    </div>
+
+    <div class="cols">
+      <div class="col about">
+        <Image src={logo} alt="SKM La Fabrik" width={96} height={96} class="logo" />
+        <p>Plateforme de production multimédia, d’innovation et de formation professionnelle.</p>
+      </div>
+      <nav class="col" aria-label="Pied de page : explorer">
+        <h2 class="surtitre">Explorer</h2>
+        <ul>
+          <li><a href="/a-propos">À propos</a></li>
+          <li><a href="/activites">Nos activités</a></li>
+          <li><a href="/projets">Nos projets</a></li>
+          <li><a href="/impact">Impact communautaire</a></li>
+          <li><a href="/actualites">Actualités &amp; galerie</a></li>
+        </ul>
+      </nav>
+      <nav class="col" aria-label="Pied de page : nos marques">
+        <h2 class="surtitre">Nos marques</h2>
+        <ul>
+          <li><a href="/sunu-kaddu-music">Sunu Kaddu Music</a></li>
+          <li><a href="/rio-fresco-fest">Rio Fresco Fest</a></li>
+        </ul>
+        <h2 class="surtitre second">Réseaux</h2>
+        <ul>
+          {
+            site.social.map((s) => (
+              <li>{s.href ? <a href={s.href} rel="noopener" target="_blank">{s.handle}</a> : <span>{s.handle}</span>}</li>
+            ))
+          }
+        </ul>
+      </nav>
+      <div class="col">
+        <h2 class="surtitre">Nous trouver</h2>
+        <address>
+          {site.address.street}<br />
+          {site.address.city}, {site.address.country}
+        </address>
+        <p><ContactEmail /></p>
+      </div>
+    </div>
+
+    <div class="legal">
+      <p>© {year} {site.legalName}. Tous droits réservés.</p>
+      <p><a href="/mentions-legales">Mentions légales &amp; confidentialité</a></p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    background: var(--c-noir);
+    color: #e9e3d7;
+    border-top: 1px solid rgb(201 161 59 / 0.22);
+    --accent: var(--c-or);
+  }
+  .top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding-block: 4.5rem 3rem;
+    border-bottom: 1px solid var(--c-anthracite-2);
+  }
+  .motto {
+    font-size: clamp(2.5rem, 1.6rem + 4vw, 5.5rem);
+    color: var(--c-papier);
+    max-width: 56rem;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    min-height: 3.25rem;
+    padding: 0 1.75rem;
+    background: var(--c-or);
+    color: var(--c-noir);
+    font-weight: 700;
+    font-size: 0.875rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: background 0.2s;
+  }
+  .btn:hover {
+    background: var(--c-or-vif);
+  }
+  .cols {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(12.5rem, 1fr));
+    gap: 2.5rem;
+    padding-block: 3rem;
+  }
+  .col {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    font-size: 0.9375rem;
+  }
+  .about p {
+    color: var(--c-pierre);
+    line-height: 1.6;
+    max-width: 18rem;
+  }
+  .logo {
+    width: 5.5rem;
+    height: 5.5rem;
+    object-fit: contain;
+    margin-bottom: 0.5rem;
+  }
+  .col h2 {
+    margin-bottom: 0.4rem;
+  }
+  .col h2.second {
+    margin-top: 1rem;
+  }
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.25rem;
+  }
+  ul a {
+    display: inline-flex;
+    min-height: 2rem;
+    align-items: center;
+    text-decoration: none;
+  }
+  ul a:hover,
+  .legal a:hover {
+    color: var(--c-or);
+  }
+  address {
+    font-style: normal;
+    line-height: 1.6;
+  }
+  .legal {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding-block: 1.5rem 2rem;
+    border-top: 1px solid var(--c-anthracite-2);
+    font-size: 0.8125rem;
+    color: var(--c-pierre);
+  }
+  .legal a {
+    text-decoration: none;
+  }
+</style>
