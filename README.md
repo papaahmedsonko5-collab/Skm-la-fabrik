@@ -41,7 +41,8 @@ tests/                         tests unitaires (Vitest)
 
 - **Ajouter un projet** : créer `src/content/projets/mon-projet.md` en copiant une fiche existante. Le schéma (`src/content.config.ts`) refuse une catégorie inconnue ou un résumé trop long.
 - **Ajouter une actualité** : créer `src/content/actualites/mon-actu.md`. Renseigner `date` dès qu’elle est connue ; `draft: true` masque la fiche.
-- **Coordonnées** : `src/data/site.ts`. Les numéros de téléphone et WhatsApp restent à `null` tant qu’ils ne sont pas confirmés. Passer `emailConfirmed` à `true` active le lien `mailto:`.
+- **Coordonnées et réseaux** : `src/data/site.ts`. WhatsApp et réseaux sociaux confirmés le 2 novembre 2026 ; le téléphone fixe reste à `null` tant qu’il n’est pas confirmé. Passer `emailConfirmed` à `true` active le lien `mailto:`.
+- **FAQ** : `src/data/faq.ts` (page `/faq`, avec données structurées FAQPage).
 - **Chiffres d’impact** : `blueprintStats` et `rff2026Stats` dans `src/data/site.ts`. Ils sont affichés avec leur source et la mention « Données en cours de validation » tant que `validated` vaut `false`.
 
 ## Variables d’environnement (Vercel › Settings › Environment Variables)
@@ -64,9 +65,9 @@ Sans `RESEND_API_KEY` et `CONTACT_TO_EMAIL`, le formulaire répond proprement qu
 
 ## Points à valider par la structure
 
-- Numéro de téléphone et WhatsApp officiels (cinq numéros différents dans les documents).
+- Numéro de téléphone fixe officiel (plusieurs numéros différents dans les documents).
 - Année de création : 2013 (OneBeat) ou 2014 (Studio Key I Am).
 - Chiffres d’impact du Blueprint et du rapport RFF 2026.
 - « 3x Best Lyricist » (Blueprint) et « Meilleur Album 2015 » (document du label).
 - Numéro d’enregistrement de l’association (mentions légales) et durée de conservation des demandes (12 mois proposés).
-- Liens officiels des réseaux sociaux et des plateformes d’écoute, dates des actualités, portraits de l’équipe.
+- Lien du compte @lafabrikskm et des plateformes d’écoute, dates des actualités, portraits de l’équipe.

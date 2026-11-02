@@ -1,0 +1,205 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Button from '@/components/Button.astro';
+import PageIntro from '@/components/PageIntro.astro';
+import { faq } from '@/data/faq';
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faq.flatMap((g) =>
+    g.items.map((it) => ({ '@type': 'Question', name: it.q, acceptedAnswer: { '@type': 'Answer', text: it.a } })),
+  ),
+};
+---
+
+<BaseLayout
+  title="Questions fréquentes"
+  description="Studio, tarifs, formations, Rio Fresco Fest, partenariats : les réponses aux questions les plus courantes sur SKM La Fabrik."
+  jsonLd={jsonLd}
+>
+  <PageIntro eyebrow="FAQ" title={'Questions <span class="accent">fréquentes</span>'} lead="Les réponses aux questions qu’on nous pose le plus souvent." />
+
+  <div class="wrap faq">
+    <nav class="sommaire" aria-label="Thèmes">
+      <ul>
+        {
+          faq.map((g, i) => (
+            <li>
+              <a href={`#theme-${i + 1}`}>{g.title}</a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="groupes">
+      {
+        faq.map((g, i) => (
+          <section id={`theme-${i + 1}`} aria-labelledby={`t-theme-${i + 1}`}>
+            <h2 id={`t-theme-${i + 1}`} class="titre titre-h3">
+              {g.title}
+            </h2>
+            {g.items.map((it) => (
+              <details id={it.id}>
+                <summary>
+                  <span>{it.q}</span>
+                  <span class="signe" aria-hidden="true" />
+                </summary>
+                <div class="reponse">
+                  <p>{it.a}</p>
+                  {it.link && (
+                    <a class="lien-fleche" href={it.link.href}>
+                      {it.link.label} <span aria-hidden="true">→</span>
+                    </a>
+                  )}
+                </div>
+              </details>
+            ))}
+          </section>
+        ))
+      }
+      <div class="encore">
+        <p class="titre titre-h3">Une autre question&nbsp;?</p>
+        <Button href="/contact">Nous écrire</Button>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  // Ouvre la question visée par l'ancre (#location, par exemple).
+  const open = () => {
+    const id = decodeURIComponent(window.location.hash.slice(1));
+    const el = id ? document.getElementById(id) : null;
+    if (el instanceof HTMLDetailsElement) el.open = true;
+  };
+  open();
+  window.addEventListener('hashchange', open);
+</script>
+
+<style>
+  .faq {
+    display: grid;
+    grid-template-columns: minmax(0, 16rem) minmax(0, 1fr);
+    gap: 2.5rem clamp(2rem, 1rem + 4vw, 6rem);
+    padding-bottom: var(--section-y);
+    --accent: var(--c-or);
+  }
+  .sommaire ul {
+    position: sticky;
+    top: 6.5rem;
+    display: grid;
+    gap: 0.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .sommaire a {
+    display: block;
+    padding: 0.6rem 0 0.6rem 1rem;
+    border-left: 2px solid var(--c-ligne-sombre);
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .sommaire a:hover {
+    border-color: var(--c-or);
+    color: var(--c-or);
+  }
+  .groupes {
+    display: grid;
+    gap: 3rem;
+  }
+  section h2 {
+    margin-bottom: 1rem;
+    color: var(--c-or);
+  }
+  details {
+    border-top: 1px solid var(--c-ligne-sombre);
+  }
+  details:last-of-type {
+    border-bottom: 1px solid var(--c-ligne-sombre);
+  }
+  summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.5rem;
+    min-height: 3.5rem;
+    padding: 1rem 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    cursor: pointer;
+    list-style: none;
+  }
+  summary::-webkit-details-marker {
+    display: none;
+  }
+  summary:hover {
+    color: var(--c-or);
+  }
+  summary:focus-visible {
+    outline: 2px solid var(--c-or);
+    outline-offset: 4px;
+  }
+  .signe {
+    position: relative;
+    flex: none;
+    width: 1rem;
+    height: 1rem;
+  }
+  .signe::before,
+  .signe::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: var(--c-or);
+    transition: transform 0.2s;
+  }
+  .signe::after {
+    transform: rotate(90deg);
+  }
+  details[open] .signe::after {
+    transform: rotate(0deg);
+  }
+  .reponse {
+    display: grid;
+    gap: 0.9rem;
+    max-width: 44rem;
+    padding-bottom: 1.5rem;
+    color: var(--c-pierre-claire);
+  }
+  .encore {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 2rem;
+    background: var(--c-anthracite);
+  }
+  @media (max-width: 56rem) {
+    .faq {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .sommaire ul {
+      position: static;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .sommaire a {
+      border: 1px solid var(--c-ligne-sombre);
+      padding: 0.6rem 0.9rem;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .signe::before,
+    .signe::after {
+      transition: none;
+    }
+  }
+</style>
