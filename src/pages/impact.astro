@@ -14,6 +14,10 @@ const actionPhotos = {
   concours: photos.communaute,
 } as const;
 const photoFor = (id: string) => actionPhotos[id as keyof typeof actionPhotos] ?? photos.communaute;
+const pad = (n: number) => String(n).padStart(2, '0');
+
+// Le cycle et l'écosystème se lisent ensemble : chaque étape du cycle est portée par un maillon de l'écosystème.
+const etapes = cycle.map((titre, i) => ({ titre, maillon: ecosysteme[i] }));
 ---
 
 <BaseLayout
@@ -21,64 +25,96 @@ const photoFor = (id: string) => actionPhotos[id as keyof typeof actionPhotos] ?
   description="Éducation, inclusion, réinsertion et environnement : les actions communautaires de Sunu Kaddu et SKM La Fabrik à Rufisque, leur alignement sur les ODD et les formules de partenariat RSE."
 >
   <section class="hero theme-papier" aria-labelledby="titre-page">
-    <div class="wrap hero-grid">
-      <div>
-        <p class="surtitre">Impact communautaire · RSE & ESG</p>
-        <h1 id="titre-page" class="titre titre-h1">L’écho<br />de <span class="accent">Rufisque</span></h1>
-        <p class="chapeau doux">D’une initiative de terrain à un moteur de transformation culturelle et économique.</p>
-      </div>
-      <figure class="hero-photo">
-        <Image src={photos.communaute.src} alt={photos.communaute.alt} widths={[480, 800, 1200]} sizes="(min-width: 56rem) 50vw, 100vw" loading="eager" fetchpriority="high" />
-      </figure>
-    </div>
-  </section>
-
-  <section class="constat theme-sombre section" aria-labelledby="t-constat">
-    <div class="wrap constat-grid">
-      <div data-reveal>
-        <p class="surtitre">Le constat</p>
-        <h2 id="t-constat" class="titre titre-h2">{constat.title}</h2>
-        <p class="chapeau doux">{constat.text}</p>
-      </div>
-      <div class="convictions" data-reveal>
-        <p class="surtitre">Notre conviction</p>
-        {convictions.map((c) => <p class="citation">{c}</p>)}
-      </div>
-    </div>
-  </section>
-
-  <section class="ecosysteme theme-blanc section" aria-labelledby="t-eco">
     <div class="wrap">
-      <p class="surtitre">Un modèle intégré</p>
-      <h2 id="t-eco" class="titre titre-h2">L’écosystème d’impact 360°</h2>
-      <ul class="eco">
+      <div class="hero-grid">
+        <div class="hero-texte">
+          <p class="surtitre">Impact communautaire · RSE &amp; ESG</p>
+          <h1 id="titre-page" class="titre hero-titre">L’écho de <span class="accent">Rufisque</span></h1>
+          <p class="chapeau">D’une initiative de terrain à un moteur de transformation culturelle et économique.</p>
+          <div class="hero-actions">
+            <Button href="/contact?objet=partenariat" style="--btn-bg: var(--c-encre); --btn-ink: var(--c-papier); --btn-bg-hover: var(--c-noir)">
+              Planifier une rencontre
+            </Button>
+            <Button href="#t-part" variant="contour" style="--btn-outline-hover: rgb(0 0 0 / 0.05)">Les formules de partenariat</Button>
+          </div>
+        </div>
+        <figure class="hero-photo">
+          <Image
+            src={photos.communaute.src}
+            alt={photos.communaute.alt}
+            widths={[480, 800, 987]}
+            sizes="(min-width: 56rem) 45vw, 100vw"
+            quality={85}
+            loading="eager"
+            fetchpriority="high"
+          />
+        </figure>
+      </div>
+      <a class="hero-odd" href="#t-odd">
+        <span class="hero-odd-label">Objectifs de développement durable</span>
+        <span class="hero-odd-liste">
+          {odd.map((o) => <span class="titre">{o.num}</span>)}
+        </span>
+        <span class="hero-odd-fleche" aria-hidden="true">→</span>
+      </a>
+    </div>
+  </section>
+
+  <section class="theme-sombre section constat" aria-labelledby="t-constat">
+    <div class="constat-lueur" aria-hidden="true"></div>
+    <div class="wrap">
+      <p class="index" data-reveal><span>01</span> Le constat</p>
+      <h2 id="t-constat" class="titre titre-h2 constat-titre" data-reveal>{constat.title}</h2>
+      <p class="grande-phrase" data-reveal>
+        Troisième ville historique du Sénégal, Rufisque déborde d’une <mark>jeunesse ambitieuse.</mark> Elle fait pourtant face à un{' '}
+        <mark>manque criant d’infrastructures culturelles</mark> et de parcours structurés vers les métiers créatifs.
+      </p>
+      <div class="convictions">
+        <p class="surtitre" data-reveal>Notre conviction</p>
         {
-          ecosysteme.map((e) => (
-            <li data-reveal>
-              <span class="role">{e.role}</span>
-              <h3 class="titre">{e.name}</h3>
-              <p>{e.text}</p>
-            </li>
+          convictions.map((c) => (
+            <blockquote data-reveal>
+              <p class="citation">{c}</p>
+            </blockquote>
           ))
         }
-      </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="theme-blanc section ecosysteme" aria-labelledby="t-eco">
+    <div class="wrap">
+      <div class="eco-tete" data-reveal>
+        <p class="index"><span>02</span> Un modèle intégré</p>
+        <h2 id="t-eco" class="titre titre-h2">L’écosystème d’impact 360°</h2>
+      </div>
       <ol class="cycle" aria-label="Le cycle Sunu Kaddu">
         {
-          cycle.map((c, i) => (
-            <li>
-              <span aria-hidden="true">{i + 1}</span>
-              {c}
+          etapes.map((e, i) => (
+            <li class="etape" data-reveal>
+              <span class="etape-num titre" aria-hidden="true">
+                {pad(i + 1)}
+              </span>
+              <h3 class="titre etape-titre">{e.titre}</h3>
+              {e.maillon && (
+                <div class="maillon">
+                  <p class="role">{e.maillon.role}</p>
+                  <p class="maillon-nom titre">{e.maillon.name}</p>
+                  <p class="maillon-texte">{e.maillon.text}</p>
+                </div>
+              )}
             </li>
           ))
         }
       </ol>
+      <div class="boucle" aria-hidden="true"><span>↺</span></div>
     </div>
   </section>
 
-  <section class="actions theme-papier section" aria-labelledby="t-actions">
+  <section class="theme-papier section actions" aria-labelledby="t-actions">
     <div class="wrap">
-      <header class="actions-head" data-reveal>
-        <p class="surtitre">L’impact par l’exemple</p>
+      <header class="actions-tete" data-reveal>
+        <p class="index"><span>03</span> L’impact par l’exemple</p>
         <h2 id="t-actions" class="titre titre-h2">Nos actions sur le terrain</h2>
       </header>
       <ol class="liste-actions">
@@ -87,10 +123,13 @@ const photoFor = (id: string) => actionPhotos[id as keyof typeof actionPhotos] ?
             const ph = photoFor(a.id);
             return (
               <li class:list={['action', { inverse: i % 2 === 1 }]} data-reveal>
-                <figure>
-                  <Image src={ph.src} alt={ph.alt} widths={[400, 700, 1000]} sizes="(min-width: 56rem) 40vw, 100vw" />
+                <figure class="action-photo">
+                  <Image src={ph.src} alt={ph.alt} widths={[400, 700, 1000]} sizes="(min-width: 56rem) 48vw, 100vw" />
+                  <span class="action-num titre" aria-hidden="true">
+                    {pad(i + 1)}
+                  </span>
                 </figure>
-                <div>
+                <div class="action-texte">
                   <p class="axe">{a.axis}</p>
                   <h3 class="titre titre-h3">{a.title}</h3>
                   <p>{a.text}</p>
@@ -106,19 +145,23 @@ const photoFor = (id: string) => actionPhotos[id as keyof typeof actionPhotos] ?
     </div>
   </section>
 
-  <section class="chiffres theme-sombre section" aria-labelledby="t-chiffres">
+  <section class="theme-sombre section chiffres" aria-labelledby="t-chiffres">
     <div class="wrap">
-      <p class="surtitre">Repères</p>
-      <h2 id="t-chiffres" class="titre titre-h2">Une décennie de bâtisseurs</h2>
+      <div class="chiffres-tete" data-reveal>
+        <p class="index"><span>04</span> Repères</p>
+        <h2 id="t-chiffres" class="titre titre-h2">Une décennie de bâtisseurs</h2>
+      </div>
       <Stats data={blueprintStats} />
     </div>
   </section>
 
   <section class="theme-blanc section" aria-labelledby="t-odd">
     <div class="wrap">
-      <p class="surtitre">Alignement stratégique</p>
-      <h2 id="t-odd" class="titre titre-h2">Objectifs de développement durable</h2>
-      <table class="odd">
+      <div class="odd-tete" data-reveal>
+        <p class="index"><span>05</span> Alignement stratégique</p>
+        <h2 id="t-odd" class="titre titre-h2">Objectifs de développement durable</h2>
+      </div>
+      <table class="odd" data-reveal>
         <caption class="sr-only">Contribution des actions de Sunu Kaddu aux objectifs de développement durable des Nations unies</caption>
         <thead>
           <tr>
@@ -132,7 +175,7 @@ const photoFor = (id: string) => actionPhotos[id as keyof typeof actionPhotos] ?
               <tr>
                 <th scope="row">
                   <span class="titre odd-num">{o.num}</span>
-                  <span>{o.name}</span>
+                  <span class="odd-nom">{o.name}</span>
                 </th>
                 <td>{o.text}</td>
               </tr>
@@ -143,19 +186,22 @@ const photoFor = (id: string) => actionPhotos[id as keyof typeof actionPhotos] ?
     </div>
   </section>
 
-  <section class="partenariat theme-papier section" aria-labelledby="t-part">
+  <section class="theme-papier section partenariat" aria-labelledby="t-part">
     <div class="wrap">
       <div class="part-grid">
-        <div data-reveal>
-          <p class="surtitre">Pourquoi s’associer à Sunu Kaddu</p>
+        <div class="part-texte" data-reveal>
+          <p class="index"><span>06</span> Pourquoi s’associer à Sunu Kaddu</p>
           <h2 id="t-part" class="titre titre-h2">Bâtir demain, dès aujourd’hui</h2>
-          <p class="chapeau doux">Devenez partenaire de la transformation culturelle de Rufisque. Commençons par une rencontre de découverte de 30 minutes.</p>
+          <p class="chapeau">Devenez partenaire de la transformation culturelle de Rufisque. Commençons par une rencontre de découverte de 30 minutes.</p>
           <Button href="/contact?objet=partenariat" style="--btn-bg: var(--c-encre); --btn-ink: var(--c-papier); --btn-bg-hover: var(--c-noir)">Planifier une rencontre</Button>
         </div>
         <dl class="pourquoi">
           {
-            pourquoi.map((p) => (
+            pourquoi.map((p, i) => (
               <div data-reveal>
+                <span class="pourquoi-num titre" aria-hidden="true">
+                  {pad(i + 1)}
+                </span>
                 <dt>{p.title}</dt>
                 <dd>{p.text}</dd>
               </div>
@@ -164,7 +210,7 @@ const photoFor = (id: string) => actionPhotos[id as keyof typeof actionPhotos] ?
         </dl>
       </div>
 
-      <div class="tiers-wrap">
+      <div class="tiers-wrap" data-reveal>
         <h3 class="titre titre-h3">Les formules de partenariat</h3>
         <div class="tiers-scroll" role="region" aria-label="Tableau des formules de partenariat" tabindex="0">
           <table class="tiers">
@@ -193,65 +239,261 @@ const photoFor = (id: string) => actionPhotos[id as keyof typeof actionPhotos] ?
 </BaseLayout>
 
 <style>
-  .hero-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: 2.5rem clamp(2rem, 1rem + 4vw, 5rem);
-    align-items: center;
-    padding-block: clamp(3.5rem, 2rem + 4vw, 6rem);
-  }
-  .hero-grid .chapeau {
-    margin-top: 1.75rem;
-    max-width: 30rem;
-  }
-  .hero .accent {
-    color: var(--c-terracotta-profond);
-  }
-  .hero-photo {
-    margin: 0;
-  }
-  .hero-photo :global(img) {
-    width: 100%;
-    aspect-ratio: 5 / 4;
-    object-fit: cover;
+  .section {
+    padding-block: clamp(5rem, 3rem + 8vw, 9.5rem);
   }
 
-  .constat-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 3rem clamp(2rem, 1rem + 4vw, 6rem);
+  /* Repères numérotés (repris de l'accueil) */
+  .index {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin-bottom: clamp(1.5rem, 1rem + 1.5vw, 2.5rem);
+    font-size: var(--t-micro);
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--soft);
   }
-  .constat-grid .chapeau {
-    margin-top: 1.5rem;
+  .index span {
+    font-family: var(--f-titre);
+    font-size: 1.25rem;
+    letter-spacing: 0;
+    color: var(--accent);
+  }
+  .theme-papier,
+  .theme-blanc {
+    --accent: var(--c-terracotta-profond);
+  }
+
+  /* Hero : institutionnel, clair, photo encadrée d'un aplat terracotta */
+  .hero {
+    padding-block: clamp(3rem, 2rem + 4vw, 6rem) clamp(3rem, 2rem + 3vw, 4.5rem);
+  }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    gap: 3rem clamp(2rem, 1rem + 4vw, 5rem);
+    align-items: center;
+  }
+  .hero-texte {
+    display: grid;
+    justify-items: start;
+    gap: 1.5rem;
+  }
+  .hero-titre {
+    font-size: clamp(3.25rem, 1.6rem + 6.4vw, 8.5rem);
+    line-height: 0.9;
+  }
+  .hero-texte .chapeau {
+    max-width: 30rem;
+    color: var(--c-encre-douce);
+  }
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+  }
+  .hero-photo {
+    position: relative;
+    margin: 0 1.25rem 1.25rem 0;
+  }
+  .hero-photo::before {
+    content: '';
+    position: absolute;
+    inset: 1.25rem -1.25rem -1.25rem 1.25rem;
+    background: var(--c-terracotta);
+  }
+  .hero-photo :global(img) {
+    position: relative;
+    display: block;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+  }
+  .hero-odd {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 1rem 2rem;
+    margin-top: clamp(3rem, 2rem + 3vw, 4.5rem);
+    padding: 1.25rem 0;
+    border-block: 1px solid var(--c-encre);
+    text-decoration: none;
+  }
+  .hero-odd-label {
+    font-size: var(--t-micro);
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+  .hero-odd-liste {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .hero-odd-liste span {
+    display: grid;
+    place-items: center;
+    min-width: 3rem;
+    height: 3rem;
+    padding-inline: 0.5rem;
+    background: var(--c-encre);
+    color: var(--c-papier);
+    font-size: 1.5rem;
+    transition: background-color 0.25s;
+  }
+  .hero-odd:hover .hero-odd-liste span {
+    background: var(--c-terracotta-profond);
+  }
+  .hero-odd-fleche {
+    font-size: 1.5rem;
+    transition: transform 0.3s var(--ease);
+  }
+  .hero-odd:hover .hero-odd-fleche {
+    transform: translateX(5px);
+  }
+  @media (max-width: 56rem) {
+    .hero-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .hero-odd {
+      grid-template-columns: minmax(0, 1fr) auto;
+    }
+    .hero-odd-label {
+      grid-column: 1 / -1;
+    }
+  }
+
+  /* 01 · Constat */
+  .constat {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .constat-lueur {
+    position: absolute;
+    z-index: -1;
+    right: -24rem;
+    bottom: -30rem;
+    width: 70rem;
+    height: 70rem;
+    background: radial-gradient(closest-side, rgb(224 102 44 / 0.16), rgb(201 161 59 / 0.06) 55%, transparent 78%);
+    pointer-events: none;
+  }
+  .constat-titre {
+    max-width: 50rem;
+    margin-bottom: clamp(2rem, 1.5rem + 2vw, 3rem);
+  }
+  .grande-phrase {
+    max-width: 64rem;
+    font-family: var(--f-texte);
+    font-size: clamp(1.5rem, 1.05rem + 2vw, 3rem);
+    font-weight: 600;
+    line-height: 1.22;
+    letter-spacing: -0.015em;
+    text-wrap: pretty;
+  }
+  .grande-phrase mark {
+    padding-inline: 0.05em;
+    background: linear-gradient(transparent 62%, var(--c-terracotta) 62%, var(--c-terracotta) 94%, transparent 94%);
+    color: inherit;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
   }
   .convictions {
     display: grid;
-    gap: 1.5rem;
-    align-content: start;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem clamp(2rem, 1rem + 4vw, 5rem);
+    margin-top: clamp(3.5rem, 2.5rem + 4vw, 6rem);
+    padding-top: 2rem;
+    border-top: 1px solid var(--c-ligne-sombre);
+  }
+  .convictions .surtitre {
+    grid-column: 1 / -1;
+  }
+  .convictions blockquote {
+    margin: 0;
     padding-left: 1.5rem;
-    border-left: 4px solid var(--c-terracotta);
+    border-left: 3px solid var(--c-terracotta);
   }
   .convictions .citation {
     font-size: clamp(1.25rem, 1.05rem + 0.8vw, 1.625rem);
-    line-height: 1.3;
+    line-height: 1.35;
+  }
+  @media (max-width: 56rem) {
+    .convictions {
+      grid-template-columns: minmax(0, 1fr);
+    }
   }
 
-  .eco {
+  /* 02 · Écosystème : le cycle en quatre maillons, qui revient à son départ */
+  .eco-tete {
+    max-width: 50rem;
+    margin-bottom: clamp(3rem, 2rem + 3vw, 4.5rem);
+  }
+  .cycle {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 1px;
-    margin: 2.5rem 0 0;
+    gap: 2.5rem 1.25rem;
+    margin: 0;
     padding: 0;
     list-style: none;
-    background: var(--c-ligne-claire);
-    border: 1px solid var(--c-ligne-claire);
   }
-  .eco li {
+  .etape {
+    position: relative;
+    display: grid;
+    grid-template-rows: auto auto 1fr;
+    gap: 1rem;
+  }
+  .etape-num {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 3rem;
+    line-height: 1;
+    color: var(--c-terracotta-profond);
+  }
+  .etape-num::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--c-encre);
+  }
+  .etape:not(:last-child) .etape-num::before {
+    content: '→';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    transform: translateY(-50%);
+    background: var(--c-encre);
+    color: var(--c-papier);
+    font-family: var(--f-texte);
+    font-size: 1rem;
+    font-weight: 700;
+  }
+  .etape-titre {
+    font-size: clamp(1.5rem, 1.2rem + 0.9vw, 2rem);
+    line-height: 1;
+    min-height: 2em;
+  }
+  .maillon {
     display: grid;
     align-content: start;
-    gap: 0.6rem;
-    padding: 1.75rem 1.5rem;
-    background: var(--c-blanc, #fff);
+    gap: 0.5rem;
+    padding: 1.5rem;
+    background: var(--c-papier);
+  }
+  .etape:last-child .maillon {
+    background: var(--c-encre);
+    color: var(--c-papier);
   }
   .role {
     font-size: 0.75rem;
@@ -260,152 +502,287 @@ const photoFor = (id: string) => actionPhotos[id as keyof typeof actionPhotos] ?
     text-transform: uppercase;
     color: var(--c-terracotta-profond);
   }
-  .eco h3 {
-    font-size: 1.75rem;
+  .etape:last-child .role {
+    color: var(--c-terracotta);
   }
-  .eco p {
+  .maillon-nom {
+    font-size: 1.5rem;
+    line-height: 1;
+  }
+  .maillon-texte {
     font-size: 0.9375rem;
+    line-height: 1.55;
     color: var(--c-encre-douce);
   }
-  .cycle {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin: 1.5rem 0 0;
-    padding: 0;
-    list-style: none;
+  .etape:last-child .maillon-texte {
+    color: var(--c-pierre-claire);
   }
-  .cycle li {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.6rem;
-    padding: 0.7rem 1.1rem;
-    background: var(--c-encre);
-    color: var(--c-papier);
+  .boucle {
+    position: relative;
+    height: 2.5rem;
+    margin: 0 12.5% 0 calc(12.5% - 0.625rem);
+    border: 1px solid var(--c-encre);
+    border-top: 0;
+  }
+  .boucle span {
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    display: grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    transform: translate(-50%, 50%);
+    background: var(--c-terracotta-profond);
+    color: #fff;
     font-weight: 700;
-    font-size: 0.875rem;
   }
-  .cycle li:not(:last-child)::after {
-    content: '→';
-    margin-left: 0.4rem;
-    color: var(--c-or);
+  @media (max-width: 64rem) {
+    .cycle {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .etape:nth-child(2) .etape-num::before {
+      display: none;
+    }
+    .boucle {
+      display: none;
+    }
   }
-  .cycle span {
-    color: var(--c-or);
+  @media (max-width: 40rem) {
+    .cycle {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .etape:not(:last-child) .etape-num::before {
+      display: none;
+    }
+    .etape-titre {
+      min-height: 0;
+    }
   }
 
-  .actions-head {
-    margin-bottom: 2.5rem;
+  /* 03 · Actions */
+  .actions-tete {
+    max-width: 50rem;
+    margin-bottom: clamp(3rem, 2rem + 3vw, 4.5rem);
   }
   .liste-actions {
     display: grid;
-    gap: clamp(2.5rem, 2rem + 2vw, 4rem);
+    gap: clamp(3.5rem, 2.5rem + 3vw, 6rem);
     margin: 0;
     padding: 0;
     list-style: none;
   }
   .action {
     display: grid;
-    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
     gap: 1.5rem clamp(2rem, 1rem + 4vw, 5rem);
     align-items: center;
   }
-  .action.inverse figure {
+  .action.inverse .action-photo {
     order: 2;
   }
-  .action figure {
+  .action-photo {
+    position: relative;
     margin: 0;
   }
-  .action :global(img) {
+  .action-photo :global(img) {
+    display: block;
     width: 100%;
     aspect-ratio: 3 / 2;
     object-fit: cover;
   }
-  .action > div {
+  .action-num {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    padding: 0.6rem 1rem 0 0;
+    background: var(--c-papier);
+    font-size: 2.5rem;
+    line-height: 1;
+    color: var(--c-terracotta-profond);
+  }
+  .action.inverse .action-num {
+    left: auto;
+    right: 0;
+    padding: 0.6rem 0 0 1rem;
+  }
+  .action-texte {
     display: grid;
+    justify-items: start;
     gap: 0.9rem;
-    max-width: 34rem;
+    max-width: 32rem;
+    line-height: 1.6;
   }
   .axe {
+    padding: 0.35rem 0.6rem;
+    background: var(--c-encre);
+    color: var(--c-papier);
     font-size: 0.75rem;
     font-weight: 700;
     letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: var(--c-terracotta-profond);
   }
-  .action .lien-fleche {
-    --accent: var(--c-or-profond);
+  @media (max-width: 56rem) {
+    .action {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .action.inverse .action-photo {
+      order: 0;
+    }
+    .action.inverse .action-num {
+      left: 0;
+      right: auto;
+      padding: 0.6rem 1rem 0 0;
+    }
   }
 
-  .chiffres h2 {
-    margin-bottom: 2.5rem;
+  /* 04 · Chiffres */
+  .chiffres {
+    --stat-color: var(--c-or);
+  }
+  .chiffres-tete {
+    margin-bottom: clamp(2.5rem, 2rem + 2vw, 3.5rem);
   }
 
+  /* 05 · ODD */
+  .odd-tete {
+    max-width: 50rem;
+    margin-bottom: clamp(2.5rem, 2rem + 2vw, 3.5rem);
+  }
   .odd {
     width: 100%;
-    margin-top: 2.5rem;
     border-collapse: collapse;
   }
   .odd thead th {
-    padding-bottom: 0.75rem;
+    padding-bottom: 0.9rem;
     text-align: left;
     font-size: 0.75rem;
     letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--c-encre-douce);
+    border-bottom: 2px solid var(--c-encre);
   }
   .odd tbody th,
   .odd td {
-    padding: 1.1rem 0;
-    border-top: 1px solid var(--c-ligne-claire);
-    vertical-align: top;
+    padding: 1.25rem 0;
+    border-bottom: 1px solid var(--c-ligne-claire);
+    vertical-align: middle;
     text-align: left;
   }
   .odd tbody th {
-    display: flex;
-    align-items: baseline;
-    gap: 1rem;
-    width: 22rem;
+    width: 26rem;
     padding-right: 2rem;
     font-weight: 700;
   }
+  .odd tbody th > span {
+    vertical-align: middle;
+  }
   .odd-num {
-    min-width: 2.5rem;
-    font-size: 2rem;
+    display: inline-grid;
+    place-items: center;
+    width: 3.5rem;
+    height: 3.5rem;
+    margin-right: 1rem;
+    background: var(--c-terracotta-profond);
+    color: #fff;
+    font-size: 1.875rem;
     line-height: 1;
-    color: var(--c-terracotta-profond);
+  }
+  .odd-nom {
+    font-size: 1.125rem;
+  }
+  .odd td {
+    color: var(--c-encre-douce);
+    line-height: 1.55;
+  }
+  @media (max-width: 56rem) {
+    .odd tbody th {
+      width: auto;
+    }
+  }
+  @media (max-width: 36rem) {
+    .odd,
+    .odd tbody,
+    .odd tr {
+      display: block;
+    }
+    .odd thead {
+      display: none;
+    }
+    .odd tr {
+      padding-block: 1.25rem;
+      border-bottom: 1px solid var(--c-ligne-claire);
+    }
+    .odd tbody th,
+    .odd td {
+      display: block;
+      padding: 0;
+      border: 0;
+    }
+    .odd td {
+      margin-top: 0.75rem;
+    }
   }
 
+  /* 06 · Partenariat */
   .part-grid {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 3rem clamp(2rem, 1rem + 4vw, 5rem);
+    align-items: start;
   }
-  .part-grid .chapeau {
-    margin-block: 1.5rem 2rem;
+  .part-texte {
+    display: grid;
+    justify-items: start;
+    gap: 1.5rem;
+  }
+  .part-texte .chapeau {
+    color: var(--c-encre-douce);
   }
   .pourquoi {
-    margin: 0;
     display: grid;
-    gap: 0;
-    border-top: 1px solid var(--c-ligne-claire);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    margin: 0;
   }
   .pourquoi > div {
-    padding: 1.1rem 0;
-    border-bottom: 1px solid var(--c-ligne-claire);
+    display: grid;
+    align-content: start;
+    gap: 0.4rem;
+    padding: 1.5rem;
+    background: #fff;
+  }
+  .pourquoi-num {
+    margin-bottom: 0.5rem;
+    font-size: 1.5rem;
+    line-height: 1;
+    color: var(--c-terracotta-profond);
   }
   .pourquoi dt {
     font-weight: 700;
+    font-size: 1.0625rem;
   }
   .pourquoi dd {
-    margin: 0.3rem 0 0;
+    margin: 0;
+    font-size: 0.9375rem;
+    line-height: 1.55;
     color: var(--c-encre-douce);
   }
+  @media (max-width: 64rem) {
+    .part-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  @media (max-width: 36rem) {
+    .pourquoi {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
   .tiers-wrap {
-    margin-top: clamp(3rem, 2rem + 3vw, 5rem);
+    margin-top: clamp(4rem, 3rem + 4vw, 6.5rem);
   }
   .tiers-wrap h3 {
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.75rem;
   }
   .tiers-scroll {
     overflow-x: auto;
@@ -419,18 +796,23 @@ const photoFor = (id: string) => actionPhotos[id as keyof typeof actionPhotos] ?
     min-width: 36rem;
     border-collapse: collapse;
     font-size: 0.9375rem;
+    background: #fff;
   }
   .tiers th,
   .tiers td {
-    padding: 0.9rem 1rem;
+    padding: 1rem 1.25rem;
     border-bottom: 1px solid var(--c-ligne-claire);
     text-align: left;
     vertical-align: top;
+    line-height: 1.5;
   }
   .tiers thead th {
     background: var(--c-encre);
     color: var(--c-papier);
-    font-size: 0.875rem;
+    font-family: var(--f-titre);
+    font-weight: 400;
+    font-size: 1.25rem;
+    text-transform: uppercase;
   }
   .tiers thead th.fondateur {
     background: var(--c-or);
@@ -447,47 +829,5 @@ const photoFor = (id: string) => actionPhotos[id as keyof typeof actionPhotos] ?
     margin-top: 1rem;
     font-size: 0.875rem;
     color: var(--c-encre-douce);
-  }
-
-  @media (max-width: 64rem) {
-    .eco {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-  }
-  @media (max-width: 56rem) {
-    .hero-grid,
-    .constat-grid,
-    .action,
-    .part-grid {
-      grid-template-columns: minmax(0, 1fr);
-    }
-    .action.inverse figure {
-      order: 0;
-    }
-    .odd tbody th {
-      width: auto;
-    }
-  }
-  @media (max-width: 36rem) {
-    .eco {
-      grid-template-columns: minmax(0, 1fr);
-    }
-    .odd,
-    .odd tbody,
-    .odd tr {
-      display: block;
-    }
-    .odd thead {
-      display: none;
-    }
-    .odd tbody th {
-      border-top: 1px solid var(--c-ligne-claire);
-      padding-bottom: 0.4rem;
-    }
-    .odd td {
-      display: block;
-      border-top: 0;
-      padding-top: 0;
-    }
   }
 </style>
