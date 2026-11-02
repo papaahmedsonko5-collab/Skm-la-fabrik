@@ -1,0 +1,601 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Button from '@/components/Button.astro';
+import Gallery from '@/components/Gallery.astro';
+import Stats from '@/components/Stats.astro';
+import VideoEmbed from '@/components/VideoEmbed.astro';
+import logoRff from '@/assets/brand/logo-rio-fresco-fest.png';
+import { photos } from '@/data/photos';
+import { rff2026Stats, rffPartners } from '@/data/site';
+import { edition2025, horizon2027, piliers, rayonnement, rff } from '@/data/rff';
+import { eventJsonLd } from '@/lib/seo';
+
+const e = rff.edition2026;
+const contactPartenaire = '/contact?objet=partenariat&detail=Partenaire%20%C3%A9v%C3%A9nement';
+
+const gallery = [
+  { ...photos.rffDanse, large: true },
+  photos.ceremonie,
+  photos.sceneNuit,
+  photos.echecs,
+  photos.defile,
+  { ...photos.fresque, large: true },
+  photos.chanteuse,
+  photos.rffDigue,
+  photos.sceneDanse,
+];
+
+const jsonLd = eventJsonLd(
+  {
+    name: `${rff.name} 2026 : ${e.title}`,
+    startDate: e.startDate,
+    endDate: e.endDate,
+    location: e.place,
+    description: `Cinq jours, quatre piliers : un village culturel éphémère au Boulodrome de Rufisque, organisé par ${rff.organizer}.`,
+    image: '/og-default.jpg',
+  },
+  Astro.site,
+);
+---
+
+<BaseLayout
+  title="Rio Fresco Fest"
+  description="Le Rio Fresco Fest, festival annuel porté par Sunu Kaddu Music à Rufisque : programme de l’édition 2026 Héritages & Horizons, bilan, partenaires et appel à partenaires pour 2027."
+  tone="rff"
+  jsonLd={jsonLd}
+>
+  <section class="hero theme-nuit" aria-labelledby="titre-page">
+    <Image class="hero-bg" src={photos.rffFoule.src} alt="" widths={[640, 1100, 1600, 2200]} sizes="100vw" loading="eager" fetchpriority="high" />
+    <div class="wrap hero-inner">
+      <Image class="hero-logo" src={logoRff} alt="Rio Fresco Fest, Rufisque" width={220} loading="eager" />
+      <p class="surtitre">{rff.organizer} présente · Édition 2026</p>
+      <h1 id="titre-page" class="titre titre-display">{e.title}</h1>
+      <p class="chapeau">{e.subtitle}.</p>
+      <p class="infos">
+        <span>{e.dates}</span>
+        <span>{e.place}</span>
+      </p>
+      <div class="ctas">
+        <Button href={contactPartenaire} style="--btn-bg: var(--c-orange); --btn-ink: var(--c-noir); --btn-bg-hover: #ff9446">Devenir partenaire 2027</Button>
+        <a class="lien-fleche" href={rff.playlist} target="_blank" rel="noopener">
+          Revoir l’édition 2026 sur YouTube <span aria-hidden="true">↗</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="vision theme-blanc section" aria-labelledby="t-vision">
+    <div class="wrap vision-grid">
+      <div data-reveal>
+        <p class="surtitre">La vision</p>
+        <h2 id="t-vision" class="titre titre-h2">Ancrer l’art au cœur de la communauté</h2>
+        <p class="implantation">{e.implantation}</p>
+      </div>
+      <figure class="quote" data-reveal>
+        <blockquote class="citation"><p>« {rff.quote.text} »</p></blockquote>
+        <figcaption><strong>{rff.quote.author}</strong>, {rff.quote.role}</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="programme theme-nuit section" aria-labelledby="t-programme">
+    <div class="wrap">
+      <header class="prog-head" data-reveal>
+        <p class="surtitre">Programme 2026</p>
+        <h2 id="t-programme" class="titre titre-h1">5 jours, <span class="accent">4 piliers</span></h2>
+      </header>
+      <ol class="piliers">
+        {
+          piliers.map((p) => (
+            <li class="pilier" data-reveal>
+              <p class="jour">
+                <span class="titre num">{p.num}</span>
+                <span>{p.days}</span>
+              </p>
+              <h3 class="titre nom">{p.name}</h3>
+              <p class="theme">{p.theme}</p>
+              <p class="sous-titre">{p.title}</p>
+              <p class="lead">{p.lead}</p>
+              <dl>
+                {p.actions.map((a) => (
+                  <div>
+                    <dt>{a.k}</dt>
+                    <dd>{a.v}</dd>
+                  </div>
+                ))}
+              </dl>
+              <p class="cible">
+                <span>Public</span> {p.audience}
+              </p>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <section class="bilan theme-blanc section" aria-labelledby="t-bilan">
+    <div class="wrap bilan-grid">
+      <div data-reveal>
+        <p class="surtitre">Bilan 2026</p>
+        <h2 id="t-bilan" class="titre titre-h2">Ce que l’édition a produit</h2>
+        <p class="doux">
+          Avec un budget numéraire investi de {rff.budget}, démultiplié par le soutien logistique de la Mairie, la force bénévole de l’Action
+          Verte et l’amplification des médias.
+        </p>
+      </div>
+      <Stats data={rff2026Stats} size="moyen" />
+    </div>
+  </section>
+
+  <section class="wrap section" aria-labelledby="t-galerie">
+    <div class="galerie-head" data-reveal>
+      <h2 id="t-galerie" class="titre titre-h2">En images</h2>
+      <a class="lien-fleche" href="/actualites/bilan-rio-fresco-fest-2026">Lire le reportage <span aria-hidden="true">→</span></a>
+    </div>
+    <Gallery items={gallery} label="Photos du Rio Fresco Fest" />
+  </section>
+
+  <section class="edition-2025 theme-nuit section" aria-labelledby="t-2025">
+    <div class="wrap e25-grid">
+      <figure data-reveal>
+        <Image src={photos.rffDigue.src} alt={photos.rffDigue.alt} widths={[480, 800, 1100]} sizes="(min-width: 56rem) 45vw, 100vw" />
+      </figure>
+      <div data-reveal>
+        <p class="surtitre">Première édition · {edition2025.dates}</p>
+        <h2 id="t-2025" class="titre titre-h2">2025, sur la digue</h2>
+        <p class="chapeau doux">{edition2025.concept}</p>
+        <dl class="e25">
+          {
+            edition2025.programme.map((it) => (
+              <div>
+                <dt>{it.k}</dt>
+                <dd>{it.v}</dd>
+              </div>
+            ))
+          }
+        </dl>
+        <a class="lien-fleche" href="/projets/rio-fresco-fest-2025">Fiche de l’édition 2025 <span aria-hidden="true">→</span></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="theme-blanc section" aria-labelledby="t-partenaires">
+    <div class="wrap">
+      <header class="part-head" data-reveal>
+        <p class="surtitre">L’écosystème RFF</p>
+        <h2 id="t-partenaires" class="titre titre-h2">Une synergie multisectorielle</h2>
+      </header>
+      <div class="partenaires">
+        {
+          rffPartners.map((g) => (
+            <section class="groupe" aria-label={g.title} data-reveal>
+              <h3>{g.title}</h3>
+              <ul>
+                {g.names.map((n) => (
+                  <li>{n}</li>
+                ))}
+              </ul>
+            </section>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="rayonnement theme-nuit section" aria-labelledby="t-archive">
+    <div class="wrap ray-grid">
+      <div data-reveal>
+        <p class="surtitre">Rayonnement numérique</p>
+        <h2 id="t-archive" class="titre titre-h2">L’archive vivante</h2>
+        <VideoEmbed playlist={rff.playlistId} title="Playlist officielle du Rio Fresco Fest 2026" poster={photos.sceneNuit.src} />
+      </div>
+      <ul class="ray">
+        {
+          rayonnement.map((r) => (
+            <li data-reveal>
+              <strong class="titre">{r.title}</strong>
+              <span>{r.text}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="horizon section" aria-labelledby="t-2027">
+    <div class="wrap">
+      <header class="hz-head" data-reveal>
+        <p class="surtitre">L’horizon 2027</p>
+        <h2 id="t-2027" class="titre titre-h1">Bâtissons ensemble l’édition 2027.</h2>
+        <p class="chapeau">
+          Rufisque mérite ce festival. Nous continuerons à le porter avec exigence, fierté et amour de notre territoire.
+        </p>
+      </header>
+      <ol class="hz">
+        {
+          horizon2027.map((h) => (
+            <li data-reveal>
+              <span class="titre hz-num">{h.num}</span>
+              <h3>{h.title}</h3>
+              {h.points.map((pt) => (
+                <p>{pt}</p>
+              ))}
+            </li>
+          ))
+        }
+      </ol>
+      <div class="hz-cta">
+        <Button href={contactPartenaire} style="--btn-bg: var(--c-noir); --btn-ink: var(--c-papier); --btn-bg-hover: var(--c-nuit)">Proposer un partenariat</Button>
+        <p>Dates et lieu de l’édition 2027 à annoncer. Le festival se tient chaque année en juin.</p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .hero {
+    position: relative;
+    isolation: isolate;
+    min-height: min(52rem, 100svh);
+    display: grid;
+    align-items: end;
+    overflow: hidden;
+  }
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.45;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(180deg, rgb(11 22 56 / 0.2) 0%, rgb(11 22 56 / 0.92) 78%);
+  }
+  .hero-inner {
+    display: grid;
+    gap: 1.25rem;
+    padding-block: 7rem clamp(3rem, 2rem + 4vw, 5.5rem);
+  }
+  .hero-logo {
+    width: clamp(8rem, 6rem + 8vw, 13.75rem);
+    height: auto;
+  }
+  .hero h1 {
+    max-width: 14ch;
+  }
+  .hero .chapeau {
+    max-width: 36rem;
+  }
+  .infos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-size: 0.875rem;
+  }
+  .infos span + span::before {
+    content: '';
+    display: inline-block;
+    width: 0.5rem;
+    height: 0.5rem;
+    margin-right: 1.5rem;
+    background: var(--c-orange);
+    vertical-align: middle;
+  }
+  .ctas {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem 2rem;
+    margin-top: 1rem;
+  }
+
+  .vision-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 3rem clamp(2rem, 1rem + 4vw, 6rem);
+    align-items: center;
+  }
+  .implantation {
+    margin-top: 1.5rem;
+    padding-left: 1.25rem;
+    border-left: 4px solid var(--c-orange);
+    color: var(--c-encre-douce);
+  }
+  .quote {
+    margin: 0;
+  }
+  .quote blockquote {
+    margin: 0;
+    font-size: clamp(1.5rem, 1.2rem + 1.2vw, 2.25rem);
+    line-height: 1.25;
+    color: var(--c-nuit);
+  }
+  .quote figcaption {
+    margin-top: 1.25rem;
+    font-size: 0.9375rem;
+    color: var(--c-encre-douce);
+  }
+
+  .prog-head {
+    margin-bottom: 3rem;
+  }
+  .piliers {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--line);
+  }
+  .pilier {
+    display: grid;
+    align-content: start;
+    gap: 0.75rem;
+    padding: 2rem 1.5rem 2rem 0;
+  }
+  .pilier + .pilier {
+    padding-left: 1.5rem;
+    border-left: 1px solid var(--line);
+  }
+  .jour {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--c-bleu-pale);
+  }
+  .num {
+    font-size: 1.25rem;
+    color: var(--c-orange);
+  }
+  .nom {
+    font-size: clamp(2rem, 1.6rem + 1.4vw, 2.75rem);
+    color: var(--c-orange);
+  }
+  .theme {
+    font-weight: 700;
+  }
+  .sous-titre {
+    font-size: 0.875rem;
+    color: var(--c-bleu-pale);
+  }
+  .lead {
+    font-size: 0.9375rem;
+  }
+  .pilier dl {
+    margin: 0.5rem 0 0;
+    display: grid;
+    gap: 0.9rem;
+  }
+  .pilier dt {
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .pilier dd {
+    margin: 0.2rem 0 0;
+    font-size: 0.9375rem;
+    color: var(--c-bleu-pale);
+  }
+  .cible {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px dashed var(--line);
+    font-size: 0.875rem;
+  }
+  .cible span {
+    margin-right: 0.4rem;
+    font-weight: 700;
+    color: var(--c-orange);
+  }
+  @media (max-width: 68rem) {
+    .piliers {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .pilier:nth-child(3) {
+      padding-left: 0;
+      border-left: 0;
+    }
+    .pilier:nth-child(n + 3) {
+      border-top: 1px solid var(--line);
+    }
+  }
+  @media (max-width: 40rem) {
+    .piliers {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .pilier + .pilier {
+      padding-left: 0;
+      border-left: 0;
+      border-top: 1px solid var(--line);
+    }
+  }
+
+  .bilan-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    gap: 3rem clamp(2rem, 1rem + 4vw, 5rem);
+    align-items: start;
+  }
+  .bilan-grid .doux {
+    margin-top: 1.25rem;
+  }
+  .bilan :global(.value) {
+    color: var(--c-nuit);
+  }
+
+  .galerie-head,
+  .part-head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: end;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .galerie-head .lien-fleche {
+    --accent: var(--c-orange-profond);
+  }
+
+  .e25-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 3rem clamp(2rem, 1rem + 4vw, 5rem);
+    align-items: center;
+  }
+  .e25-grid figure {
+    margin: 0;
+  }
+  .e25-grid :global(img) {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+  }
+  .e25-grid .chapeau {
+    margin-block: 1.25rem 1.5rem;
+  }
+  .e25 {
+    margin: 0 0 1.75rem;
+    border-top: 1px solid var(--line);
+  }
+  .e25 > div {
+    padding: 0.8rem 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .e25 dt {
+    font-weight: 700;
+    color: var(--c-orange);
+  }
+  .e25 dd {
+    margin: 0.2rem 0 0;
+  }
+
+  .partenaires {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+    gap: 0;
+    border-top: 3px solid var(--c-nuit);
+  }
+  .groupe {
+    padding: 1.5rem 1.5rem 1.5rem 0;
+  }
+  .groupe h3 {
+    margin-bottom: 0.75rem;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--c-orange-profond);
+  }
+  .groupe ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 0.35rem;
+    font-size: 1.0625rem;
+    font-weight: 600;
+  }
+
+  .ray-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: 3rem clamp(2rem, 1rem + 4vw, 5rem);
+    align-items: start;
+  }
+  .ray-grid h2 {
+    margin-bottom: 2rem;
+  }
+  .ray {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .ray li {
+    display: grid;
+    gap: 0.35rem;
+    padding: 1.25rem 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .ray li:first-child {
+    border-top: 1px solid var(--line);
+  }
+  .ray strong {
+    font-size: clamp(1.5rem, 1.2rem + 1vw, 2rem);
+    font-weight: 400;
+  }
+  .ray span {
+    color: var(--c-bleu-pale);
+  }
+
+  .horizon {
+    background: var(--c-orange);
+    color: var(--c-noir);
+    --line: rgb(13 12 10 / 0.25);
+  }
+  .horizon .surtitre {
+    color: var(--c-noir);
+  }
+  .hz-head {
+    max-width: 50rem;
+    margin-bottom: 3rem;
+  }
+  .hz-head .chapeau {
+    margin-top: 1.5rem;
+  }
+  .hz {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 2rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .hz li {
+    display: grid;
+    align-content: start;
+    gap: 0.6rem;
+    padding-top: 1.25rem;
+    border-top: 2px solid var(--c-noir);
+  }
+  .hz-num {
+    font-size: 3rem;
+    line-height: 1;
+  }
+  .hz h3 {
+    font-size: 1.125rem;
+    font-weight: 700;
+  }
+  .hz-cta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem 2rem;
+    margin-top: 3rem;
+    font-weight: 600;
+  }
+  @media (max-width: 56rem) {
+    .vision-grid,
+    .bilan-grid,
+    .e25-grid,
+    .ray-grid,
+    .hz {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>
