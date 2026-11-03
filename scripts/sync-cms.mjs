@@ -6,7 +6,7 @@
 //  - actualités/projets -> src/.cms/<collection>/<slug>.md (+ photos dans src/.cms/medias)
 // Sans configuration Supabase, ou tant qu'une collection est vide côté admin,
 // le site garde les fichiers du dépôt (src/content/...). Lecture seule, clé publiable.
-import { mkdir, rm, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 
 const URL_ = process.env.PUBLIC_SUPABASE_URL;
@@ -38,6 +38,20 @@ async function download(path) {
   await writeFile(dest, Buffer.from(await res.arrayBuffer()));
   // Chemin relatif depuis src/.cms/<collection>/<slug>.md
   return `../medias/${path}`;
+}
+
+// Visuel du dépôt (src/content/projets/<slug>.md) quand l'admin n'en a pas :
+// même profondeur de dossier, donc le chemin relatif reste valable.
+async function repoCover(slug) {
+  try {
+    const md = await readFile(join('src/content/projets', `${slug}.md`), 'utf8');
+    const fm = md.split('---')[1] ?? '';
+    const cover = fm.match(/^cover:\s*(.+)$/m)?.[1]?.trim();
+    const alt = fm.match(/^coverAlt:\s*(.+)$/m)?.[1]?.trim();
+    return cover ? { cover, coverAlt: alt } : null;
+  } catch {
+    return null;
+  }
 }
 
 function frontmatter(obj) {
@@ -131,6 +145,7 @@ async function main() {
     for (const p of projets) {
       const gallery = [];
       for (const g of p.gallery ?? []) gallery.push({ src: await download(g.path), alt: g.alt ?? '' });
+      const fallback = p.cover_path ? null : await repoCover(p.slug);
       const fm = {
         title: p.title,
         category: p.category,
@@ -139,8 +154,8 @@ async function main() {
         place: p.place,
         partners: p.partners,
         summary: p.summary,
-        cover: p.cover_path ? await download(p.cover_path) : undefined,
-        coverAlt: p.cover_path ? p.cover_alt : undefined,
+        cover: p.cover_path ? await download(p.cover_path) : fallback?.cover,
+        coverAlt: p.cover_path ? p.cover_alt : fallback?.coverAlt,
         gallery,
         videos: p.videos,
         relatedPage: p.related_page ?? undefined,
