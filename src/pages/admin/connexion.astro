@@ -6,6 +6,7 @@ export const prerender = false;
 
 let flash: { type: 'ok' | 'erreur'; text: string } | null = null;
 if (Astro.url.searchParams.get('erreur') === 'acces') flash = { type: 'erreur', text: 'Ce compte n’a pas accès à l’espace admin.' };
+if (Astro.url.searchParams.get('statut') === 'mot-de-passe') flash = { type: 'ok', text: 'Mot de passe changé. Connectez-vous avec le nouveau.' };
 if (Astro.url.searchParams.get('statut') === 'deconnecte') flash = { type: 'ok', text: 'Vous êtes déconnecté.' };
 
 if (Astro.request.method === 'POST' && Astro.locals.supabase) {
@@ -32,5 +33,6 @@ if (Astro.request.method === 'POST' && Astro.locals.supabase) {
       </label>
       <button class="bouton or" type="submit">Continuer</button>
     </form>
+    <a class="auth-lien" href="/admin/mot-de-passe-oublie">Mot de passe oublié ?</a>
   </AuthCard>
 </AdminLayout>

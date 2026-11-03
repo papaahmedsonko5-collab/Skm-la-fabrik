@@ -45,7 +45,7 @@ if (Astro.request.method === 'POST') {
   } else if (!/^\d{6}$/.test(code)) flash = { type: 'erreur', text: 'Le code contient 6 chiffres.' };
   else {
     const { error } = await supabase.auth.mfa.challengeAndVerify({ factorId, code });
-    if (!error) return Astro.redirect('/admin?ok=securite', 303);
+    if (!error) return Astro.redirect(Astro.cookies.has('skm_admin_reinit') ? '/admin/mot-de-passe' : '/admin?ok=securite', 303);
     flash = { type: 'erreur', text: 'Code incorrect. Vérifiez que l’heure du téléphone est réglée automatiquement, puis réessayez.' };
   }
 }

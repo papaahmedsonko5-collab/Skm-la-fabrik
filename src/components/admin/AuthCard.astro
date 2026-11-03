@@ -159,6 +159,13 @@ const { title, intro, flash = null, etape = 1 } = Astro.props;
     width: 100%;
     min-height: 3rem;
   }
+  .auth-form :global(.auth-lien) {
+    justify-self: start;
+    color: var(--a-texte);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
   @media (max-width: 56rem) {
     .auth-carte {
       grid-template-columns: minmax(0, 1fr);

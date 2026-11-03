@@ -4,6 +4,10 @@ import { supabaseConfigured, supabaseForRequest } from '@/lib/admin/supabase';
 
 /** Pages de connexion (étape 1 : mot de passe ; étape 2 : code de l'application). */
 const ETAPE_1 = '/admin/connexion';
+const ETAPE_1_PAGES = new Set([ETAPE_1, '/admin/mot-de-passe-oublie']);
+/** Arrivée depuis l'e-mail « mot de passe oublié ». */
+const RETOUR = '/admin/retour';
+const COOKIE_REINIT = 'skm_admin_reinit';
 const ETAPE_2 = new Set(['/admin/verification', '/admin/securite', '/admin/deconnexion']);
 const COOKIE_ENTREE = 'skm_admin_entree';
 
@@ -70,6 +74,27 @@ export const onRequest = defineMiddleware(async (context, next) => {
   const supabase = supabaseForRequest(context.request, context.cookies);
   context.locals.supabase = supabase;
 
+  // Lien reçu par e-mail (avant toute lecture de session, qui effacerait la preuve) : il n'est valable que dans le navigateur qui a fait
+  // la demande (preuve gardée dans un cookie). Sinon, page introuvable.
+  if (pathname === RETOUR) {
+    const code = context.url.searchParams.get('code');
+    if (!code) return introuvable();
+    const flowId = context.url.searchParams.get('sb_flow_id');
+    const { error } = await supabase.auth.exchangeCodeForSession(code, flowId ? { flowId } : undefined);
+    if (error) return introuvable();
+    if (ADMIN_ENTREE) {
+      context.cookies.set(COOKIE_ENTREE, await empreinte(ADMIN_ENTREE), {
+        path: '/admin',
+        httpOnly: true,
+        secure: true,
+        sameSite: 'strict',
+        maxAge: 60 * 60 * 24 * 30,
+      });
+    }
+    // Le nouveau mot de passe sera demandé après le code de sécurité.
+    context.cookies.set(COOKIE_REINIT, '1', { path: '/admin', httpOnly: true, secure: true, sameSite: 'lax', maxAge: 60 * 30 });
+    return finish(context.redirect('/admin/verification', 303));
+  }
   const { data } = await supabase.auth.getUser();
   const user = data.user;
 
@@ -85,7 +110,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
       const memorise = context.cookies.get(COOKIE_ENTREE)?.value ?? '';
       if (!egal(memorise, attendu)) return introuvable();
     }
-    if (pathname === ETAPE_1) return finish(await next());
+    if (ETAPE_1_PAGES.has(pathname)) return finish(await next());
     if (pathname.startsWith('/api/admin/')) return introuvable();
     return finish(context.redirect(ETAPE_1, 303));
   }
@@ -107,7 +132,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
     return finish(context.redirect(niveau?.nextLevel === 'aal2' ? '/admin/verification' : '/admin/securite', 303));
   }
 
-  if (pathname === ETAPE_1 || pathname === '/admin/configuration') return finish(context.redirect('/admin', 303));
+  if (ETAPE_1_PAGES.has(pathname) || pathname === RETOUR || pathname === '/admin/configuration') return finish(context.redirect('/admin', 303));
   context.locals.admin = { id: user.id, email: user.email ?? '' };
   return finish(await next());
 });

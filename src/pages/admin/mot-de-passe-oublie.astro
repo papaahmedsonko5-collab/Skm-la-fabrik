@@ -1,0 +1,51 @@
+---
+import AdminLayout from '@/layouts/AdminLayout.astro';
+import AuthCard from '@/components/admin/AuthCard.astro';
+
+export const prerender = false;
+
+let flash: { type: 'ok' | 'erreur'; text: string } | null = null;
+let envoye = false;
+
+if (Astro.request.method === 'POST' && Astro.locals.supabase) {
+  const form = await Astro.request.formData();
+  const email = String(form.get('email') ?? '').trim().slice(0, 254);
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) flash = { type: 'erreur', text: 'Adresse e-mail invalide.' };
+  else {
+    const { error } = await Astro.locals.supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: new URL('/admin/retour', Astro.url).toString(),
+    });
+    // Même réponse que le compte existe ou non. Seule la limite d'envoi est signalée.
+    if (error && error.status === 429) flash = { type: 'erreur', text: 'Trop de demandes. Réessayez dans une heure.' };
+    else envoye = true;
+  }
+}
+---
+
+<AdminLayout title="Mot de passe oublié" auth>
+  {
+    envoye ? (
+      <AuthCard
+        title="Vérifiez vos e-mails"
+        intro="Si cette adresse a un accès admin, un e-mail vient de partir avec un lien pour choisir un nouveau mot de passe."
+      >
+        <p class="aide">
+          Ouvrez le lien dans ce même navigateur, sur cet appareil. Le code de sécurité de votre application vous sera demandé avant le nouveau mot de
+          passe.
+        </p>
+        <a class="auth-lien" href="/admin/connexion">Retour à la connexion</a>
+      </AuthCard>
+    ) : (
+      <AuthCard title="Mot de passe oublié" intro="Saisissez l’e-mail de votre compte admin. Vous recevrez un lien pour en choisir un nouveau." flash={flash}>
+        <form method="post">
+          <label>
+            E-mail
+            <input type="email" name="email" autocomplete="username" required autofocus />
+          </label>
+          <button class="bouton or" type="submit">Recevoir le lien</button>
+        </form>
+        <a class="auth-lien" href="/admin/connexion">Retour à la connexion</a>
+      </AuthCard>
+    )
+  }
+</AdminLayout>

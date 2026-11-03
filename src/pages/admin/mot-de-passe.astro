@@ -1,0 +1,58 @@
+---
+import AdminLayout from '@/layouts/AdminLayout.astro';
+
+export const prerender = false;
+
+// Changer son mot de passe (après « mot de passe oublié », ou à tout moment).
+// La page n'est accessible qu'après le code de sécurité.
+const supabase = Astro.locals.supabase!;
+const reinit = Astro.cookies.has('skm_admin_reinit');
+let flash: { type: 'ok' | 'erreur'; text: string } | null = reinit
+  ? { type: 'ok', text: 'Identité confirmée. Choisissez votre nouveau mot de passe.' }
+  : null;
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const mdp = String(form.get('password') ?? '');
+  const confirmation = String(form.get('confirmation') ?? '');
+  if (mdp.length < 12) flash = { type: 'erreur', text: 'Au moins 12 caractères.' };
+  else if (mdp.length > 72) flash = { type: 'erreur', text: '72 caractères au maximum.' };
+  else if (mdp !== confirmation) flash = { type: 'erreur', text: 'Les deux mots de passe ne sont pas identiques.' };
+  else {
+    const { error } = await supabase.auth.updateUser({ password: mdp });
+    if (!error) {
+      Astro.cookies.delete('skm_admin_reinit', { path: '/admin' });
+      // Déconnecte toutes les sessions ouvertes avec l'ancien mot de passe.
+      await supabase.auth.signOut({ scope: 'global' });
+      return Astro.redirect('/admin/connexion?statut=mot-de-passe', 303);
+    }
+    flash = {
+      type: 'erreur',
+      text: error.code === 'same_password' ? 'Choisissez un mot de passe différent de l’ancien.' : error.code === 'weak_password' ? 'Mot de passe trop faible.' : 'Le changement a échoué. Réessayez.',
+    };
+  }
+}
+---
+
+<AdminLayout title="Mot de passe" flash={flash}>
+  <form method="post" class="carte champs mdp">
+    <p class="aide">Au moins 12 caractères. Après le changement, vous serez déconnecté partout et vous vous reconnecterez avec le nouveau.</p>
+    <label>
+      Nouveau mot de passe
+      <input type="password" name="password" autocomplete="new-password" minlength="12" maxlength="72" required />
+    </label>
+    <label>
+      Confirmer le mot de passe
+      <input type="password" name="confirmation" autocomplete="new-password" minlength="12" maxlength="72" required />
+    </label>
+    <div class="actions-bas">
+      <button class="bouton or" type="submit">Changer le mot de passe</button>
+    </div>
+  </form>
+</AdminLayout>
+
+<style>
+  .mdp {
+    max-width: 32rem;
+  }
+</style>

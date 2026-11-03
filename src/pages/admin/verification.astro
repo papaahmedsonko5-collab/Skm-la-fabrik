@@ -11,7 +11,7 @@ const totp = facteurs?.totp?.find((f) => f.status === 'verified');
 if (!totp) return Astro.redirect('/admin/securite', 303);
 
 const { data: niveau } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-if (niveau?.currentLevel === 'aal2') return Astro.redirect('/admin', 303);
+if (niveau?.currentLevel === 'aal2') return Astro.redirect(Astro.cookies.has('skm_admin_reinit') ? '/admin/mot-de-passe' : '/admin', 303);
 
 let flash: { type: 'ok' | 'erreur'; text: string } | null = null;
 if (Astro.request.method === 'POST') {
@@ -20,7 +20,7 @@ if (Astro.request.method === 'POST') {
   if (!/^\d{6}$/.test(code)) flash = { type: 'erreur', text: 'Le code contient 6 chiffres.' };
   else {
     const { error } = await supabase.auth.mfa.challengeAndVerify({ factorId: totp.id, code });
-    if (!error) return Astro.redirect('/admin', 303);
+    if (!error) return Astro.redirect(Astro.cookies.has('skm_admin_reinit') ? '/admin/mot-de-passe' : '/admin', 303);
     flash = { type: 'erreur', text: 'Code incorrect ou expiré. Utilisez le code affiché en ce moment dans l’application.' };
   }
 }
