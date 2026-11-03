@@ -37,7 +37,16 @@ scripts/security-headers.mjs   ajoute les en-têtes de sécurité après le buil
 tests/                         tests unitaires (Vitest)
 ```
 
-## Modifier le contenu
+## Espace d’administration (`/admin`)
+
+Les actualités, les projets, les photos et les textes des pages se gèrent depuis `/admin`, ainsi que les demandes reçues par le formulaire. Les données sont dans Supabase (projet « SKM La Fabrik »), protégées par RLS : le public ne lit que le contenu publié et ne peut qu’envoyer une demande.
+
+- **Accès** : un compte créé dans Supabase › Authentication › Users, puis ajouté à la table `public.admins`.
+- **Publier** : les modifications sont enregistrées tout de suite, mais le site public change après « Publier le site » (tableau de bord), qui relance la construction via le Deploy Hook Vercel.
+- **Construction** : `scripts/sync-cms.mjs` récupère le contenu publié dans `src/.cms/` (ignoré par Git). Tant qu’une collection est vide dans l’admin, les fichiers de `src/content/` restent utilisés.
+- **Schéma** : `supabase/migrations/`.
+
+## Modifier le contenu à la main
 
 - **Ajouter un projet** : créer `src/content/projets/mon-projet.md` en copiant une fiche existante. Le schéma (`src/content.config.ts`) refuse une catégorie inconnue ou un résumé trop long.
 - **Ajouter une actualité** : créer `src/content/actualites/mon-actu.md`. Renseigner `date` dès qu’elle est connue ; `draft: true` masque la fiche.
@@ -53,8 +62,11 @@ tests/                         tests unitaires (Vitest)
 | `RESEND_API_KEY` | Clé secrète Resend pour envoyer les demandes du formulaire. |
 | `CONTACT_TO_EMAIL` | Adresse qui reçoit les demandes. |
 | `CONTACT_FROM_EMAIL` | Expéditeur, sur un domaine vérifié dans Resend. |
+| `PUBLIC_SUPABASE_URL` | Adresse du projet Supabase (publique). |
+| `PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Clé publiable Supabase (publique, limitée par RLS). |
+| `DEPLOY_HOOK_URL` | Deploy Hook Vercel du bouton « Publier le site » (secret). |
 
-Sans `RESEND_API_KEY` et `CONTACT_TO_EMAIL`, le formulaire répond proprement qu’il est indisponible et invite à écrire par e-mail. Aucune clé ne doit être commitée : `.env` est ignoré par Git.
+Avec Supabase configuré, les demandes arrivent dans l’admin ; Resend ajoute alors une notification par e-mail. Sans Supabase ni Resend, le formulaire répond proprement qu’il est indisponible et invite à écrire par e-mail. Aucune clé ne doit être commitée : `.env` est ignoré par Git.
 
 ## Sécurité
 
