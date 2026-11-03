@@ -1,0 +1,402 @@
+---
+import AdminLayout from '@/layouts/AdminLayout.astro';
+import { libellePage } from '@/lib/visites';
+
+export const prerender = false;
+
+interface Stats {
+  vues: number;
+  visiteurs: number;
+  par_jour: { jour: string; vues: number; visiteurs: number }[];
+  pages: { chemin: string; vues: number; visiteurs: number }[];
+  provenances: { provenance: string; visiteurs: number }[];
+  appareils: { appareil: string; visiteurs: number }[];
+}
+
+const PERIODES = [
+  { jours: 7, label: '7 jours' },
+  { jours: 30, label: '30 jours' },
+  { jours: 90, label: '3 mois' },
+  { jours: 365, label: '12 mois' },
+];
+const demande = Number(Astro.url.searchParams.get('periode'));
+const periode = PERIODES.find((p) => p.jours === demande) ?? PERIODES[1]!;
+
+const supabase = Astro.locals.supabase!;
+const { data, error } = await supabase.rpc('stats_visites', { p_jours: periode.jours });
+const stats = (data ?? { vues: 0, visiteurs: 0, par_jour: [], pages: [], provenances: [], appareils: [] }) as Stats;
+
+// Jour par jour (fuseau de Dakar), jours sans visite compris.
+const aujourdhui = new Date(new Date().toLocaleString('en-US', { timeZone: 'Africa/Dakar' }));
+const parJour = new Map(stats.par_jour.map((j) => [j.jour, j]));
+const jours: { cle: string; date: Date; vues: number; visiteurs: number }[] = [];
+for (let i = periode.jours - 1; i >= 0; i--) {
+  const d = new Date(aujourdhui.getFullYear(), aujourdhui.getMonth(), aujourdhui.getDate() - i);
+  const cle = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  const j = parJour.get(cle);
+  jours.push({ cle, date: d, vues: j?.vues ?? 0, visiteurs: j?.visiteurs ?? 0 });
+}
+// Sur 12 mois, on regroupe par mois pour garder des barres lisibles.
+const groupes =
+  periode.jours > 90
+    ? Object.values(
+        jours.reduce<Record<string, { label: string; detail: string; vues: number; visiteurs: number }>>((acc, j) => {
+          const cle = `${j.date.getFullYear()}-${j.date.getMonth()}`;
+          const label = j.date.toLocaleDateString('fr-FR', { month: 'short' }).replace('.', '');
+          acc[cle] ??= { label, detail: j.date.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }), vues: 0, visiteurs: 0 };
+          acc[cle].vues += j.vues;
+          acc[cle].visiteurs += j.visiteurs;
+          return acc;
+        }, {}),
+      )
+    : jours.map((j) => ({
+        label: j.date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }).replace('.', ''),
+        detail: j.date.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }),
+        vues: j.vues,
+        visiteurs: j.visiteurs,
+      }));
+const maxVues = Math.max(1, ...groupes.map((g) => g.vues));
+// Une étiquette d'axe sur n, pour ne pas les superposer.
+const pas = groupes.length <= 12 ? 1 : groupes.length <= 31 ? 5 : 15;
+
+const parVisite = stats.visiteurs > 0 ? (stats.vues / stats.visiteurs).toFixed(1).replace('.', ',') : '0';
+const totalAppareils = stats.appareils.reduce((a, x) => a + x.visiteurs, 0);
+const totalProvenances = stats.provenances.reduce((a, x) => a + x.visiteurs, 0);
+const nomsAppareils: Record<string, string> = { mobile: 'Téléphone', tablette: 'Tablette', ordinateur: 'Ordinateur' };
+const fmt = (n: number) => n.toLocaleString('fr-FR');
+---
+
+<AdminLayout title="Visites du site">
+  <nav slot="actions" class="periodes" aria-label="Période">
+    {
+      PERIODES.map((p) => (
+        <a href={`/admin/visites?periode=${p.jours}`} aria-current={p.jours === periode.jours ? 'page' : undefined}>
+          {p.label}
+        </a>
+      ))
+    }
+  </nav>
+
+  {error && <p class="flash erreur" role="alert">Les statistiques n’ont pas pu être chargées. Réessayez dans un instant.</p>}
+
+  <section class="carte apercu">
+    <div class="carte-tete">
+      <h2>Pages vues</h2>
+      <span class="aide">{periode.label}, heure de Dakar</span>
+    </div>
+    <dl class="chiffres">
+      <div class="fort"><dt>Pages vues</dt><dd>{fmt(stats.vues)}</dd></div>
+      <div><dt>Visiteurs</dt><dd>{fmt(stats.visiteurs)}</dd></div>
+      <div><dt>Pages par visiteur</dt><dd>{parVisite}</dd></div>
+    </dl>
+    {
+      stats.vues === 0 ? (
+        <p class="vide">Aucune visite comptée sur cette période. Le compteur démarre à la mise en ligne de cette page : les visites précédentes ne sont pas connues.</p>
+      ) : (
+        <div class="graph" style={`--n: ${groupes.length}`} role="img" aria-label={`Pages vues : ${groupes.map((g) => `${g.detail} ${g.vues}`).join(', ')}`}>
+          {groupes.map((g, i) => (
+            <div class="barre" tabindex="0">
+              <span class="colonne" style={`--h: ${Math.round((g.vues / maxVues) * 100)}%`} />
+              <span class="bulle">
+                <strong>{g.detail}</strong>
+                {fmt(g.vues)} page(s) vue(s) · {fmt(g.visiteurs)} visiteur(s)
+              </span>
+              <span class="etiquette">{i % pas === 0 || i === groupes.length - 1 ? g.label : ''}</span>
+            </div>
+          ))}
+        </div>
+      )
+    }
+  </section>
+
+  <section class="bas">
+    <div class="carte">
+      <h2>Pages les plus vues</h2>
+      {
+        stats.pages.length === 0 ? (
+          <p class="vide">Pas encore de données.</p>
+        ) : (
+          <table class="tableau">
+            <thead>
+              <tr>
+                <th scope="col">Page</th>
+                <th scope="col">Vues</th>
+                <th scope="col">Visiteurs</th>
+              </tr>
+            </thead>
+            <tbody>
+              {stats.pages.map((p) => (
+                <tr>
+                  <td>
+                    <a href={p.chemin} target="_blank" rel="noopener">
+                      {libellePage(p.chemin)}
+                    </a>
+                  </td>
+                  <td>{fmt(p.vues)}</td>
+                  <td>{fmt(p.visiteurs)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )
+      }
+    </div>
+
+    <div class="colonne-droite">
+      <div class="carte">
+        <h2>D’où viennent les visiteurs</h2>
+        {
+          stats.provenances.length === 0 ? (
+            <p class="vide">Pas encore de données.</p>
+          ) : (
+            <ul class="types">
+              {stats.provenances.map((s) => (
+                <li>
+                  <span>{s.provenance || 'Accès direct'}</span>
+                  <span class="jauge" style={`--p: ${Math.round((s.visiteurs / totalProvenances) * 100)}%`} />
+                  <strong>{fmt(s.visiteurs)}</strong>
+                </li>
+              ))}
+            </ul>
+          )
+        }
+      </div>
+      <div class="carte">
+        <h2>Appareils</h2>
+        {
+          stats.appareils.length === 0 ? (
+            <p class="vide">Pas encore de données.</p>
+          ) : (
+            <ul class="types">
+              {stats.appareils.map((a) => (
+                <li>
+                  <span>{nomsAppareils[a.appareil] ?? a.appareil}</span>
+                  <span class="jauge" style={`--p: ${Math.round((a.visiteurs / totalAppareils) * 100)}%`} />
+                  <strong>{Math.round((a.visiteurs / totalAppareils) * 100)} %</strong>
+                </li>
+              ))}
+            </ul>
+          )
+        }
+      </div>
+    </div>
+  </section>
+
+  <p class="aide note">
+    Comptage sans cookie : un visiteur est compté une fois par jour, sans conserver son adresse IP. Les robots et les pages de l’admin ne sont
+    pas comptés. Les visites sont gardées 13 mois.
+  </p>
+</AdminLayout>
+
+<style>
+  .periodes {
+    display: flex;
+    gap: 0.25rem;
+    padding: 0.25rem;
+    border: 1px solid var(--a-ligne);
+    border-radius: 0.75rem;
+    background: var(--a-carte);
+  }
+  .periodes a {
+    padding: 0.45rem 0.8rem;
+    border-radius: 0.55rem;
+    color: inherit;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    text-decoration: none;
+  }
+  .periodes a[aria-current='page'] {
+    background: var(--c-noir);
+    color: var(--c-papier);
+  }
+  .apercu {
+    background: var(--c-noir);
+    border-color: var(--c-noir);
+    color: var(--c-papier);
+  }
+  .apercu .aide,
+  .apercu .vide {
+    color: var(--c-pierre);
+  }
+  .carte-tete {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+  .chiffres {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin: 0 0 1.25rem;
+  }
+  .chiffres div {
+    padding: 0.9rem 1rem;
+    border-radius: 0.9rem;
+    background: rgb(255 255 255 / 0.06);
+    text-align: center;
+  }
+  .chiffres .fort {
+    background: var(--c-or);
+    color: var(--c-noir);
+  }
+  .chiffres dt {
+    font-size: 0.8125rem;
+    opacity: 0.85;
+  }
+  .chiffres dd {
+    margin: 0.15rem 0 0;
+    font-family: var(--f-titre);
+    font-size: 2rem;
+    line-height: 1;
+  }
+  .graph {
+    display: grid;
+    grid-template-columns: repeat(var(--n), minmax(0, 1fr));
+    gap: 2px;
+    align-items: end;
+    height: 13rem;
+    margin-bottom: 1.4rem;
+    padding-top: 0.5rem;
+    border-bottom: 1px solid rgb(255 255 255 / 0.15);
+  }
+  .barre {
+    position: relative;
+    display: grid;
+    grid-template-rows: 1fr 1.4rem;
+    height: 100%;
+    outline: none;
+  }
+  .colonne {
+    align-self: end;
+    justify-self: center;
+    width: min(100%, 2.5rem);
+    height: max(var(--h), 2px);
+    border-radius: 4px 4px 0 0;
+    background: var(--c-or);
+  }
+  .barre:hover .colonne,
+  .barre:focus-visible .colonne {
+    background: var(--c-or-vif);
+  }
+  .etiquette {
+    position: absolute;
+    bottom: -1.4rem;
+    left: 50%;
+    color: var(--c-pierre);
+    font-size: 0.75rem;
+    white-space: nowrap;
+    transform: translateX(-50%);
+  }
+  .bulle {
+    position: absolute;
+    bottom: 50%;
+    left: 50%;
+    z-index: 2;
+    display: none;
+    width: max-content;
+    max-width: 14rem;
+    padding: 0.5rem 0.7rem;
+    border-radius: 0.5rem;
+    background: var(--c-papier);
+    color: var(--c-noir);
+    font-size: 0.8125rem;
+    transform: translateX(-50%);
+    pointer-events: none;
+  }
+  .bulle strong {
+    display: block;
+  }
+  .bulle strong::first-letter {
+    text-transform: uppercase;
+  }
+  .barre:hover .bulle,
+  .barre:focus-visible .bulle {
+    display: block;
+  }
+  .barre:first-child .bulle {
+    left: 0;
+    transform: none;
+  }
+  .barre:last-child .bulle {
+    right: 0;
+    left: auto;
+    transform: none;
+  }
+  .bas {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) minmax(16rem, 1fr);
+    gap: 1.25rem;
+    align-items: start;
+  }
+  .colonne-droite {
+    display: grid;
+    gap: 1.25rem;
+  }
+  .tableau {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9375rem;
+  }
+  .tableau th {
+    padding: 0 0.25rem 0.6rem;
+    color: var(--a-doux);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    text-align: right;
+  }
+  .tableau th:first-child,
+  .tableau td:first-child {
+    text-align: left;
+  }
+  .tableau td {
+    padding: 0.6rem 0.25rem;
+    border-top: 1px solid var(--a-ligne);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  .tableau a {
+    color: inherit;
+  }
+  .types {
+    display: grid;
+    gap: 0.9rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .types li {
+    display: grid;
+    grid-template-columns: minmax(0, 8rem) minmax(0, 1fr) 3rem;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.9375rem;
+  }
+  .types li span:first-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .jauge {
+    height: 0.6rem;
+    border-radius: 1rem;
+    background: linear-gradient(90deg, var(--c-or) var(--p), var(--c-papier-2) var(--p));
+  }
+  .types strong {
+    text-align: right;
+  }
+  .note {
+    margin: 0;
+  }
+  @media (max-width: 64rem) {
+    .bas {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  @media (max-width: 40rem) {
+    .chiffres dd {
+      font-size: 1.5rem;
+    }
+  }
+</style>

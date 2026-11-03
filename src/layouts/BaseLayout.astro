@@ -78,6 +78,31 @@ const structured = [organizationJsonLd(Astro.site), ...(jsonLd ? (Array.isArray(
       import { initReveal } from '@/lib/reveal';
       initReveal();
     </script>
+    {
+      !noindex && (
+        <script is:inline>
+          (function () {
+            // Compteur de visites sans cookie (voir la page Confidentialité).
+            function compter() {
+              try {
+                fetch('/api/visite', {
+                  method: 'POST',
+                  keepalive: true,
+                  headers: { 'content-type': 'application/json' },
+                  body: JSON.stringify({ chemin: location.pathname, provenance: document.referrer }),
+                }).catch(function () {});
+              } catch {
+                // La mesure d’audience ne doit jamais gêner la page.
+              }
+            }
+            if (navigator.webdriver) return;
+            // Page préchargée en arrière-plan : on ne compte qu'à l'affichage réel.
+            if (document.prerendering) document.addEventListener('prerenderingchange', compter, { once: true });
+            else compter();
+          })();
+        </script>
+      )
+    }
   </body>
 </html>
 
