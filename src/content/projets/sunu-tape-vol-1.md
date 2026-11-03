@@ -5,7 +5,9 @@ period: "2015"
 year: 2015
 place: Studio Key I Am, Rufisque
 summary: "Compilation gratuite de 23 titres offerte pour le premier anniversaire du studio Key I Am."
-missing: [Lien Audiomack officiel, Visuel de la pochette]
+cover: ../../assets/photos/sunu-tape-cover.jpg
+coverAlt: Pochette de la compilation Sunu Tape, avec la liste des artistes, affichée au studio Key I Am
+missing: [Lien Audiomack officiel]
 ---
 
 Pour le premier anniversaire de Key I Am, le label a offert une compilation gratuite de 23 titres, téléchargeable sur Audiomack. Elle a mis en lumière des artistes de Rufisque, Thiès, Dakar, Bargny et des zones rurales (Keur Ndiaye Lo, Sangalkam).
