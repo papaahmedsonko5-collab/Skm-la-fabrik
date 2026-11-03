@@ -155,7 +155,7 @@ export function flashFrom(url: URL): { type: 'ok' | 'erreur'; text: string } | n
     publication: 'La publication n’a pas pu être lancée. Réessayez dans un instant.',
     hook: 'Le bouton Publier n’est pas encore configuré (DEPLOY_HOOK_URL manquant dans Vercel).',
     introuvable: 'Élément introuvable.',
-    import: 'Import annulé : l’admin contient déjà des actualités ou des projets.',
+    photos: 'Certaines photos n’ont pas pu être copiées. Les fiches concernées restent en brouillon : relancez « Récupérer les photos ».',
   };
   if (err) return { type: 'erreur', text: erreurs[err] ?? 'Une erreur est survenue.' };
   return null;
