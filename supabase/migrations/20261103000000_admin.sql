@@ -23,7 +23,8 @@ as $$
   select exists (select 1 from public.admins where user_id = (select auth.uid()));
 $$;
 revoke all on function public.is_admin() from public;
-grant execute on function public.is_admin() to authenticated;
+-- anon aussi : la fonction est évaluée dans les règles de lecture publiques (elle renvoie alors false).
+grant execute on function public.is_admin() to anon, authenticated;
 
 create policy "admins lisent la liste" on public.admins
   for select to authenticated using ((select public.is_admin()));
@@ -206,9 +207,12 @@ insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_typ
 values ('medias', 'medias', true, 15728640, array['image/jpeg', 'image/png', 'image/webp', 'image/avif'])
 on conflict (id) do nothing;
 
+create policy "admins listent les médias" on storage.objects
+  for select to authenticated using (bucket_id = 'medias' and (select public.is_admin()));
 create policy "admins ajoutent des médias" on storage.objects
   for insert to authenticated with check (bucket_id = 'medias' and (select public.is_admin()));
 create policy "admins modifient des médias" on storage.objects
-  for update to authenticated using (bucket_id = 'medias' and (select public.is_admin()));
+  for update to authenticated using (bucket_id = 'medias' and (select public.is_admin()))
+  with check (bucket_id = 'medias' and (select public.is_admin()));
 create policy "admins suppriment des médias" on storage.objects
   for delete to authenticated using (bucket_id = 'medias' and (select public.is_admin()));
