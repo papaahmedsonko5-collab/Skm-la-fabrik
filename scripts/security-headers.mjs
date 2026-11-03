@@ -69,12 +69,8 @@ config.routes = config.routes ?? [];
 // Relancer le script remplace la règle existante au lieu de la dupliquer.
 config.routes = config.routes.filter((r) => !r.headers?.['Content-Security-Policy']);
 config.routes.unshift({ src: '/(.*)', headers: securityHeaders, continue: true });
-// Tâches planifiées (vercel.json › crons) : la sortie Vercel les attend dans config.json.
-try {
-  const { crons } = JSON.parse(await readFile('vercel.json', 'utf8'));
-  if (Array.isArray(crons) && crons.length > 0) config.crons = crons;
-} catch {
-  // Pas de vercel.json : aucune tâche planifiée.
-}
+// Tâche planifiée Vercel (sortie « Build Output » : déclarée ici, pas dans vercel.json).
+// Chaque jour à 6 h UTC : entretien de la base, qui garde aussi Supabase actif.
+config.crons = [{ path: '/api/entretien', schedule: '0 6 * * *' }];
 await writeFile(CONFIG, JSON.stringify(config, null, 2));
 console.log(`[security-headers] ${Object.keys(securityHeaders).length} en-têtes ajoutés, ${hashes.size} script(s) en ligne autorisé(s) par empreinte.`);
