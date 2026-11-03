@@ -48,6 +48,16 @@ import rff25Loge5 from '@/assets/photos/rff2025-loge-5.jpg';
 import rff25Loge6 from '@/assets/photos/rff2025-loge-6.jpg';
 import rff25Loge7 from '@/assets/photos/rff2025-loge-7.jpg';
 import rff25Loge8 from '@/assets/photos/rff2025-loge-8.jpg';
+import lieuCouloirStudio from '@/assets/photos/lieu/couloir-studio.jpg';
+import lieuCabine from '@/assets/photos/lieu/studio-cabine.jpg';
+import lieuPoste from '@/assets/photos/lieu/poste-production.jpg';
+import lieuInterface from '@/assets/photos/lieu/interface-audio.jpg';
+import lieuClavier from '@/assets/photos/lieu/clavier.jpg';
+import lieuOrgue from '@/assets/photos/lieu/orgue.jpg';
+import lieuFormation from '@/assets/photos/lieu/salle-formation.jpg';
+import lieuBureau from '@/assets/photos/lieu/bureau.jpg';
+import lieuPorte from '@/assets/photos/lieu/porte-creatif.jpg';
+import lieuGraffiti from '@/assets/photos/lieu/couloir-graffiti.jpg';
 
 export interface Photo {
   readonly src: ImageMetadata;
@@ -102,3 +112,25 @@ export const photos = {
   rff25Loge8: p(rff25Loge8, 'Artiste sur la scène de la Loge des Poètes, Rio Fresco Fest 2025'),
   rff25Site: p(rff25Site, 'Le site du village culturel avant son aménagement, au pied des murs anciens'),
 } as const satisfies Record<string, Photo>;
+
+/** Les espaces de SKM La Fabrik (3ᵉ étage, Cité Senelec), photos de l'équipe, février 2026. */
+const lieuStudio = {
+  cabine: p(lieuCabine, 'Le Studio Key I Am sous lumière bleue : poste de mixage, panneaux acoustiques et cabine d’enregistrement'),
+  poste: p(lieuPoste, 'Poste de production : écran au logo SKM La Fabrik, enceintes de monitoring, pads et clavier maître'),
+  interface: p(lieuInterface, 'Interface audio du studio devant l’écran au logo SKM La Fabrik'),
+};
+/** Trois vues du Studio Key I Am, pour la page Sunu Kaddu Music. */
+export const studioPhotos = [lieuStudio.cabine, lieuStudio.poste, lieuStudio.interface];
+
+export const lieu = [
+  { ...p(lieuCouloirStudio, 'Couloir de SKM La Fabrik, entrée du Studio Key I Am et affiche « Chaque pas raconte une histoire »'), large: true },
+  { ...lieuStudio.cabine, large: true },
+  lieuStudio.poste,
+  { ...p(lieuFormation, 'Salle de co-working et de formation, mur de citations peintes à la main'), large: true },
+  p(lieuPorte, 'Affiche « Nul n’entre ici s’il n’est créatif » sur une porte en bois au logo SKM La Fabrik'),
+  lieuStudio.interface,
+  p(lieuClavier, 'Clavier du studio sous lumière bleue'),
+  p(lieuOrgue, 'Orgue électronique ancien devant un panneau acoustique'),
+  p(lieuGraffiti, 'Couloir aux murs graffés menant à l’accueil de SKM La Fabrik'),
+  p(lieuBureau, 'Bureau de l’équipe : trophées, attestations, affiches d’artistes et visuel « Arts & Community »'),
+];

@@ -5,7 +5,7 @@ import Button from '@/components/Button.astro';
 import Carousel from '@/components/Carousel.astro';
 import VideoEmbed from '@/components/VideoEmbed.astro';
 import logoSk from '@/assets/brand/logo-sunu-kaddu.png';
-import { photos } from '@/data/photos';
+import { photos, studioPhotos } from '@/data/photos';
 import { heritage, label, productions, scenes, sunuTapeArtists } from '@/data/music';
 import { offresArtistes, tarifsSource } from '@/data/offres';
 import { rff } from '@/data/rff';
@@ -228,6 +228,16 @@ const loge = [photos.rff25Loge1, photos.rff25Loge2, photos.rff25Loge4, photos.rf
         </div>
         <p class="doux">Création, mixage, mastering et promotion des talents locaux, au sein de SKM La Fabrik.</p>
       </header>
+      <ul class="studio-photos" aria-label="Le Studio Key I Am" data-reveal>
+        {
+          studioPhotos.map((ph) => (
+            <li>
+              <Image src={ph.src} alt={ph.alt} widths={[400, 640, 960]} sizes="(min-width: 56rem) 30vw, 100vw" quality={85} />
+            </li>
+          ))
+        }
+      </ul>
+      <p class="studio-lien"><a href="/a-propos#le-lieu">Voir tous les espaces de la Fabrik</a></p>
       <div class="offres">
         {
           offresArtistes.map((o, i) => (
@@ -263,6 +273,37 @@ const loge = [photos.rff25Loge1, photos.rff25Loge2, photos.rff25Loge4, photos.rf
 </BaseLayout>
 
 <style>
+  .studio-photos {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr;
+    gap: 0.75rem;
+    margin: 0 0 0.75rem;
+    padding: 0;
+    list-style: none;
+  }
+  .studio-photos img {
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: 0.75rem;
+  }
+  .studio-lien {
+    margin: 0 0 clamp(2rem, 1.5rem + 2vw, 3rem);
+  }
+  .studio-lien a {
+    color: var(--c-or);
+    font-weight: 600;
+    text-underline-offset: 0.2em;
+  }
+  @media (max-width: 40rem) {
+    .studio-photos {
+      grid-template-columns: 1fr 1fr;
+    }
+    .studio-photos li:first-child {
+      grid-column: 1 / -1;
+    }
+  }
   .section {
     padding-block: clamp(5rem, 3rem + 6vw, 7.5rem);
   }

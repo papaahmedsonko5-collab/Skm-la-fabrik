@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content';
 import type { AdminClient } from '@/lib/admin/supabase';
 import { slugify } from '@/lib/admin/data';
 import { galerieDepot } from '@/lib/galerie';
+import { cheminImport, photosEnAttente } from '@/lib/admin/photos-a-ajouter';
 
 export const prerender = false;
 
@@ -25,7 +26,7 @@ export const POST: APIRoute = async ({ locals, redirect }) => {
 
   const [{ data: actusDb }, { data: projetsDb }, { count: nPhotos }] = await Promise.all([
     supabase.from('actualites').select('slug, cover_path'),
-    supabase.from('projets').select('slug, cover_path, gallery'),
+    supabase.from('projets').select('slug, cover_path, gallery, updated_at'),
     supabase.from('photos').select('id', { count: 'exact', head: true }),
   ]);
   const actusExistantes = new Map((actusDb ?? []).map((r) => [r.slug as string, r]));
@@ -86,7 +87,7 @@ export const POST: APIRoute = async ({ locals, redirect }) => {
     const d = p.data;
     const existant = projetsExistants.get(p.id);
     const aDesPhotos = Boolean(d.cover) || d.gallery.length > 0;
-    if (existant && (existant.cover_path || (existant.gallery as unknown[]).length > 0)) continue;
+    if (existant && (!aDesPhotos || existant.cover_path || (existant.gallery as unknown[]).length > 0)) continue;
 
     const gallery: { path: string; alt: string }[] = [];
     for (const g of d.gallery) {
@@ -129,6 +130,33 @@ export const POST: APIRoute = async ({ locals, redirect }) => {
       if (!path) continue;
       await supabase.from('photos').insert({ path, alt: ph.alt, categorie: ph.categorie ?? 'Événements', large: Boolean(ph.large), position: position++ });
     }
+  }
+
+  // Photos de projets envoyées par l'équipe (public/import/projets).
+  // État lu avant l'import : une fiche modifiée à la main depuis l'envoi n'est pas touchée.
+  const { data: fiches } = await supabase.from('projets').select('slug, cover_path, gallery, updated_at');
+  const attente = photosEnAttente((projetsDb ?? []) as Parameters<typeof photosEnAttente>[0]);
+  for (const slug of new Set(attente.map((ph) => ph.slug))) {
+    const fiche = fiches!.find((f) => f.slug === slug)!;
+    let cover_path = fiche.cover_path as string | null;
+    const gallery = [...((fiche.gallery as { path: string; alt: string }[]) ?? [])];
+    for (const ph of attente.filter((x) => x.slug === slug)) {
+      try {
+        const res = await fetch(new URL(`/import/projets/${ph.fichier}`, origine), { signal: AbortSignal.timeout(20000) });
+        if (!res.ok || !(res.headers.get('content-type') ?? '').startsWith('image/')) throw new Error('photo illisible');
+        const path = cheminImport(ph.fichier);
+        const { error } = await supabase.storage
+          .from('medias')
+          .upload(path, await res.arrayBuffer(), { contentType: 'image/jpeg', upsert: true, cacheControl: '31536000' });
+        if (error) throw error;
+        if (ph.role === 'couverture') cover_path = path;
+        else gallery.push({ path, alt: ph.alt });
+      } catch {
+        echecs++;
+      }
+    }
+    const { error } = await supabase.from('projets').update({ cover_path, gallery }).eq('slug', slug);
+    if (error) echecs++;
   }
 
   return redirect(echecs > 0 ? '/admin?erreur=photos' : '/admin?ok=importe', 303);

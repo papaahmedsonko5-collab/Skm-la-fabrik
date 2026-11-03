@@ -1,5 +1,6 @@
 ---
 import AdminLayout from '@/layouts/AdminLayout.astro';
+import { photosEnAttente } from '@/lib/admin/photos-a-ajouter';
 import { flashFrom, formatDateHeure, objetLabel, statutLabels, type Demande } from '@/lib/admin/data';
 
 export const prerender = false;
@@ -10,7 +11,7 @@ const [demandesRes, nouvellesRes, actusRes, projetsRes, photosRes, recentRes, pu
   supabase.from('demandes').select('id', { count: 'exact', head: true }),
   supabase.from('demandes').select('id', { count: 'exact', head: true }).eq('statut', 'nouvelle'),
   supabase.from('actualites').select('id, draft, cover_path'),
-  supabase.from('projets').select('id, draft, cover_path, gallery'),
+  supabase.from('projets').select('id, slug, draft, cover_path, gallery, updated_at'),
   supabase.from('photos').select('id', { count: 'exact', head: true }),
   supabase.from('demandes').select('id, created_at, nom, objet, statut').order('created_at', { ascending: false }).limit(6),
   supabase.from('publications').select('created_at, user_email, ok').order('created_at', { ascending: false }).limit(1),
@@ -30,6 +31,8 @@ const derniere = pubRes.data?.[0];
 const sansPhotos =
   actus.filter((a) => !a.cover_path).length +
   projets.filter((p) => p.draft && !p.cover_path && (p.gallery as unknown[]).length === 0).length;
+// Photos de projets envoyées par l'équipe, pas encore copiées dans l'admin.
+const nouvellesPhotos = photosEnAttente(projets as Parameters<typeof photosEnAttente>[0]).length;
 
 // Demandes des six derniers mois, pour le graphique.
 const mois: { cle: string; label: string; n: number }[] = [];
@@ -108,7 +111,7 @@ const flash = flashFrom(Astro.url);
         </div>
         <button class="bouton or" type="submit" data-confirm="Importer le contenu actuel du site dans l’admin ?">Importer le contenu du site</button>
       </form>
-    ) : sansPhotos > 0 || (photosRes.count ?? 0) === 0 ? (
+    ) : sansPhotos > 0 || nouvellesPhotos > 0 || (photosRes.count ?? 0) === 0 ? (
       <form method="post" action="/api/admin/importer" class="carte import">
         <div>
           <h2>Photos à récupérer</h2>
@@ -116,6 +119,7 @@ const flash = flashFrom(Astro.url);
             {sansPhotos > 0
               ? `${sansPhotos} fiche(s) importée(s) n’ont pas encore leurs photos. Elles restent en brouillon pour ne pas apparaître sans image sur le site. `
               : ''}
+            {nouvellesPhotos > 0 ? `${nouvellesPhotos} nouvelle(s) photo(s) de projets à ajouter. ` : ''}
             {(photosRes.count ?? 0) === 0 ? 'La galerie photo du site n’est pas encore dans l’admin. ' : ''}
             Rien d’autre n’est modifié.
           </p>

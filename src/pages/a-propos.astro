@@ -5,7 +5,8 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
 import Button from '@/components/Button.astro';
 import Carousel from '@/components/Carousel.astro';
 import { team } from '@/data/site';
-import { photos } from '@/data/photos';
+import Gallery from '@/components/Gallery.astro';
+import { lieu, photos } from '@/data/photos';
 import { timeline, values, cycle } from '@/data/histoire';
 
 // Les deux tournants de l'histoire, mis en avant dans la frise.
@@ -178,11 +179,31 @@ const tournants = ['2014', '2024'];
     </div>
   </section>
 
+  <section class="theme-blanc section" aria-labelledby="lieu" id="le-lieu">
+    <div class="wrap">
+      <div class="tete-ligne" data-reveal>
+        <div>
+          <p class="index"><span>06</span> Le lieu</p>
+          <h2 id="lieu" class="titre titre-h2">Bienvenue à la Fabrik</h2>
+        </div>
+        <p class="doux tete-chapeau">
+          {t('coordonnees.adresse')}, {t('coordonnees.ville')}. Le Studio Key I Am, avec sa cabine d’enregistrement et son unité de production complète, une
+          salle de co-working et de formation, et des espaces de création.
+        </p>
+      </div>
+      <Gallery items={lieu} label="Photos des espaces de SKM La Fabrik" />
+      <div class="lieu-actions" data-reveal>
+        <Button href="/contact?objet=production">Réserver le studio</Button>
+        <Button href="/contact" variant="contour">Venir nous voir</Button>
+      </div>
+    </div>
+  </section>
+
   <section class="theme-sombre section" aria-labelledby="equipe">
     <div class="wrap">
       <div class="tete-ligne" data-reveal>
         <div>
-          <p class="index"><span>06</span> Les architectes</p>
+          <p class="index"><span>07</span> Les architectes</p>
           <h2 id="equipe" class="titre titre-h2">L’équipe dirigeante</h2>
         </div>
       </div>
@@ -211,6 +232,12 @@ const tournants = ['2014', '2024'];
 </BaseLayout>
 
 <style>
+  .lieu-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: clamp(1.5rem, 1rem + 1.5vw, 2.5rem);
+  }
   .section {
     padding-block: clamp(5rem, 3rem + 6vw, 7.5rem);
   }

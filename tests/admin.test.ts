@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { lireLienYoutube, slugify } from '../src/lib/admin/data';
+import { cheminImport, photosAAjouter, photosEnAttente } from '@/lib/admin/photos-a-ajouter';
 
 describe('lireLienYoutube', () => {
   it('reconnaît les liens de vidéo', () => {
@@ -28,5 +29,30 @@ describe('lireLienYoutube', () => {
 describe('slugify', () => {
   it('produit un identifiant d’URL propre', () => {
     expect(slugify('Rio Fresco Fest 2026 : Héritages & Horizons')).toBe('rio-fresco-fest-2026-heritages-horizons');
+  });
+});
+
+describe('photosEnAttente', () => {
+  const avant = '2026-11-03T09:00:56Z';
+  it('liste les photos manquantes des fiches non modifiées', () => {
+    const r = photosEnAttente([
+      { slug: 'handischool-day', cover_path: 'projets/x.jpg', gallery: [], updated_at: avant },
+      { slug: 'concours-art-scolaire-2024', cover_path: null, gallery: [], updated_at: avant },
+    ]);
+    expect(r).toHaveLength(photosAAjouter.length);
+  });
+  it('ne remet rien sur une fiche modifiée depuis', () => {
+    expect(photosEnAttente([{ slug: 'handischool-day', cover_path: null, gallery: [], updated_at: '2026-11-03T10:00:00Z' }])).toHaveLength(0);
+  });
+  it('ignore les photos déjà copiées et une couverture existante', () => {
+    const r = photosEnAttente([
+      {
+        slug: 'concours-art-scolaire-2024',
+        cover_path: 'projets/autre.jpg',
+        gallery: [{ path: cheminImport('nio-far-exposition-2024.jpg'), alt: '' }],
+        updated_at: avant,
+      },
+    ]);
+    expect(r).toHaveLength(0);
   });
 });
