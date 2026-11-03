@@ -42,6 +42,8 @@ tests/                         tests unitaires (Vitest)
 Les actualités, les projets, les photos et les textes des pages se gèrent depuis `/admin`, ainsi que les demandes reçues par le formulaire. Les données sont dans Supabase (projet « SKM La Fabrik »), protégées par RLS : le public ne lit que le contenu publié et ne peut qu’envoyer une demande.
 
 - **Accès** : un compte créé dans Supabase › Authentication › Users, puis ajouté à la table `public.admins`.
+- **Connexion cachée** : sans session, toute adresse `/admin` répond « page introuvable ». La page de connexion s’ouvre par le lien secret `/admin?cle=<ADMIN_ENTREE>`, puis reste accessible 30 jours sur cet appareil.
+- **Double authentification** : obligatoire (application Google ou Microsoft Authenticator). La base elle-même refuse l’accès sans ce second facteur. Téléphone perdu : dans Supabase › Authentication › Users, ouvrir le compte et supprimer son facteur MFA ; il sera redemandé à la connexion suivante.
 - **Publier** : les modifications sont enregistrées tout de suite, mais le site public change après « Publier le site » (tableau de bord), qui relance la construction via le Deploy Hook Vercel.
 - **Construction** : `scripts/sync-cms.mjs` récupère le contenu publié dans `src/.cms/` (ignoré par Git). Tant qu’une collection est vide dans l’admin, les fichiers de `src/content/` restent utilisés.
 - **Schéma** : `supabase/migrations/`.
@@ -65,6 +67,7 @@ Les actualités, les projets, les photos et les textes des pages se gèrent depu
 | `PUBLIC_SUPABASE_URL` | Adresse du projet Supabase (publique). |
 | `PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Clé publiable Supabase (publique, limitée par RLS). |
 | `DEPLOY_HOOK_URL` | Deploy Hook Vercel du bouton « Publier le site » (secret). |
+| `ADMIN_ENTREE` | Mot secret du lien de connexion admin (secret). |
 
 Avec Supabase configuré, les demandes arrivent dans l’admin ; Resend ajoute alors une notification par e-mail. Sans Supabase ni Resend, le formulaire répond proprement qu’il est indisponible et invite à écrire par e-mail. Aucune clé ne doit être commitée : `.env` est ignoré par Git.
 

@@ -30,6 +30,8 @@ export default defineConfig({
       PUBLIC_SUPABASE_PUBLISHABLE_KEY: envField.string({ context: 'server', access: 'public', optional: true }),
       /** URL du « Deploy Hook » Vercel, déclenchée par le bouton Publier de l'admin. */
       DEPLOY_HOOK_URL: envField.string({ context: 'server', access: 'secret', optional: true }),
+      // Lien secret d'accès à la connexion admin : /admin?cle=<ADMIN_ENTREE>.
+      ADMIN_ENTREE: envField.string({ context: 'server', access: 'secret', optional: true }),
     },
   },
   prefetch: { prefetchAll: true, defaultStrategy: 'hover' },

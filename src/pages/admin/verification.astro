@@ -1,0 +1,42 @@
+---
+import AdminLayout from '@/layouts/AdminLayout.astro';
+import AuthCard from '@/components/admin/AuthCard.astro';
+
+export const prerender = false;
+
+// Deuxième étape : code à 6 chiffres de l'application d'authentification.
+const supabase = Astro.locals.supabase!;
+const { data: facteurs } = await supabase.auth.mfa.listFactors();
+const totp = facteurs?.totp?.find((f) => f.status === 'verified');
+if (!totp) return Astro.redirect('/admin/securite', 303);
+
+const { data: niveau } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+if (niveau?.currentLevel === 'aal2') return Astro.redirect('/admin', 303);
+
+let flash: { type: 'ok' | 'erreur'; text: string } | null = null;
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const code = String(form.get('code') ?? '').replace(/\s+/g, '');
+  if (!/^\d{6}$/.test(code)) flash = { type: 'erreur', text: 'Le code contient 6 chiffres.' };
+  else {
+    const { error } = await supabase.auth.mfa.challengeAndVerify({ factorId: totp.id, code });
+    if (!error) return Astro.redirect('/admin', 303);
+    flash = { type: 'erreur', text: 'Code incorrect ou expiré. Utilisez le code affiché en ce moment dans l’application.' };
+  }
+}
+---
+
+<AdminLayout title="Code de sécurité" auth>
+  <AuthCard title="Code de sécurité" intro="Ouvrez votre application d’authentification et saisissez le code à 6 chiffres affiché pour SKM La Fabrik." flash={flash} etape={2}>
+    <form method="post">
+      <label>
+        Code à 6 chiffres
+        <input type="text" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9 ]{6,7}" maxlength="7" required autofocus />
+      </label>
+      <button class="bouton or" type="submit">Valider</button>
+    </form>
+    <form method="post" action="/admin/deconnexion">
+      <button class="bouton contour" type="submit">Annuler et se déconnecter</button>
+    </form>
+  </AuthCard>
+</AdminLayout>

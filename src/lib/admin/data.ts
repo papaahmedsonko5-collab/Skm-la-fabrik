@@ -164,6 +164,7 @@ export function flashFrom(url: URL): { type: 'ok' | 'erreur'; text: string } | n
     publie: 'Publication lancée : le site sera à jour dans une à deux minutes.',
     statut: 'Statut mis à jour.',
     importe: 'Contenu actuel du site importé. Vérifiez-le, puis publiez.',
+    securite: 'Double authentification activée. Gardez l’application sur votre téléphone : elle sera demandée à chaque connexion.',
     ajoute: 'Photos ajoutées. Ajoutez une description à chacune, puis publiez.',
   };
   if (ok && messages[ok]) return { type: 'ok', text: messages[ok] };

@@ -1,0 +1,124 @@
+---
+import AdminLayout from '@/layouts/AdminLayout.astro';
+import AuthCard from '@/components/admin/AuthCard.astro';
+
+export const prerender = false;
+
+// Mise en place obligatoire de la double authentification (application
+// d'authentification : Google Authenticator, Microsoft Authenticator…).
+const supabase = Astro.locals.supabase!;
+const { data: facteurs } = await supabase.auth.mfa.listFactors();
+if (facteurs?.totp?.some((f) => f.status === 'verified')) return Astro.redirect('/admin/verification', 303);
+
+/** Le QR code arrive en SVG « data:image/svg+xml;utf-8,… » : on le réencode en base64, lu par tous les navigateurs. */
+function qrEnBase64(v: string): string {
+  let svg = v;
+  // Retire le ou les préfixes « data: » éventuels pour retrouver le SVG lui-même.
+  for (let m = svg.match(/^data:image\/svg\+xml;[^,]*,(.*)$/s); m; m = svg.match(/^data:image\/svg\+xml;[^,]*,(.*)$/s)) {
+    svg = m[1]!;
+    try {
+      svg = decodeURIComponent(svg);
+    } catch {
+      /* déjà décodé */
+    }
+  }
+  if (!svg.trimStart().startsWith('<svg')) return v;
+  return `data:image/svg+xml;base64,${Buffer.from(svg, 'utf8').toString('base64')}`;
+}
+
+let flash: { type: 'ok' | 'erreur'; text: string } | null = null;
+let factorId = '';
+let qr = '';
+let secret = '';
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  factorId = String(form.get('factorId') ?? '');
+  // Même QR code qu'au premier affichage, pour ne pas devoir rescanner après une faute de frappe.
+  qr = String(form.get('qr') ?? '');
+  secret = String(form.get('secret') ?? '');
+  const code = String(form.get('code') ?? '').replace(/\s+/g, '');
+  const enCours = facteurs?.all?.find((f) => f.id === factorId && f.status === 'unverified');
+  if (!enCours || !qr.startsWith('data:image/svg+xml')) {
+    factorId = '';
+    flash = { type: 'erreur', text: 'La mise en place a expiré. Scannez le nouveau QR code.' };
+  } else if (!/^\d{6}$/.test(code)) flash = { type: 'erreur', text: 'Le code contient 6 chiffres.' };
+  else {
+    const { error } = await supabase.auth.mfa.challengeAndVerify({ factorId, code });
+    if (!error) return Astro.redirect('/admin?ok=securite', 303);
+    flash = { type: 'erreur', text: 'Code incorrect. Vérifiez que l’heure du téléphone est réglée automatiquement, puis réessayez.' };
+  }
+}
+
+if (!factorId) {
+  // Nouveau QR code : on retire d'abord les essais non terminés.
+  for (const f of facteurs?.all ?? []) if (f.status === 'unverified') await supabase.auth.mfa.unenroll({ factorId: f.id });
+  const { data, error } = await supabase.auth.mfa.enroll({ factorType: 'totp', friendlyName: `SKM La Fabrik ${Date.now().toString(36)}` });
+  if (error || !data) flash = { type: 'erreur', text: 'Impossible de préparer la double authentification. Réessayez dans un instant.' };
+  else {
+    factorId = data.id;
+    qr = qrEnBase64(data.totp.qr_code);
+    secret = data.totp.secret;
+  }
+}
+---
+
+<AdminLayout title="Double authentification" auth>
+  <AuthCard
+    title="Double authentification"
+    intro="Obligatoire pour l’espace admin. Une seule fois : ensuite, chaque connexion demandera le code affiché sur votre téléphone."
+    flash={flash}
+    etape={2}
+  >
+    <ol class="aide etapes">
+      <li>Installez <strong>Google Authenticator</strong> ou <strong>Microsoft Authenticator</strong> sur votre téléphone.</li>
+      <li>Dans l’application, ajoutez un compte en scannant ce QR code.</li>
+      <li>Saisissez le code à 6 chiffres qui s’affiche.</li>
+    </ol>
+    {
+      qr && (
+        <div class="qr">
+          <img src={qr} alt="QR code à scanner avec l’application d’authentification" width="180" height="180" />
+          <p class="aide">
+            Pas de lecteur de QR code ? Saisissez cette clé dans l’application : <code>{secret}</code>
+          </p>
+        </div>
+      )
+    }
+    <form method="post">
+      <input type="hidden" name="factorId" value={factorId} />
+      <input type="hidden" name="qr" value={qr} />
+      <input type="hidden" name="secret" value={secret} />
+      <label>
+        Code à 6 chiffres
+        <input type="text" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9 ]{6,7}" maxlength="7" required />
+      </label>
+      <button class="bouton or" type="submit">Activer</button>
+    </form>
+  </AuthCard>
+</AdminLayout>
+
+<style>
+  .etapes {
+    display: grid;
+    gap: 0.35rem;
+    margin: 0;
+    padding-left: 1.2rem;
+  }
+  .qr {
+    display: grid;
+    justify-items: center;
+    gap: 0.5rem;
+    text-align: center;
+  }
+  .qr img {
+    padding: 0.5rem;
+    border: 1px solid var(--a-ligne);
+    border-radius: 0.75rem;
+    background: #fff;
+  }
+  .qr code {
+    word-break: break-all;
+    font-size: 0.85rem;
+  }
+</style>

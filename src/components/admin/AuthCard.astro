@@ -1,0 +1,175 @@
+---
+import { Image } from 'astro:assets';
+import logo from '@/assets/brand/logo-skm-la-fabrik.png';
+import { photos } from '@/data/photos';
+
+export interface Props {
+  title: string;
+  intro?: string;
+  flash?: { type: 'ok' | 'erreur'; text: string } | null;
+  /** Étape affichée dans le panneau photo (1 : mot de passe, 2 : code). */
+  etape?: 1 | 2;
+}
+const { title, intro, flash = null, etape = 1 } = Astro.props;
+---
+
+<div class="auth-carte">
+  <div class="auth-visuel">
+    <Image src={photos.rffFoule.src} alt="" widths={[640, 960, 1280]} sizes="(min-width: 56rem) 32rem, 100vw" loading="eager" />
+    <div class="auth-voile"></div>
+    <div class="auth-marque">
+      <Image src={logo} alt="SKM La Fabrik" width={110} />
+    </div>
+    <div class="auth-texte">
+      <p class="auth-titre">Espace admin</p>
+      <p>Demandes, actualités, projets, photos et textes du site.</p>
+      <ol class="auth-etapes" aria-label="Étapes de connexion">
+        <li aria-current={etape === 1 ? 'step' : undefined}>Mot de passe</li>
+        <li aria-current={etape === 2 ? 'step' : undefined}>Code de sécurité</li>
+      </ol>
+    </div>
+  </div>
+  <div class="auth-form">
+    <div class="auth-tete">
+      <h1>{title}</h1>
+      {intro && <p class="aide">{intro}</p>}
+    </div>
+    {
+      flash && (
+        <p class:list={['flash', flash.type]} role={flash.type === 'erreur' ? 'alert' : 'status'}>
+          {flash.text}
+        </p>
+      )
+    }
+    <slot />
+  </div>
+</div>
+
+<style>
+  .auth-carte {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    min-height: min(40rem, calc(100svh - 2.5rem));
+    overflow: hidden;
+    border-radius: 1.5rem;
+    background: var(--a-carte);
+    box-shadow: 0 1.5rem 4rem rgb(10 10 10 / 0.12);
+  }
+  .auth-visuel {
+    position: relative;
+    margin: 0.75rem;
+    overflow: hidden;
+    border-radius: 1.1rem;
+    background: var(--c-noir);
+    color: var(--c-papier);
+  }
+  .auth-visuel > :global(img) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .auth-voile {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgb(10 10 10 / 0.55) 0%, rgb(10 10 10 / 0.15) 40%, rgb(10 10 10 / 0.92) 100%);
+  }
+  .auth-marque {
+    position: absolute;
+    top: 1.5rem;
+    left: 1.5rem;
+  }
+  .auth-texte {
+    position: absolute;
+    right: 1.75rem;
+    bottom: 1.75rem;
+    left: 1.75rem;
+    display: grid;
+    gap: 0.5rem;
+  }
+  .auth-texte p {
+    margin: 0;
+    color: rgb(244 239 230 / 0.85);
+  }
+  .auth-texte .auth-titre {
+    color: var(--c-or);
+    font-family: var(--f-titre);
+    font-size: clamp(2rem, 1.5rem + 2vw, 3rem);
+    line-height: 1;
+    text-transform: uppercase;
+  }
+  .auth-etapes {
+    display: flex;
+    gap: 1.25rem;
+    margin: 0.75rem 0 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: etape;
+    font-size: 0.875rem;
+    color: rgb(244 239 230 / 0.6);
+  }
+  .auth-etapes li {
+    counter-increment: etape;
+  }
+  .auth-etapes li::before {
+    content: counter(etape) '. ';
+  }
+  .auth-etapes li[aria-current='step'] {
+    color: var(--c-or);
+    font-weight: 700;
+  }
+  .auth-form {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1.25rem;
+    width: min(100%, 24rem);
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem;
+  }
+  .auth-tete h1 {
+    margin: 0;
+    font-family: var(--f-texte);
+    font-size: clamp(1.75rem, 1.4rem + 1.2vw, 2.4rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    text-transform: none;
+  }
+  .auth-tete p {
+    margin: 0.4rem 0 0;
+  }
+  .auth-form :global(form) {
+    display: grid;
+    gap: 1rem;
+  }
+  .auth-form :global(label) {
+    display: grid;
+    gap: 0.4rem;
+    font-weight: 600;
+  }
+  .auth-form :global(.bouton) {
+    width: 100%;
+    min-height: 3rem;
+  }
+  @media (max-width: 56rem) {
+    .auth-carte {
+      grid-template-columns: minmax(0, 1fr);
+      min-height: 0;
+    }
+    .auth-visuel {
+      min-height: 15rem;
+    }
+    .auth-marque :global(img) {
+      width: 80px;
+      height: auto;
+    }
+    .auth-texte p:not(.auth-titre),
+    .auth-etapes {
+      display: none;
+    }
+    .auth-form {
+      padding: 1.75rem 1.25rem 2.25rem;
+    }
+  }
+</style>
