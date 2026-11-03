@@ -34,6 +34,9 @@ const structured = [organizationJsonLd(Astro.site), ...(jsonLd ? (Array.isArray(
 <html lang="fr" data-tone={tone}>
   <head>
     <meta charset="utf-8" />
+    <Fragment set:html={'<!-- Imaginé et signé par PPS the Writah · SKM La Fabrik · Rufisque, Sénégal -->'} />
+    <meta name="author" content="PPS the Writah" />
+    <link rel="author" href="/humans.txt" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
@@ -77,6 +80,8 @@ const structured = [organizationJsonLd(Astro.site), ...(jsonLd ? (Array.isArray(
     <script>
       import { initReveal } from '@/lib/reveal';
       initReveal();
+      // Signature, visible seulement dans la console des développeurs.
+      console.info('%cSKM La Fabrik%c\nImaginé et signé par PPS the Writah', 'font:700 16px sans-serif;color:#c9a23a', 'font:12px sans-serif');
     </script>
     {
       !noindex && (
