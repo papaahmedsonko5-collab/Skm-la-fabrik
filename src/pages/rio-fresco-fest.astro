@@ -1,5 +1,5 @@
 ---
-import { Image } from 'astro:assets';
+import { Image, getImage } from 'astro:assets';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import Button from '@/components/Button.astro';
 import Carousel from '@/components/Carousel.astro';
@@ -8,6 +8,12 @@ import Stats from '@/components/Stats.astro';
 import VideoEmbed from '@/components/VideoEmbed.astro';
 import logoRff2025 from '@/assets/brand/logo-rff-2025.png';
 import logoRff from '@/assets/brand/logo-rio-fresco-fest.png';
+import afficheBandeau from '@/assets/photos/rff2026/affiche-bandeau.jpg';
+import afficheDimanche from '@/assets/photos/rff2026/affiche-dimanche.jpg';
+import afficheLoge from '@/assets/photos/rff2026/affiche-loge-poetes.jpg';
+import affichePrincipale from '@/assets/photos/rff2026/affiche-principale.jpg';
+import afficheSamedi from '@/assets/photos/rff2026/affiche-samedi.jpg';
+import afficheVillage from '@/assets/photos/rff2026/affiche-village-terre.jpg';
 import { photos } from '@/data/photos';
 import { rff2026Stats, rffPartners, site } from '@/data/site';
 import { edition2025, horizon2027, piliers, rayonnement, rff } from '@/data/rff';
@@ -50,6 +56,18 @@ const gallery = [
   photos.rffDigue,
   photos.sceneDanse,
 ];
+
+
+const affiches2026 = await Promise.all(
+  [
+    { src: affichePrincipale, alt: 'Affiche du Rio Fresco Fest 2026, du 10 au 14 juin à Rufisque, avec Baaba Maal parrain du festival et l’hommage à Adja Khar Mbaye' },
+    { src: afficheVillage, alt: 'Affiche des mercredi 10 et jeudi 11 juin : Village & Terre, action verte, Green Lab et ouverture du village' },
+    { src: afficheSamedi, alt: 'Affiche du samedi 13 juin : Loge des Poètes, parade, street art et méga concert' },
+    { src: afficheLoge, alt: 'Affiche du concert Loge des Poètes du samedi 13 juin, avec la liste des artistes' },
+    { src: afficheDimanche, alt: 'Affiche du dimanche 14 juin : tournois, conférence sur l’érosion côtière et veillée de clôture' },
+  ].map(async (a) => ({ ...a, full: (await getImage({ src: a.src, width: a.src.width, format: 'webp', quality: 88 })).src })),
+);
+const bandeauFull = (await getImage({ src: afficheBandeau, width: afficheBandeau.width, format: 'webp', quality: 88 })).src;
 
 const gallery2025 = [
   { ...photos.rff25Aerien, large: true },
@@ -157,6 +175,25 @@ const jsonLd = eventJsonLd(
           ))
         }
       </ol>
+
+      <div class="affiches" aria-labelledby="t-affiches">
+        <h3 id="t-affiches" class="titre titre-h3">Les affiches de l’édition</h3>
+        <a class="affiche affiche-bandeau" href={bandeauFull} target="_blank" rel="noopener">
+          <Image src={afficheBandeau} alt="Programme complet du Rio Fresco Fest 2026, du 10 au 14 juin au Boulodrome de Rufisque" widths={[640, 1100, 1600, 2400]} sizes="(min-width: 90rem) 84rem, 100vw" quality={85} />
+        </a>
+        <ul class="affiches-grille">
+          {
+            affiches2026.map((a) => (
+              <li>
+                <a class="affiche" href={a.full} target="_blank" rel="noopener">
+                  <Image src={a.src} alt={a.alt} widths={[360, 560, 900, 1200]} sizes="(min-width: 64rem) 20vw, (min-width: 40rem) 45vw, 100vw" quality={85} />
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+        <p class="affiches-note">Touchez une affiche pour l’ouvrir en grand.</p>
+      </div>
     </div>
   </section>
 
@@ -555,6 +592,40 @@ const jsonLd = eventJsonLd(
     --accent: var(--c-orange-profond);
   }
 
+  .affiches {
+    margin-top: clamp(3rem, 2rem + 4vw, 5rem);
+  }
+  .affiches h3 {
+    margin-bottom: 1.25rem;
+  }
+  .affiche {
+    display: block;
+    overflow: hidden;
+    border: 1px solid rgb(255 255 255 / 0.12);
+  }
+  .affiche :global(img) {
+    display: block;
+    width: 100%;
+    height: auto;
+    transition: transform 0.6s var(--ease);
+  }
+  .affiche:hover :global(img) {
+    transform: scale(1.02);
+  }
+  .affiches-grille {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr));
+    align-items: start;
+    gap: 1rem;
+    margin: 1rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .affiches-note {
+    margin-top: 0.75rem;
+    font-size: 0.875rem;
+    opacity: 0.75;
+  }
   .e25-tete {
     max-width: 50rem;
     margin-bottom: clamp(2.5rem, 2rem + 2vw, 4rem);
