@@ -1,12 +1,10 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import ContactEmail from '@/components/ContactEmail.astro';
+import ContactForm from '@/components/ContactForm.astro';
 import ContactWhatsapp from '@/components/ContactWhatsapp.astro';
 import PageIntro from '@/components/PageIntro.astro';
 import { site } from '@/data/site';
-import { LIMITS, contactObjectKeys, contactObjects } from '@/lib/contact';
-
-const objets = contactObjectKeys.map((k) => ({ key: k, ...contactObjects[k] }));
 ---
 
 <BaseLayout
@@ -20,92 +18,7 @@ const objets = contactObjectKeys.map((k) => ({ key: k, ...contactObjects[k] }));
   />
 
   <div class="wrap contact-grid">
-    <section id="formulaire" class="form-zone" aria-labelledby="t-form">
-      <h2 id="t-form" class="titre titre-h3">Votre demande</h2>
-
-      <div class="statut" role="status" aria-live="polite" data-status hidden></div>
-
-      <form method="post" action="/api/contact" novalidate data-contact-form>
-        <p class="obligatoire">Les champs marqués <span aria-hidden="true">*</span><span class="sr-only">d’un astérisque</span> sont obligatoires.</p>
-
-        <div class="champ-double">
-          <div class="champ">
-            <label for="objet">Objet <span aria-hidden="true">*</span></label>
-            <select id="objet" name="objet" required aria-describedby="err-objet" data-objet>
-              {objets.map((o) => <option value={o.key}>{o.label}</option>)}
-            </select>
-            <p class="erreur" id="err-objet" data-error-for="objet"></p>
-          </div>
-          <div class="champ">
-            <label for="detail"><span data-detail-label>Précision</span> <span aria-hidden="true">*</span></label>
-            <select id="detail" name="detail" required aria-describedby="err-detail" data-detail>
-              {
-                objets.map((o) => (
-                  <optgroup label={o.label} data-group={o.key}>
-                    {o.options.map((opt) => (
-                      <option value={opt}>{opt}</option>
-                    ))}
-                  </optgroup>
-                ))
-              }
-            </select>
-            <p class="erreur" id="err-detail" data-error-for="detail"></p>
-          </div>
-        </div>
-
-        <div class="champ-double">
-          <div class="champ">
-            <label for="name">Nom et prénom <span aria-hidden="true">*</span></label>
-            <input id="name" name="name" type="text" autocomplete="name" required minlength="2" maxlength={LIMITS.name} aria-describedby="err-name" />
-            <p class="erreur" id="err-name" data-error-for="name"></p>
-          </div>
-          <div class="champ">
-            <label for="organization">Structure <span class="facultatif">(facultatif)</span></label>
-            <input id="organization" name="organization" type="text" autocomplete="organization" maxlength={LIMITS.organization} aria-describedby="err-organization" />
-            <p class="erreur" id="err-organization" data-error-for="organization"></p>
-          </div>
-        </div>
-
-        <div class="champ-double">
-          <div class="champ">
-            <label for="email">E-mail <span aria-hidden="true">*</span></label>
-            <input id="email" name="email" type="email" autocomplete="email" inputmode="email" required maxlength={LIMITS.email} aria-describedby="err-email" />
-            <p class="erreur" id="err-email" data-error-for="email"></p>
-          </div>
-          <div class="champ">
-            <label for="phone">Téléphone <span class="facultatif">(facultatif)</span></label>
-            <input id="phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" maxlength={LIMITS.phone} aria-describedby="err-phone" />
-            <p class="erreur" id="err-phone" data-error-for="phone"></p>
-          </div>
-        </div>
-
-        <div class="champ">
-          <label for="message">Votre message <span aria-hidden="true">*</span></label>
-          <textarea id="message" name="message" rows="7" required minlength={LIMITS.messageMin} maxlength={LIMITS.message} aria-describedby="aide-message err-message"></textarea>
-          <p class="aide" id="aide-message">Entre {LIMITS.messageMin} et {LIMITS.message} caractères. Précisez vos dates, votre lieu et votre budget si possible.</p>
-          <p class="erreur" id="err-message" data-error-for="message"></p>
-        </div>
-
-        <div class="piege" aria-hidden="true">
-          <label for="site_web">Ne pas remplir ce champ</label>
-          <input id="site_web" name="site_web" type="text" tabindex="-1" autocomplete="off" />
-        </div>
-        <input type="hidden" name="started_at" value="" data-started />
-
-        <div class="champ consent">
-          <input id="consent" name="consent" type="checkbox" value="oui" required aria-describedby="err-consent" />
-          <label for="consent">
-            J’accepte que mes informations soient utilisées pour répondre à ma demande, conformément à la
-            <a href="/confidentialite">politique de confidentialité</a>. <span aria-hidden="true">*</span>
-          </label>
-          <p class="erreur" id="err-consent" data-error-for="consent"></p>
-        </div>
-
-        <button type="submit" class="envoyer" data-submit>
-          <span data-submit-label>Envoyer la demande</span>
-        </button>
-      </form>
-    </section>
+    <ContactForm />
 
     <aside class="coordonnees" aria-labelledby="t-coord">
       <h2 id="t-coord" class="titre titre-h3">Nous trouver</h2>
@@ -161,123 +74,13 @@ const objets = contactObjectKeys.map((k) => ({ key: k, ...contactObjects[k] }));
           <li><a href="/activites#offre">L’offre entreprises & institutions</a></li>
           <li><a href="/sunu-kaddu-music#studio">Les formules studio</a></li>
           <li><a href="/rio-fresco-fest">Le Rio Fresco Fest 2027</a></li>
+          <li><a href="/accreditation">Demander une accréditation presse</a></li>
           <li><a href="/faq">Questions fréquentes</a></li>
         </ul>
       </div>
     </aside>
   </div>
 </BaseLayout>
-
-<script>
-  import { contactObjects, isContactObject } from '@/lib/contact';
-
-  const form = document.querySelector<HTMLFormElement>('[data-contact-form]');
-  const status = document.querySelector<HTMLElement>('[data-status]');
-
-  const messages: Record<string, { text: string; tone: 'ok' | 'ko' }> = {
-    envoye: { text: 'Merci, votre demande a bien été envoyée. L’équipe vous répondra par e-mail.', tone: 'ok' },
-    erreur: { text: 'Votre demande n’a pas pu être envoyée. Vérifiez les champs puis réessayez.', tone: 'ko' },
-    indisponible: { text: 'L’envoi en ligne est temporairement indisponible. Merci de nous écrire à sunukaddu@gmail.com.', tone: 'ko' },
-    limite: { text: 'Trop d’envois en peu de temps. Merci de réessayer dans quelques minutes.', tone: 'ko' },
-  };
-
-  function showStatus(text: string, tone: 'ok' | 'ko') {
-    if (!status) return;
-    status.hidden = false;
-    status.dataset['tone'] = tone;
-    status.textContent = text;
-  }
-
-  if (form) {
-    const objet = form.querySelector<HTMLSelectElement>('[data-objet]');
-    const detail = form.querySelector<HTMLSelectElement>('[data-detail]');
-    const detailLabel = form.querySelector<HTMLElement>('[data-detail-label]');
-    const started = form.querySelector<HTMLInputElement>('[data-started]');
-    const submit = form.querySelector<HTMLButtonElement>('[data-submit]');
-    const submitLabel = form.querySelector<HTMLElement>('[data-submit-label]');
-    if (started) started.value = String(Date.now());
-
-    /** N'affiche que les précisions de l'objet choisi. */
-    const syncDetail = (preferred?: string | null) => {
-      if (!objet || !detail) return;
-      const key = isContactObject(objet.value) ? objet.value : 'contact';
-      const conf = contactObjects[key];
-      detail.replaceChildren(
-        ...conf.options.map((opt) => {
-          const o = document.createElement('option');
-          o.value = opt;
-          o.textContent = opt;
-          return o;
-        }),
-      );
-      if (preferred && (conf.options as readonly string[]).includes(preferred)) detail.value = preferred;
-      if (detailLabel) detailLabel.textContent = conf.detailLabel;
-    };
-
-    const params = new URLSearchParams(window.location.search);
-    const wanted = params.get('objet');
-    if (objet && isContactObject(wanted)) objet.value = wanted;
-    syncDetail(params.get('detail'));
-    objet?.addEventListener('change', () => syncDetail());
-
-    const st = params.get('statut');
-    if (st && messages[st]) showStatus(messages[st].text, messages[st].tone);
-
-    const clearErrors = () => {
-      for (const p of form.querySelectorAll<HTMLElement>('[data-error-for]')) p.textContent = '';
-      for (const el of form.querySelectorAll('[aria-invalid]')) el.removeAttribute('aria-invalid');
-    };
-
-    const showErrors = (errors: Record<string, string>) => {
-      let first: HTMLElement | null = null;
-      for (const [field, msg] of Object.entries(errors)) {
-        const slot = form.querySelector<HTMLElement>(`[data-error-for="${field}"]`);
-        const input = form.querySelector<HTMLElement>(`[name="${field}"]`);
-        if (slot) slot.textContent = msg;
-        if (input) {
-          input.setAttribute('aria-invalid', 'true');
-          first ??= input;
-        }
-      }
-      first?.focus();
-    };
-
-    let sending = false;
-    form.addEventListener('submit', async (ev) => {
-      ev.preventDefault();
-      if (sending) return;
-      clearErrors();
-      if (status) status.hidden = true;
-
-      sending = true;
-      submit?.setAttribute('disabled', '');
-      submit?.setAttribute('aria-busy', 'true');
-      if (submitLabel) submitLabel.textContent = 'Envoi en cours…';
-
-      try {
-        const res = await fetch(form.action, { method: 'POST', body: new FormData(form), headers: { accept: 'application/json' } });
-        const data = (await res.json().catch(() => ({}))) as { ok?: boolean; message?: string; errors?: Record<string, string> };
-        if (res.ok && data.ok) {
-          form.reset();
-          syncDetail();
-          if (started) started.value = String(Date.now());
-          showStatus(data.message ?? messages['envoye']!.text, 'ok');
-        } else {
-          if (data.errors) showErrors(data.errors);
-          showStatus(data.message ?? messages['erreur']!.text, 'ko');
-        }
-      } catch {
-        showStatus('Connexion impossible. Vérifiez votre réseau puis réessayez.', 'ko');
-      } finally {
-        sending = false;
-        submit?.removeAttribute('disabled');
-        submit?.removeAttribute('aria-busy');
-        if (submitLabel) submitLabel.textContent = 'Envoyer la demande';
-        status?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-    });
-  }
-</script>
 
 <style>
   .contact-grid {
@@ -286,140 +89,6 @@ const objets = contactObjectKeys.map((k) => ({ key: k, ...contactObjects[k] }));
     gap: 3rem clamp(2rem, 1rem + 4vw, 6rem);
     padding-bottom: var(--section-y);
   }
-  .form-zone h2 {
-    margin-bottom: 1.5rem;
-  }
-  form {
-    display: grid;
-    gap: 1.5rem;
-  }
-  .obligatoire {
-    font-size: 0.9375rem;
-    color: var(--c-pierre-claire);
-  }
-  .champ-double {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1.5rem;
-  }
-  .champ {
-    display: grid;
-    gap: 0.45rem;
-    align-content: start;
-  }
-  label {
-    font-weight: 700;
-    font-size: 1rem;
-  }
-  .facultatif {
-    font-weight: 400;
-    color: var(--c-pierre-claire);
-  }
-  input[type='text'],
-  input[type='email'],
-  input[type='tel'],
-  select,
-  textarea {
-    width: 100%;
-    min-height: 3.25rem;
-    padding: 0.8rem 1rem;
-    border: 1px solid var(--c-ligne-sombre);
-    border-radius: 0;
-    background: var(--c-anthracite);
-    color: var(--c-papier);
-    font: inherit;
-    font-size: 1rem;
-  }
-  textarea {
-    resize: vertical;
-    min-height: 10rem;
-  }
-  input:focus-visible,
-  select:focus-visible,
-  textarea:focus-visible {
-    outline: 2px solid var(--c-or);
-    outline-offset: 1px;
-    border-color: var(--c-or);
-  }
-  [aria-invalid='true'] {
-    border-color: var(--c-terracotta);
-  }
-  .aide {
-    font-size: 0.875rem;
-    color: var(--c-pierre-claire);
-  }
-  .erreur {
-    font-size: 0.9375rem;
-    font-weight: 600;
-    color: #ff9a6b;
-  }
-  .erreur:empty {
-    display: none;
-  }
-  .piege {
-    position: absolute;
-    left: -10000px;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-  }
-  .consent {
-    grid-template-columns: auto minmax(0, 1fr);
-    column-gap: 0.8rem;
-    align-items: start;
-  }
-  .consent input {
-    width: 1.25rem;
-    height: 1.25rem;
-    margin-top: 0.15rem;
-    accent-color: var(--c-or);
-  }
-  .consent label {
-    font-weight: 400;
-  }
-  .consent .erreur {
-    grid-column: 2;
-  }
-  .envoyer {
-    justify-self: start;
-    min-height: 3.25rem;
-    padding: 0 2rem;
-    border: 0;
-    background: var(--c-or);
-    color: var(--c-noir);
-    font: inherit;
-    font-weight: 700;
-    font-size: 0.9375rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: background-color 0.2s;
-  }
-  .envoyer:hover {
-    background: var(--c-or-vif);
-  }
-  .envoyer:focus-visible {
-    outline: 2px solid var(--c-papier);
-    outline-offset: 3px;
-  }
-  .envoyer[disabled] {
-    cursor: progress;
-    opacity: 0.7;
-  }
-  .statut {
-    margin-bottom: 1.5rem;
-    padding: 1rem 1.25rem;
-    border-left: 4px solid var(--c-or);
-    background: var(--c-anthracite);
-    font-weight: 600;
-  }
-  .statut[data-tone='ko'] {
-    border-color: var(--c-terracotta);
-  }
-  .statut[hidden] {
-    display: none;
-  }
-
   .coordonnees {
     display: grid;
     align-content: start;
@@ -477,8 +146,7 @@ const objets = contactObjectKeys.map((k) => ({ key: k, ...contactObjects[k] }));
     color: var(--c-or);
   }
   @media (max-width: 56rem) {
-    .contact-grid,
-    .champ-double {
+    .contact-grid {
       grid-template-columns: minmax(0, 1fr);
     }
   }

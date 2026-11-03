@@ -64,6 +64,7 @@ const LIBELLES: Record<string, string> = {
   '/impact': 'Impact',
   '/actualites': 'Actualités',
   '/contact': 'Contact',
+  '/accreditation': 'Accréditation',
   '/faq': 'Questions fréquentes',
   '/confidentialite': 'Confidentialité',
   '/mentions-legales': 'Mentions légales',

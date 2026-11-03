@@ -124,3 +124,42 @@ describe('whatsappLink', () => {
     expect(whatsappLink('+221 70 484 40 40', 'Bonjour & merci')).toBe('https://wa.me/221704844040?text=Bonjour+%26+merci');
   });
 });
+
+describe('accréditation', () => {
+  const accr = (o: Record<string, string> = {}) =>
+    form({ objet: 'accreditation', detail: 'Photographe', organization: 'Le Soleil', evenement: 'Rio Fresco Fest 2027', ...o });
+
+  it('ajoute l’événement et le lien en tête du message', () => {
+    const r = validateContact(accr({ lien: 'https://exemple.sn/portfolio' }), NOW);
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.data.objet).toBe('accreditation');
+      expect(r.data.message.startsWith('Événement : Rio Fresco Fest 2027\nPublications : https://exemple.sn/portfolio\n\n')).toBe(true);
+    }
+  });
+  it('exige l’événement et le média', () => {
+    const r = validateContact(accr({ evenement: '', organization: '' }), NOW);
+    expect(r.ok).toBe(false);
+    if (!r.ok) {
+      expect(r.errors.evenement).toBeTruthy();
+      expect(r.errors.organization).toBeTruthy();
+    }
+  });
+  it('refuse un lien qui n’est pas une adresse web', () => {
+    for (const lien of ['javascript:alert(1)', 'pas un lien', 'ftp://x.sn']) {
+      const r = validateContact(accr({ lien }), NOW);
+      expect(r.ok).toBe(false);
+      if (!r.ok) expect(r.errors.lien).toBeTruthy();
+    }
+  });
+  it('n’ajoute rien aux autres demandes', () => {
+    const r = validateContact(form({ evenement: 'X' }), NOW);
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.data.message.startsWith('Bonjour')).toBe(true);
+  });
+  it('garde le message complet sous la limite de la base', () => {
+    const r = validateContact(accr({ message: 'a'.repeat(3990) }), NOW);
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.errors.message).toMatch(/raccourcissez/);
+  });
+});

@@ -25,6 +25,11 @@ export const contactObjects = {
     detailLabel: 'Projet',
     options: ['Single', 'EP (5 titres)', 'Mixtape (10 titres)', 'Album (15 titres)', 'Location du studio', 'Mixage / mastering'],
   },
+  accreditation: {
+    label: 'Accréditation',
+    detailLabel: 'Vous êtes',
+    options: ['Presse écrite', 'Radio', 'Télévision', 'Média en ligne', 'Photographe', 'Vidéaste', 'Créateur de contenu', 'Partenaire ou exposant'],
+  },
 } as const;
 
 export type ContactObject = keyof typeof contactObjects;
@@ -59,6 +64,8 @@ export const LIMITS = {
   phone: 30,
   message: 4000,
   messageMin: 20,
+  evenement: 120,
+  lien: 300,
 } as const;
 
 export interface ContactInput {
@@ -73,7 +80,7 @@ export interface ContactInput {
 
 export type ValidationResult =
   | { ok: true; data: ContactInput }
-  | { ok: false; errors: Partial<Record<keyof ContactInput | 'consent' | 'form', string>> };
+  | { ok: false; errors: Partial<Record<keyof ContactInput | 'consent' | 'form' | 'evenement' | 'lien', string>> };
 
 const EMAIL_RE = /^[^\s@<>()[\]\\,;:"]+@[^\s@<>()[\]\\,;:"]+\.[^\s@<>()[\]\\,;:"]{2,}$/;
 const PHONE_RE = /^[+()\d\s.-]{6,30}$/;
@@ -86,7 +93,7 @@ const text = (v: FormDataEntryValue | null): string =>
  * (les robots le remplissent) ; `startedAt` écarte les envois en moins de 3 s.
  */
 export function validateContact(form: FormData, now: number = Date.now()): ValidationResult {
-  const errors: Partial<Record<keyof ContactInput | 'consent' | 'form', string>> = {};
+  const errors: Partial<Record<keyof ContactInput | 'consent' | 'form' | 'evenement' | 'lien', string>> = {};
 
   if (text(form.get('site_web')) !== '') {
     return { ok: false, errors: { form: 'Votre envoi n’a pas pu être traité.' } };
@@ -117,14 +124,41 @@ export function validateContact(form: FormData, now: number = Date.now()): Valid
   const phone = text(form.get('phone'));
   if (phone !== '' && !PHONE_RE.test(phone)) errors.phone = 'Ce numéro ne semble pas valide.';
 
+  // Accréditation : l'événement est obligatoire, le média aussi ; le lien vers
+  // les publications est facultatif. Ils sont ajoutés en tête du message.
+  let entete = '';
+  if (objet === 'accreditation') {
+    const evenement = text(form.get('evenement'));
+    if (evenement.length < 2) errors.evenement = 'Indiquez l’événement concerné.';
+    else if (evenement.length > LIMITS.evenement) errors.evenement = 'Ce nom d’événement est trop long.';
+    if (organization.length < 2 && !errors.organization) errors.organization = 'Indiquez votre média ou votre structure.';
+    const lien = text(form.get('lien'));
+    if (lien !== '' && !lienValide(lien)) errors.lien = 'Indiquez un lien complet, commençant par https://';
+    entete = `Événement : ${evenement}\n${lien ? `Publications : ${lien}\n` : ''}\n`;
+  }
+
   const message = text(form.get('message'));
   if (message.length < LIMITS.messageMin) errors.message = `Votre message doit compter au moins ${LIMITS.messageMin} caractères.`;
   else if (message.length > LIMITS.message) errors.message = `Votre message ne doit pas dépasser ${LIMITS.message} caractères.`;
 
+  if (!errors.message && entete.length + message.length > LIMITS.message) {
+    errors.message = `Votre message est trop long : raccourcissez-le de ${entete.length + message.length - LIMITS.message} caractères.`;
+  }
+
   if (text(form.get('consent')) !== 'oui') errors.consent = 'Votre accord est nécessaire pour traiter la demande.';
 
   if (Object.keys(errors).length > 0) return { ok: false, errors };
-  return { ok: true, data: { objet, detail, name, organization, email, phone, message } };
+  return { ok: true, data: { objet, detail, name, organization, email, phone, message: entete + message } };
+}
+
+function lienValide(valeur: string): boolean {
+  if (valeur.length > LIMITS.lien) return false;
+  try {
+    const url = new URL(valeur);
+    return (url.protocol === 'https:' || url.protocol === 'http:') && url.hostname.includes('.');
+  } catch {
+    return false;
+  }
 }
 
 /** Échappe le texte saisi avant insertion dans un e-mail HTML. */

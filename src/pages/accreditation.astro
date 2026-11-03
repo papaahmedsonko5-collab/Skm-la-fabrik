@@ -1,0 +1,127 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import ContactEmail from '@/components/ContactEmail.astro';
+import ContactForm from '@/components/ContactForm.astro';
+import PageIntro from '@/components/PageIntro.astro';
+import { contactObjects } from '@/lib/contact';
+
+const profils = contactObjects.accreditation.options;
+---
+
+<BaseLayout
+  title="Demande d’accréditation"
+  description="Journalistes, photographes, vidéastes, créateurs de contenu et partenaires : demandez votre accréditation pour les événements de SKM La Fabrik, dont le Rio Fresco Fest."
+>
+  <PageIntro
+    eyebrow="Presse · Médias · Partenaires"
+    title={'Demande d’<span class="accent">accréditation</span>'}
+    lead="Vous souhaitez couvrir un événement de SKM La Fabrik, comme le Rio Fresco Fest ? Présentez votre média et votre projet de couverture : l’équipe étudie chaque demande et vous répond par e-mail."
+  />
+
+  <div class="wrap accr-grid">
+    <ContactForm objetFixe="accreditation" titre="Votre demande d’accréditation" bouton="Envoyer ma demande" />
+
+    <aside class="accr-infos" aria-labelledby="t-infos">
+      <h2 id="t-infos" class="titre titre-h3">Comment ça marche</h2>
+      <ol class="etapes">
+        <li>
+          <strong>Vous envoyez votre demande</strong>
+          <span>Le plus tôt possible avant l’événement, avec un lien vers vos publications si vous en avez.</span>
+        </li>
+        <li>
+          <strong>L’équipe l’étudie</strong>
+          <span>Chaque demande est lue par l’équipe de SKM La Fabrik.</span>
+        </li>
+        <li>
+          <strong>Vous recevez la réponse par e-mail</strong>
+          <span>L’accréditation n’est valable qu’après cette réponse écrite, qui précise les modalités sur place.</span>
+        </li>
+      </ol>
+
+      <div class="profils">
+        <p class="surtitre">Qui peut demander</p>
+        <ul>
+          {profils.map((p) => <li>{p}</li>)}
+        </ul>
+      </div>
+
+      <p class="note">
+        Une question avant d’envoyer votre demande ? Écrivez-nous à <ContactEmail />. Pour un partenariat ou un stand, passez plutôt par la{' '}
+        <a href="/contact?objet=partenariat">page Contact</a>.
+      </p>
+    </aside>
+  </div>
+</BaseLayout>
+
+<style>
+  .accr-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+    gap: 3rem clamp(2rem, 1rem + 4vw, 6rem);
+    padding-bottom: var(--section-y);
+  }
+  .accr-infos {
+    display: grid;
+    align-content: start;
+    gap: 2rem;
+  }
+  .etapes {
+    display: grid;
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid var(--c-ligne-sombre);
+    list-style: none;
+    counter-reset: etape;
+  }
+  .etapes li {
+    display: grid;
+    grid-template-columns: 2.5rem minmax(0, 1fr);
+    gap: 0.25rem 0.75rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--c-ligne-sombre);
+    counter-increment: etape;
+  }
+  .etapes li::before {
+    grid-row: span 2;
+    content: '0' counter(etape);
+    color: var(--c-or);
+    font-family: var(--f-titre);
+    font-size: 1.5rem;
+    line-height: 1.1;
+  }
+  .etapes span {
+    color: var(--c-pierre-claire);
+    font-size: 0.9375rem;
+  }
+  .profils ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0.75rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .profils li {
+    padding: 0.35rem 0.7rem;
+    border: 1px solid var(--c-ligne-sombre);
+    font-size: 0.9375rem;
+  }
+  .note {
+    color: var(--c-pierre-claire);
+    font-size: 0.9375rem;
+  }
+  .note a,
+  .note :global(a) {
+    color: inherit;
+    text-decoration: underline;
+  }
+  .note a:hover,
+  .note :global(a:hover) {
+    color: var(--c-or);
+  }
+  @media (max-width: 56rem) {
+    .accr-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

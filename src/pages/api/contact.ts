@@ -22,7 +22,15 @@ function json(status: number, body: Record<string, unknown>, extra: HeadersInit 
 
 /** Sans JavaScript, le formulaire est envoyé classiquement : on renvoie vers la page avec un statut. */
 function redirect(request: Request, status: Status): Response {
-  const url = new URL('/contact', request.url);
+  // Retour sur la page d'où vient le formulaire (Contact ou Accréditation).
+  let page = '/contact';
+  try {
+    const ref = new URL(request.headers.get('referer') ?? '');
+    if (ref.host === new URL(request.url).host && ref.pathname.replace(/\/$/, '') === '/accreditation') page = '/accreditation';
+  } catch {
+    // Pas de page d'origine lisible : on revient sur Contact.
+  }
+  const url = new URL(page, request.url);
   url.searchParams.set('statut', status);
   url.hash = 'formulaire';
   return new Response(null, { status: 303, headers: { location: url.toString(), 'cache-control': 'no-store' } });
