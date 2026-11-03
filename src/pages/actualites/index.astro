@@ -5,24 +5,12 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import Carousel from '@/components/Carousel.astro';
 import Gallery from '@/components/Gallery.astro';
-import { photos } from '@/data/photos';
+import { galerie } from '@/lib/galerie';
 import { sortNews } from '@/lib/content';
 
 const news = sortNews(await getCollection('actualites', ({ data }) => !data.draft));
 const [une, ...autres] = news;
 
-const mediatheque = [
-  { ...photos.rffFoule, large: true },
-  photos.studio,
-  photos.formation,
-  photos.scene2,
-  photos.scene3,
-  { ...photos.defile, large: true },
-  photos.echecs,
-  photos.handischool,
-  photos.setSetal,
-  photos.chanteuse,
-];
 ---
 
 <BaseLayout
@@ -117,7 +105,7 @@ const mediatheque = [
         <p class="index"><span>{autres.length > 0 ? '03' : '02'}</span> Médiathèque</p>
         <h2 id="t-galerie" class="titre titre-h2">Galerie photo</h2>
       </div>
-      <Gallery items={mediatheque} label="Galerie photo de SKM La Fabrik" />
+      <Gallery items={galerie} label="Galerie photo de SKM La Fabrik" filtres />
     </div>
   </section>
 </BaseLayout>

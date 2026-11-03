@@ -6,11 +6,12 @@ export const prerender = false;
 
 const supabase = Astro.locals.supabase!;
 
-const [demandesRes, nouvellesRes, actusRes, projetsRes, recentRes, pubRes, moisRes] = await Promise.all([
+const [demandesRes, nouvellesRes, actusRes, projetsRes, photosRes, recentRes, pubRes, moisRes] = await Promise.all([
   supabase.from('demandes').select('id', { count: 'exact', head: true }),
   supabase.from('demandes').select('id', { count: 'exact', head: true }).eq('statut', 'nouvelle'),
   supabase.from('actualites').select('id, draft, cover_path'),
   supabase.from('projets').select('id, draft, cover_path, gallery'),
+  supabase.from('photos').select('id', { count: 'exact', head: true }),
   supabase.from('demandes').select('id, created_at, nom, objet, statut').order('created_at', { ascending: false }).limit(6),
   supabase.from('publications').select('created_at, user_email, ok').order('created_at', { ascending: false }).limit(1),
   supabase
@@ -107,13 +108,16 @@ const flash = flashFrom(Astro.url);
         </div>
         <button class="bouton or" type="submit" data-confirm="Importer le contenu actuel du site dans l’admin ?">Importer le contenu du site</button>
       </form>
-    ) : sansPhotos > 0 ? (
+    ) : sansPhotos > 0 || (photosRes.count ?? 0) === 0 ? (
       <form method="post" action="/api/admin/importer" class="carte import">
         <div>
           <h2>Photos à récupérer</h2>
           <p class="aide">
-            {sansPhotos} fiche(s) importée(s) n’ont pas encore leurs photos. Elles restent en brouillon pour ne pas apparaître sans image sur le site.
-            Le reste des fiches n’est pas modifié.
+            {sansPhotos > 0
+              ? `${sansPhotos} fiche(s) importée(s) n’ont pas encore leurs photos. Elles restent en brouillon pour ne pas apparaître sans image sur le site. `
+              : ''}
+            {(photosRes.count ?? 0) === 0 ? 'La galerie photo du site n’est pas encore dans l’admin. ' : ''}
+            Rien d’autre n’est modifié.
           </p>
         </div>
         <button class="bouton or" type="submit">Récupérer les photos</button>

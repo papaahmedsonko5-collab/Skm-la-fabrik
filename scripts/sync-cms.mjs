@@ -1,6 +1,7 @@
 // Avant `astro build` : récupère le contenu publié depuis l'admin (Supabase)
 // et le prépare pour la construction du site statique.
 //  - textes des pages  -> src/.cms/contenus.json
+//  - galerie photo     -> src/.cms/photos.json (+ photos dans src/.cms/medias)
 //  - actualités/projets -> src/.cms/<collection>/<slug>.md (+ photos dans src/.cms/medias)
 // Sans configuration Supabase, ou tant qu'une collection est vide côté admin,
 // le site garde les fichiers du dépôt (src/content/...). Lecture seule, clé publiable.
@@ -57,6 +58,20 @@ async function main() {
   await mkdir(ROOT, { recursive: true });
   await writeFile(CONTENUS, JSON.stringify(valeurs, null, 2) + '\n');
   console.log(`[sync-cms] ${Object.keys(valeurs).length} texte(s) personnalisé(s).`);
+
+  // Galerie photo (page Actualités)
+  const photos = await rest('photos?select=path,alt,categorie,large&visible=eq.true&order=position.asc,created_at.asc');
+  if (photos.length > 0) {
+    const liste = [];
+    for (const ph of photos) {
+      const rel = await download(ph.path); // ../medias/<chemin>
+      liste.push({ file: rel.replace(/^\.\.\//, ''), alt: ph.alt ?? '', categorie: ph.categorie, large: Boolean(ph.large) });
+    }
+    await writeFile(join(ROOT, 'photos.json'), JSON.stringify(liste, null, 2) + '\n');
+    console.log(`[sync-cms] ${photos.length} photo(s) de galerie depuis l'admin.`);
+  } else {
+    console.log('[sync-cms] Galerie vide dans l’admin : galerie du dépôt conservée.');
+  }
 
   // Actualités
   const actus = await rest('actualites?select=*&draft=eq.false&order=date.desc.nullslast');

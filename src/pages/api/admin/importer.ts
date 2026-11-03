@@ -2,16 +2,18 @@ import type { APIRoute } from 'astro';
 import { getCollection } from 'astro:content';
 import type { AdminClient } from '@/lib/admin/supabase';
 import { slugify } from '@/lib/admin/data';
+import { galerieDepot } from '@/lib/galerie';
 
 export const prerender = false;
 
 /**
  * Import du contenu actuel du site (fichiers du dépôt) dans l'admin :
- * actualités, projets et leurs photos.
+ * actualités, projets et leurs photos, et la galerie photo.
  *
  * - Admin vide : crée les fiches.
  * - Fiches déjà importées mais sans photo (import interrompu) : ajoute
  *   seulement les photos manquantes, sans toucher au reste de la fiche.
+ * - Galerie vide : copie les photos de la galerie actuelle.
  * Une fiche qui a déjà une photo n'est jamais modifiée.
  *
  * Les photos sont lues sur le site public (et non sur l'adresse de la requête),
@@ -21,16 +23,17 @@ export const POST: APIRoute = async ({ locals, redirect }) => {
   const supabase = locals.supabase!;
   const origine = import.meta.env.SITE ?? 'https://skm-la-fabrik.vercel.app';
 
-  const [{ data: actusDb }, { data: projetsDb }] = await Promise.all([
+  const [{ data: actusDb }, { data: projetsDb }, { count: nPhotos }] = await Promise.all([
     supabase.from('actualites').select('slug, cover_path'),
     supabase.from('projets').select('slug, cover_path, gallery'),
+    supabase.from('photos').select('id', { count: 'exact', head: true }),
   ]);
   const actusExistantes = new Map((actusDb ?? []).map((r) => [r.slug as string, r]));
   const projetsExistants = new Map((projetsDb ?? []).map((r) => [r.slug as string, r]));
 
   let echecs = 0;
   const cache = new Map<string, string>();
-  async function upload(src: string, folder: 'actualites' | 'projets', client: AdminClient): Promise<string | null> {
+  async function upload(src: string, folder: 'actualites' | 'projets' | 'galerie', client: AdminClient): Promise<string | null> {
     if (cache.has(src)) return cache.get(src)!;
     try {
       const res = await fetch(new URL(src, origine), { signal: AbortSignal.timeout(20000) });
@@ -117,6 +120,15 @@ export const POST: APIRoute = async ({ locals, redirect }) => {
       featured: d.featured,
       draft: aDesPhotos && !photosCompletes,
     });
+  }
+
+  if ((nPhotos ?? 0) === 0) {
+    let position = 1;
+    for (const ph of galerieDepot) {
+      const path = await upload(ph.src.src, 'galerie', supabase);
+      if (!path) continue;
+      await supabase.from('photos').insert({ path, alt: ph.alt, categorie: ph.categorie ?? 'Événements', large: Boolean(ph.large), position: position++ });
+    }
   }
 
   return redirect(echecs > 0 ? '/admin?erreur=photos' : '/admin?ok=importe', 303);

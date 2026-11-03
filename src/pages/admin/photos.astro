@@ -1,0 +1,255 @@
+---
+import AdminLayout from '@/layouts/AdminLayout.astro';
+import { categoriesPhotos, field, flashFrom, isCategoriePhoto, uploadImage, type PhotoGalerie } from '@/lib/admin/data';
+import { mediaUrl } from '@/lib/admin/supabase';
+
+export const prerender = false;
+
+const supabase = Astro.locals.supabase!;
+let erreur: string | null = null;
+
+async function lister(): Promise<PhotoGalerie[]> {
+  const { data } = await supabase.from('photos').select('id, path, alt, categorie, position, visible, large').order('position').order('created_at');
+  return (data ?? []) as PhotoGalerie[];
+}
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const action = field(form, 'action', 20);
+  const id = field(form, 'id', 60);
+  const isFetch = Astro.request.headers.get('x-envoi') === 'photo';
+
+  if (action === 'ajouter') {
+    const categorie = field(form, 'categorie', 40);
+    const fichiers = form.getAll('photos').filter((f): f is File => f instanceof File && f.size > 0);
+    if (!isCategoriePhoto(categorie)) erreur = 'Choisissez une catégorie.';
+    else if (fichiers.length === 0) erreur = 'Choisissez au moins une photo.';
+    else {
+      const { data: last } = await supabase.from('photos').select('position').order('position', { ascending: false }).limit(1);
+      let position = ((last?.[0]?.position as number | undefined) ?? 0) + 1;
+      for (const f of fichiers) {
+        const up = await uploadImage(supabase, f, 'galerie');
+        if (!up || 'error' in up) {
+          erreur = up && 'error' in up ? up.error : 'L’envoi de la photo a échoué.';
+          break;
+        }
+        const { error } = await supabase.from('photos').insert({ path: up.path, categorie, position: position++, alt: '' });
+        if (error) {
+          erreur = 'La photo a été envoyée mais pas enregistrée.';
+          break;
+        }
+      }
+    }
+    // Envoi photo par photo depuis le navigateur : réponse courte.
+    if (isFetch) return new Response(erreur ?? 'ok', { status: erreur ? 400 : 200 });
+    if (!erreur) return Astro.redirect('/admin/photos?ok=ajoute', 303);
+  } else if (id) {
+    const photos = await lister();
+    const i = photos.findIndex((p) => p.id === id);
+    const photo = photos[i];
+    if (!photo) return Astro.redirect('/admin/photos?erreur=introuvable', 303);
+
+    // La description et la catégorie saisies sont gardées, quel que soit le bouton utilisé.
+    if (action !== 'supprimer') {
+      const categorie = field(form, 'categorie', 40);
+      const { error } = await supabase
+        .from('photos')
+        .update({
+          alt: field(form, 'alt', 200),
+          categorie: isCategoriePhoto(categorie) ? categorie : photo.categorie,
+          large: form.get('large') === 'on',
+        })
+        .eq('id', id);
+      if (error) erreur = 'L’enregistrement a échoué.';
+    }
+    if (erreur) {
+      /* on affiche l'erreur */
+    } else if (action === 'monter' || action === 'descendre') {
+      const voisin = photos[action === 'monter' ? i - 1 : i + 1];
+      if (voisin) {
+        // Renumérote toute la liste pour éviter les positions en double.
+        const ordre = photos.map((p) => p.id);
+        ordre[i] = voisin.id;
+        ordre[action === 'monter' ? i - 1 : i + 1] = photo.id;
+        for (const [pos, pid] of ordre.entries()) {
+          const actuelle = photos.find((p) => p.id === pid)!;
+          if (actuelle.position !== pos + 1) await supabase.from('photos').update({ position: pos + 1 }).eq('id', pid);
+        }
+      }
+    } else if (action === 'visibilite') {
+      const { error } = await supabase.from('photos').update({ visible: !photo.visible }).eq('id', id);
+      if (error) erreur = 'La modification a échoué.';
+    } else if (action === 'supprimer') {
+      const { error } = await supabase.from('photos').delete().eq('id', id);
+      if (error) erreur = 'La suppression a échoué.';
+      else {
+        // Les fichiers du dossier « galerie » ne servent qu'ici : on les efface aussi.
+        if (photo.path.startsWith('galerie/')) await supabase.storage.from('medias').remove([photo.path]);
+        return Astro.redirect('/admin/photos?ok=supprime', 303);
+      }
+    }
+    if (!erreur) return Astro.redirect(`/admin/photos?ok=enregistre#photo-${id}`, 303);
+  }
+}
+
+const photos = await lister();
+const visibles = photos.filter((p) => p.visible).length;
+const flash = erreur ? { type: 'erreur' as const, text: erreur } : flashFrom(Astro.url);
+---
+
+<AdminLayout title="Photos" flash={flash}>
+  <p class="intro aide">
+    La galerie photo de la page Actualités. {photos.length} photo(s), dont {visibles} affichée(s) sur le site. Les changements apparaissent sur le
+    site après « Publier le site ».
+  </p>
+
+  <form method="post" enctype="multipart/form-data" class="carte champs ajout" data-envoi-photos>
+    <h2>Ajouter des photos</h2>
+    <input type="hidden" name="action" value="ajouter" />
+    <label>
+      Catégorie
+      <select name="categorie" required>
+        {categoriesPhotos.map((c) => <option value={c}>{c}</option>)}
+      </select>
+    </label>
+    <label>
+      Photos
+      <span class="aide">Vous pouvez en choisir plusieurs. Les grandes photos sont réduites à 2400 px avant l’envoi, en gardant la qualité HD.</span>
+      <input type="file" name="photos" accept="image/jpeg,image/png,image/webp,image/avif" multiple required />
+    </label>
+    <div class="actions-bas">
+      <button class="bouton or" type="submit">Ajouter les photos</button>
+      <span class="aide" data-progression aria-live="polite"></span>
+    </div>
+    <p class="aide">Pensez ensuite à écrire une description pour chacune, ci-dessous.</p>
+  </form>
+
+  {
+    photos.length === 0 ? (
+      <p class="carte vide">
+        Aucune photo pour l’instant. Tant que la galerie est vide ici, le site garde sa galerie actuelle. Vous pouvez la copier ici depuis le
+        tableau de bord.
+      </p>
+    ) : (
+      <ul class="grille">
+        {photos.map((p, i) => (
+          <li id={`photo-${p.id}`} class:list={['carte', 'photo', { masquee: !p.visible }]}>
+            <div class="image">
+              <img src={mediaUrl(p.path)} alt="" loading="lazy" />
+              {!p.visible && <span class="pastille brouillon">Masquée</span>}
+              {!p.alt && <span class="pastille alerte">Description manquante</span>}
+            </div>
+            <form method="post" class="champs">
+              <input type="hidden" name="id" value={p.id} />
+              <label>
+                Catégorie
+                <select name="categorie">
+                  {categoriesPhotos.map((c) => (
+                    <option value={c} selected={c === p.categorie}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                Description
+                <input type="text" name="alt" value={p.alt} maxlength="200" placeholder="Ce qu’on voit sur la photo" />
+              </label>
+              <label class="case">
+                <input type="checkbox" name="large" checked={p.large} /> Grande photo dans la mosaïque
+              </label>
+              <div class="boutons">
+                <button class="bouton or" type="submit" name="action" value="enregistrer">
+                  Enregistrer
+                </button>
+                <button class="bouton contour" type="submit" name="action" value="monter" disabled={i === 0} aria-label="Monter la photo">
+                  ↑
+                </button>
+                <button
+                  class="bouton contour"
+                  type="submit"
+                  name="action"
+                  value="descendre"
+                  disabled={i === photos.length - 1}
+                  aria-label="Descendre la photo"
+                >
+                  ↓
+                </button>
+                <button class="bouton contour" type="submit" name="action" value="visibilite">
+                  {p.visible ? 'Masquer' : 'Afficher'}
+                </button>
+                <button class="bouton danger" type="submit" name="action" value="supprimer" data-confirm="Supprimer définitivement cette photo ?">
+                  Supprimer
+                </button>
+              </div>
+            </form>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</AdminLayout>
+
+<style>
+  .intro {
+    margin: 0;
+  }
+  .ajout h2 {
+    margin: 0;
+    font-size: 1.15rem;
+  }
+  .grille {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+    gap: 1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .photo {
+    display: grid;
+    gap: 1rem;
+    align-content: start;
+  }
+  .photo.masquee .image img {
+    opacity: 0.45;
+  }
+  .image {
+    position: relative;
+    overflow: hidden;
+    border-radius: 0.75rem;
+    background: var(--c-papier-2);
+    aspect-ratio: 4 / 3;
+  }
+  .image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .image .pastille {
+    position: absolute;
+    top: 0.6rem;
+    left: 0.6rem;
+  }
+  .image .pastille + .pastille {
+    top: 2.4rem;
+  }
+  .pastille.alerte {
+    background: var(--c-or);
+    color: var(--c-noir);
+  }
+  .case {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    font-weight: 500;
+  }
+  .boutons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .boutons .bouton {
+    padding-inline: 0.9rem;
+  }
+</style>

@@ -7,22 +7,42 @@ export interface GalleryItem {
   alt: string;
   /** Occupe deux colonnes et deux lignes dans la mosaïque. */
   large?: boolean;
+  /** Catégorie, pour le filtre de la galerie. */
+  categorie?: string;
 }
 
 interface Props {
   items: readonly GalleryItem[];
   label: string;
+  /** Affiche un filtre par catégorie quand la galerie en compte plusieurs. */
+  filtres?: boolean;
 }
-const { items, label } = Astro.props;
+const { items, label, filtres = false } = Astro.props;
+const categories = [...new Set(items.map((it) => it.categorie).filter((c): c is string => Boolean(c)))];
+const avecFiltre = filtres && categories.length > 1;
 
 const full = await Promise.all(items.map((it) => getImage({ src: it.src, width: Math.min(1920, it.src.width), format: 'webp', quality: 88 })));
 ---
 
 <div class="gallery" data-gallery>
+  {
+    avecFiltre && (
+      <div class="filtres" role="group" aria-label="Filtrer les photos par catégorie">
+        <button type="button" data-filtre="" aria-pressed="true">
+          Toutes <span>{items.length}</span>
+        </button>
+        {categories.map((c) => (
+          <button type="button" data-filtre={c} aria-pressed="false">
+            {c} <span>{items.filter((it) => it.categorie === c).length}</span>
+          </button>
+        ))}
+      </div>
+    )
+  }
   <ul class="grid" aria-label={label}>
     {
       items.map((it, i) => (
-        <li class:list={{ large: it.large }}>
+        <li class:list={{ large: it.large }} data-categorie={it.categorie ?? ''}>
           <button type="button" data-open={i} data-full={full[i]?.src} data-alt={it.alt} aria-label={`Agrandir : ${it.alt}`}>
             <Image src={it.src} alt="" widths={[360, 560, 900, 1280, 1600, 1920]} sizes="(min-width: 64rem) 50vw, 100vw" />
           </button>
@@ -51,8 +71,23 @@ const full = await Promise.all(items.map((it) => getImage({ src: it.src, width: 
     const img = root.querySelector<HTMLImageElement>('[data-lb-img]');
     const caption = root.querySelector<HTMLElement>('[data-lb-caption]');
     const count = root.querySelector<HTMLElement>('[data-lb-count]');
-    const triggers = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-open]'));
-    if (!dialog || !img || !caption || !count || triggers.length === 0) return;
+    const tous = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-open]'));
+    if (!dialog || !img || !caption || !count || tous.length === 0) return;
+    // La visionneuse ne parcourt que les photos affichées par le filtre.
+    let triggers = tous;
+
+    const boutons = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-filtre]'));
+    boutons.forEach((b) =>
+      b.addEventListener('click', () => {
+        const cat = b.dataset['filtre'] ?? '';
+        boutons.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+        tous.forEach((t) => {
+          const li = t.closest('li');
+          if (li) li.hidden = cat !== '' && li.dataset['categorie'] !== cat;
+        });
+        triggers = tous.filter((t) => !t.closest('li')?.hidden);
+      }),
+    );
 
     let index = 0;
     const show = (i: number) => {
@@ -65,9 +100,9 @@ const full = await Promise.all(items.map((it) => getImage({ src: it.src, width: 
       count.textContent = `${index + 1} / ${triggers.length}`;
     };
 
-    triggers.forEach((t, i) =>
+    tous.forEach((t) =>
       t.addEventListener('click', () => {
-        show(i);
+        show(triggers.indexOf(t));
         dialog.showModal();
       }),
     );
@@ -86,6 +121,39 @@ const full = await Promise.all(items.map((it) => getImage({ src: it.src, width: 
 </script>
 
 <style>
+  .filtres {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+  }
+  .filtres button {
+    min-height: 2.75rem;
+    padding: 0 1rem;
+    border: 1px solid var(--c-ligne-sombre);
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .filtres button span {
+    margin-left: 0.35rem;
+    color: var(--c-pierre);
+    font-weight: 400;
+  }
+  .filtres button[aria-pressed='true'] {
+    border-color: var(--c-or);
+    background: var(--c-or);
+    color: var(--c-noir);
+  }
+  .filtres button[aria-pressed='true'] span {
+    color: inherit;
+  }
+  .grid li[hidden] {
+    display: none;
+  }
   .grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(min(100%, 13rem), 1fr));

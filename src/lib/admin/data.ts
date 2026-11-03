@@ -73,6 +73,21 @@ export interface Projet {
   updated_at: string;
 }
 
+export const categoriesPhotos = ['Festivals', 'Concerts', 'Formations', 'Communauté', 'Studio', 'Événements'] as const;
+export type CategoriePhoto = (typeof categoriesPhotos)[number];
+export const isCategoriePhoto = (v: unknown): v is CategoriePhoto =>
+  typeof v === 'string' && (categoriesPhotos as readonly string[]).includes(v);
+
+export interface PhotoGalerie {
+  id: string;
+  path: string;
+  alt: string;
+  categorie: CategoriePhoto;
+  position: number;
+  visible: boolean;
+  large: boolean;
+}
+
 export interface Contenu {
   key: string;
   page: string;
@@ -126,7 +141,7 @@ const MAX_IMAGE = 15 * 1024 * 1024;
 export async function uploadImage(
   supabase: import('./supabase').AdminClient,
   file: FormDataEntryValue | null,
-  folder: 'actualites' | 'projets',
+  folder: 'actualites' | 'projets' | 'galerie',
 ): Promise<{ path: string } | { error: string } | null> {
   if (!(file instanceof File) || file.size === 0) return null;
   if (!IMAGE_TYPES.has(file.type)) return { error: 'Format de photo non accepté (JPEG, PNG, WebP ou AVIF).' };
@@ -149,6 +164,7 @@ export function flashFrom(url: URL): { type: 'ok' | 'erreur'; text: string } | n
     publie: 'Publication lancée : le site sera à jour dans une à deux minutes.',
     statut: 'Statut mis à jour.',
     importe: 'Contenu actuel du site importé. Vérifiez-le, puis publiez.',
+    ajoute: 'Photos ajoutées. Ajoutez une description à chacune, puis publiez.',
   };
   if (ok && messages[ok]) return { type: 'ok', text: messages[ok] };
   const erreurs: Record<string, string> = {

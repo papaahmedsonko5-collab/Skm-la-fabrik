@@ -2,9 +2,52 @@
 (function () {
   'use strict';
 
+  // Ajout de plusieurs photos : envoi une par une, pour rester sous la limite
+  // de taille d'une requête et afficher la progression.
+  function envoyerPhotos(form) {
+    var input = form.querySelector('input[type="file"]');
+    var info = form.querySelector('[data-progression]');
+    var files = input && input.files ? Array.prototype.slice.call(input.files) : [];
+    if (!files.length) return false;
+    var cat = form.querySelector('select[name="categorie"]').value;
+    var btn = form.querySelector('button[type="submit"]');
+    btn.setAttribute('disabled', '');
+    var fait = 0;
+    var erreurs = [];
+    function suivant() {
+      if (fait >= files.length) {
+        if (erreurs.length) {
+          info.textContent = erreurs.length + ' photo(s) non envoyée(s) : ' + erreurs.join(', ') + '.';
+          btn.removeAttribute('disabled');
+          if (erreurs.length < files.length) setTimeout(function () { window.location.href = '/admin/photos?ok=ajoute'; }, 2500);
+        } else {
+          window.location.href = '/admin/photos?ok=ajoute';
+        }
+        return;
+      }
+      var f = files[fait];
+      info.textContent = 'Envoi ' + (fait + 1) + ' sur ' + files.length + '…';
+      var fd = new FormData();
+      fd.append('action', 'ajouter');
+      fd.append('categorie', cat);
+      fd.append('photos', f, f.name);
+      fetch(form.getAttribute('action') || window.location.pathname, { method: 'POST', body: fd, headers: { 'x-envoi': 'photo' }, credentials: 'same-origin' })
+        .then(function (r) { if (!r.ok) erreurs.push(f.name); })
+        .catch(function () { erreurs.push(f.name); })
+        .then(function () { fait++; suivant(); });
+    }
+    suivant();
+    return true;
+  }
+
   // Confirmation avant une action irréversible (suppression).
   document.addEventListener('submit', function (e) {
     var form = e.target;
+    if (form.hasAttribute('data-envoi-photos') && window.fetch && window.FormData) {
+      e.preventDefault();
+      if (form.dataset.envoi !== '1' && envoyerPhotos(form)) form.dataset.envoi = '1';
+      return;
+    }
     var submitter = e.submitter;
     var msg = (submitter && submitter.getAttribute('data-confirm')) || form.getAttribute('data-confirm');
     if (msg && !window.confirm(msg)) {
