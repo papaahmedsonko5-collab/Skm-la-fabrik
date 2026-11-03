@@ -23,6 +23,30 @@ import sceneNuit from '@/assets/photos/scene-nuit.jpg';
 import setSetal from '@/assets/photos/set-setal.jpg';
 import studio from '@/assets/photos/studio-key-i-am.jpg';
 import echecs from '@/assets/photos/tournoi-echecs.jpg';
+import p26Hero from '@/assets/photos/rff2026/parade-danseuses-hero.jpg';
+import p26Parade from '@/assets/photos/rff2026/parade-danseuses.jpg';
+import p26Caleche from '@/assets/photos/rff2026/parade-caleche.jpg';
+import p26CalecheRouge from '@/assets/photos/rff2026/caleche-tenues-rouges.jpg';
+import p26Digue from '@/assets/photos/rff2026/digue-fauteuils-pneus.jpg';
+import p26Delegation from '@/assets/photos/rff2026/autorites-delegation.jpg';
+import p26Discours from '@/assets/photos/rff2026/discours-officiel.jpg';
+import p26AutoritesFresque from '@/assets/photos/rff2026/autorites-fresque.jpg';
+import p26FresqueEchanges from '@/assets/photos/rff2026/fresque-echanges.jpg';
+import p26Scene from '@/assets/photos/rff2026/scene-artiste.jpg';
+import p26Loge1 from '@/assets/photos/rff2026/loge-poetes-1.jpg';
+import p26Loge2 from '@/assets/photos/rff2026/loge-poetes-2.jpg';
+import p26Preparation from '@/assets/photos/rff2026/preparation-site.jpg';
+import p26InvitesDigue from '@/assets/photos/rff2026/invites-digue.jpg';
+import p26Promenade from '@/assets/photos/rff2026/invites-promenade.jpg';
+import p26Dj from '@/assets/photos/rff2026/scene-dj.jpg';
+import p26RappeurNoir from '@/assets/photos/rff2026/scene-rappeur-noir.jpg';
+import p26RappeurPortrait from '@/assets/photos/rff2026/scene-rappeur-portrait.jpg';
+import p26ChanteuseOrange from '@/assets/photos/rff2026/scene-chanteuse-orange.jpg';
+import p26Chapeau from '@/assets/photos/rff2026/scene-artiste-chapeau.jpg';
+import p26Cuir from '@/assets/photos/rff2026/scene-artiste-cuir.jpg';
+import p26Lunettes from '@/assets/photos/rff2026/scene-rappeur-lunettes.jpg';
+import p26Jean from '@/assets/photos/rff2026/scene-rappeur-jean.jpg';
+import p26Raye from '@/assets/photos/rff2026/scene-rappeur-raye.jpg';
 import rff25Accueil from '@/assets/photos/rff2025-accueil-autorites.jpg';
 import rff25Affiche from '@/assets/photos/rff2025-affiche-programme.jpg';
 import rff25SetSetal from '@/assets/photos/rff2025-affiche-set-setal.jpg';
@@ -96,6 +120,30 @@ export const photos = {
   setSetal: p(setSetal, 'Jeunes mobilisés pour le nettoyage de la digue de Rufisque'),
   studio: p(studio, 'Entrée du Studio Key I Am, au sein de SKM La Fabrik'),
   echecs: p(echecs, 'Tournoi d’échecs intergénérationnel au Boulodrome'),
+  p26Hero: p(p26Hero, 'Danseuses en tenues traditionnelles pendant la parade du Rio Fresco Fest 2026'),
+  p26Parade: p(p26Parade, 'Danseuses en boubous colorés sous les tissus tendus de la parade du Rio Fresco Fest 2026'),
+  p26Caleche: p(p26Caleche, 'Deux femmes en tenues et coiffes traditionnelles sur une calèche, pendant la parade des Rufisquois'),
+  p26CalecheRouge: p(p26CalecheRouge, 'Deux femmes en grands boubous rouges sur une calèche peinte, pendant la parade'),
+  p26Digue: p(p26Digue, 'Invités assis sur des fauteuils en pneus recyclés face à l’océan, sur la digue de Rufisque'),
+  p26Delegation: p(p26Delegation, 'Délégation officielle et invitées réunies pendant le Rio Fresco Fest 2026'),
+  p26Discours: p(p26Discours, 'Prise de parole devant la fresque, en présence des autorités'),
+  p26AutoritesFresque: p(p26AutoritesFresque, 'Invités et autorités devant une fresque du festival'),
+  p26FresqueEchanges: p(p26FresqueEchanges, 'Échanges devant la fresque « Une légende ne meurt jamais »'),
+  p26Scene: p(p26Scene, 'Artiste au micro devant l’écran de la grande scène du festival'),
+  p26Loge1: p(p26Loge1, 'Rappeur sur la scène de la Loge des Poètes'),
+  p26Loge2: p(p26Loge2, 'Rappeur au micro pendant la Loge des Poètes'),
+  p26Preparation: p(p26Preparation, 'Installation des tissus colorés devant la scène du festival'),
+  p26InvitesDigue: p(p26InvitesDigue, 'Invités en tenues traditionnelles sur la digue, face à la mer'),
+  p26Promenade: p(p26Promenade, 'Invités en grands boubous blancs dans la rue décorée du festival'),
+  p26Dj: p(p26Dj, 'DJ au micro, main levée, aux platines du festival'),
+  p26RappeurNoir: p(p26RappeurNoir, 'Rappeur en tee-shirt noir devant l’écran de scène'),
+  p26RappeurPortrait: p(p26RappeurPortrait, 'Rappeur souriant au micro, en gros plan'),
+  p26ChanteuseOrange: p(p26ChanteuseOrange, 'Chanteuse en robe orange sur la scène du festival'),
+  p26Chapeau: p(p26Chapeau, 'Artiste au chapeau en pleine performance'),
+  p26Cuir: p(p26Cuir, 'Artiste en veste de cuir et béret, au micro'),
+  p26Lunettes: p(p26Lunettes, 'Rappeur en veste à paillettes sous les projecteurs'),
+  p26Jean: p(p26Jean, 'Rappeur en veste en jean devant les décors peints de la scène'),
+  p26Raye: p(p26Raye, 'Rappeur en tee-shirt rayé devant un écran orange'),
   rff25Accueil: p(rff25Accueil, 'L’équipe Sunu Kaddu accueille les autorités au Rio Fresco Fest 2025'),
   rff25Affiche: p(rff25Affiche, 'Affiche officielle du programme du Rio Fresco Fest 2025, les 14 et 15 juin à Rufisque'),
   rff25SetSetal: p(rff25SetSetal, 'Affiche du Set Setal du 11 juin 2025 sur la digue de Rufisque, avec la SONAGED'),

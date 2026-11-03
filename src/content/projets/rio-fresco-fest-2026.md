@@ -6,7 +6,7 @@ year: 2026
 place: Boulodrome, derrière l’église Sainte-Agnès, Rufisque
 partners: [Préfecture de Rufisque, Ville de Rufisque, DGPU, Fondation Sococim, Greenpeace Africa, SONAGED SA, Visit Rufisque, Diwane G Management]
 summary: "Héritages & Horizons : cinq jours, quatre piliers, un village culturel éphémère au cœur de la ville historique."
-cover: ../../assets/photos/rff-danse.jpg
+cover: ../../assets/photos/rff2026/parade-danseuses-hero.jpg
 coverAlt: Danseuses en tenues traditionnelles pendant le Rio Fresco Fest 2026
 gallery:
   - { src: ../../assets/photos/ceremonie-officielle.jpg, alt: Cérémonie officielle en présence des autorités }

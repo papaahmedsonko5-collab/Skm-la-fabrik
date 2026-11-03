@@ -44,7 +44,7 @@ const full = await Promise.all(items.map((it) => getImage({ src: it.src, width: 
       items.map((it, i) => (
         <li class:list={{ large: it.large }} data-categorie={it.categorie ?? ''}>
           <button type="button" data-open={i} data-full={full[i]?.src} data-alt={it.alt} aria-label={`Agrandir : ${it.alt}`}>
-            <Image src={it.src} alt="" widths={[360, 560, 900, 1280, 1600, 1920]} sizes="(min-width: 64rem) 50vw, 100vw" />
+            <Image src={it.src} alt="" widths={[360, 560, 900, 1280, 1600]} sizes={it.large ? '(min-width: 64rem) 45vw, (min-width: 30rem) 90vw, 100vw' : '(min-width: 64rem) 25vw, (min-width: 30rem) 45vw, 100vw'} quality={82} />
           </button>
         </li>
       ))
