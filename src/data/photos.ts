@@ -66,6 +66,7 @@ import rff25Percussions from '@/assets/photos/rff2025-percussions.jpg';
 import rff25Artistes from '@/assets/photos/rff2025-artistes.jpg';
 import rff25Loge1 from '@/assets/photos/rff2025-loge-1.jpg';
 import rff25Loge2 from '@/assets/photos/rff2025-loge-2.jpg';
+import labelHero from '@/assets/photos/label-hero-artiste.jpg';
 import rff25Loge3 from '@/assets/photos/rff2025-loge-3.jpg';
 import rff25Loge4 from '@/assets/photos/rff2025-loge-4.jpg';
 import rff25Loge5 from '@/assets/photos/rff2025-loge-5.jpg';
@@ -162,6 +163,7 @@ export const photos = {
   rff25Artistes: p(rff25Artistes, 'Artistes en coulisses du Rio Fresco Fest 2025'),
   rff25Loge1: p(rff25Loge1, 'Artiste sur la scène de la Loge des Poètes, Rio Fresco Fest 2025'),
   rff25Loge2: p(rff25Loge2, 'Artiste sur la scène de la Loge des Poètes, Rio Fresco Fest 2025'),
+  labelHero: p(labelHero, 'Artiste au micro sur scène, Sunu Kaddu Music'),
   rff25Loge3: p(rff25Loge3, 'Artiste sur la scène de la Loge des Poètes, Rio Fresco Fest 2025'),
   rff25Loge4: p(rff25Loge4, 'Artiste sur la scène de la Loge des Poètes, Rio Fresco Fest 2025'),
   rff25Loge5: p(rff25Loge5, 'Artiste sur la scène de la Loge des Poètes, Rio Fresco Fest 2025'),
