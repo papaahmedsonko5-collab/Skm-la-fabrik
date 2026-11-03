@@ -6,7 +6,7 @@ year: 2015
 place: Studio Key I Am, Rufisque
 summary: "Compilation gratuite de 23 titres offerte pour le premier anniversaire du studio Key I Am."
 cover: ../../assets/photos/sunu-tape-cover.jpg
-coverAlt: Pochette de la compilation Sunu Tape, avec la liste des artistes, affichée au studio Key I Am
+coverAlt: Pochette de la compilation Sunu Tape, deux mains tendues et la liste des 23 artistes
 missing: [Lien Audiomack officiel]
 ---
 

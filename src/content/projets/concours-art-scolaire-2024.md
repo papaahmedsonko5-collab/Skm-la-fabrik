@@ -5,6 +5,8 @@ period: Biennale 2024
 year: 2024
 place: Lycées de Rufisque · Ambassade des États-Unis, Dakar
 partners: [Ambassade des États-Unis]
+cover: ../../assets/photos/nio-far-cover.jpg
+coverAlt: Logo Ñoo far, We are together, avec le sceau de l’Ambassade des États-Unis à Dakar
 summary: "100 élèves de quatre lycées mobilisés, 20 œuvres exposées à l’ambassade."
 ---
 
