@@ -73,8 +73,11 @@ export const onRequest = defineMiddleware(async (context, next) => {
     return introuvable();
   }
 
+  // « lax » et non « strict » : sinon un lien secret cliqué depuis WhatsApp Web ou un e-mail
+  // perd le cookie à la redirection vers la connexion. Les envois de formulaire venant
+  // d'un autre site restent refusés plus haut (contrôle de l'origine).
   const memoriser = (valeur: string) =>
-    context.cookies.set(COOKIE_ENTREE, valeur, { path: '/admin', httpOnly: true, secure: true, sameSite: 'strict', maxAge: DUREE_APPAREIL });
+    context.cookies.set(COOKIE_ENTREE, valeur, { path: '/admin', httpOnly: true, secure: true, sameSite: 'lax', maxAge: DUREE_APPAREIL });
 
   const supabase = supabaseForRequest(context.request, context.cookies);
   context.locals.supabase = supabase;
