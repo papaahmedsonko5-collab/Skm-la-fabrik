@@ -159,6 +159,9 @@ const icons: Record<string, string> = {
     flex-direction: column;
     gap: 2rem;
     height: calc(100svh - 2.5rem);
+    /* Petit écran (ou zoom du PC) : le menu défile, « Se déconnecter » reste accessible. */
+    overflow-y: auto;
+    overscroll-behavior: contain;
     padding: 1.5rem 1rem;
     border-radius: 1.5rem;
     background: var(--c-noir);
@@ -223,6 +226,20 @@ const icons: Record<string, string> = {
     margin-top: auto;
     padding-top: 1rem;
     border-top: 1px solid var(--c-ligne-sombre);
+  }
+  @media (min-width: 56.01rem) and (max-height: 56rem) {
+    .admin .side {
+      gap: 1rem;
+      padding-block: 1rem;
+    }
+    .admin .side-logo img {
+      width: 4.25rem;
+    }
+    .admin .side a,
+    .admin .side button {
+      min-height: 2.4rem;
+      padding-block: 0.4rem;
+    }
   }
   .admin .contenu {
     display: flex;
