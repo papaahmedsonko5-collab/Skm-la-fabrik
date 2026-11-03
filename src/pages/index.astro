@@ -9,7 +9,7 @@ import Marquee from '@/components/Marquee.astro';
 import ProjectCard from '@/components/ProjectCard.astro';
 import SectionHead from '@/components/SectionHead.astro';
 import Stats from '@/components/Stats.astro';
-import { blueprintStats, partners, rff2026Stats } from '@/data/site';
+import { homeReperes, partners, rff2026Stats } from '@/data/site';
 import { cycle } from '@/data/impact';
 import { photos } from '@/data/photos';
 import { poles } from '@/data/poles';
@@ -89,6 +89,13 @@ const etapes = [
 
   <Marquee items={['Nul n’entre ici s’il n’est créatif', 'Formation', 'Production', 'Événementiel', 'Festivals', 'Communauté', 'Chaque pas raconte une histoire']} />
 
+  <section class="theme-sombre reperes" aria-labelledby="t-reperes">
+    <div class="wrap">
+      <h2 id="t-reperes" class="sr-only">SKM La Fabrik en quelques repères</h2>
+      <Stats data={homeReperes} />
+    </div>
+  </section>
+
   <section class="theme-papier section manifeste" aria-labelledby="qui">
     <div class="wrap">
       <p class="index" data-reveal><span>01</span> Manifeste</p>
@@ -116,7 +123,6 @@ const etapes = [
           <a class="lien-fleche" href="/a-propos">Notre histoire <span aria-hidden="true">→</span></a>
         </div>
       </div>
-      <Stats data={blueprintStats} limit={4} />
     </div>
   </section>
 
@@ -131,7 +137,7 @@ const etapes = [
                 <span class="num">{p.num}</span>
                 <span class="titre nom">{p.title}</span>
                 <span class="desc">{p.short}</span>
-                <Image src={p.photo.src} alt="" widths={[200, 320, 1280, 1600, 1920]} sizes="10rem" class="vignette" />
+                <Image src={p.photo.src} alt={p.photo.alt} widths={[200, 320, 1280, 1600, 1920]} sizes="10rem" class="vignette" />
               </a>
             </li>
           ))
@@ -162,7 +168,7 @@ const etapes = [
           etapes.map((e, i) => (
             <li class="etape" data-reveal>
               <div class="etape-photo">
-                <Image src={e.photo.src} alt="" widths={[360, 640, 1280, 1600, 1920]} sizes="(min-width: 64rem) 22vw, (min-width: 40rem) 45vw, 100vw" quality={85} />
+                <Image src={e.photo.src} alt={e.photo.alt} widths={[360, 640, 1280, 1600, 1920]} sizes="(min-width: 64rem) 22vw, (min-width: 40rem) 45vw, 100vw" quality={85} />
                 <span class="etape-num" aria-hidden="true">0{i + 1}</span>
               </div>
               <h3 class="titre titre-h3">{e.titre}</h3>
@@ -239,7 +245,7 @@ const etapes = [
             { tag: 'Réinsertion', title: 'Fort B', href: '/projets/fort-b', photo: photos.fortB, text: 'Des ateliers d’écriture et d’expression pour des mineurs incarcérés, vers un retour dans la société.' },
           ].map((a, i) => (
             <a class:list={['action', { decale: i === 1 }]} href={a.href} data-reveal>
-              <Image src={a.photo.src} alt="" widths={[400, 640, 1280, 1600, 1920]} sizes="(min-width: 64rem) 30vw, 100vw" />
+              <Image src={a.photo.src} alt={a.photo.alt} widths={[400, 640, 1280, 1600, 1920]} sizes="(min-width: 64rem) 30vw, 100vw" />
               <span class="surtitre">{a.tag}</span>
               <span class="titre titre-h3">{a.title}</span>
               <span class="doux">{a.text}</span>
@@ -262,7 +268,7 @@ const etapes = [
           news.map((n) => (
             <article class="news">
               <a href={`/actualites/${n.id}`}>
-                <Image src={n.data.cover} style={`object-position: ${n.data.coverPosition}`} alt="" widths={[400, 640, 1280, 1600, 1920]} sizes="(min-width: 64rem) 32vw, 85vw" />
+                <Image src={n.data.cover} style={`object-position: ${n.data.coverPosition}`} alt={n.data.coverAlt} widths={[400, 640, 1280, 1600, 1920]} sizes="(min-width: 64rem) 32vw, 85vw" />
                 <span class="news-meta">
                   {n.data.type} · {n.data.period}
                 </span>
@@ -286,6 +292,10 @@ const etapes = [
 </BaseLayout>
 
 <style>
+  .reperes {
+    --stat-color: var(--c-or);
+    padding-block: clamp(2.5rem, 2rem + 3vw, 4.5rem);
+  }
   /* Respiration plus généreuse entre les sections de l'accueil */
   .section {
     padding-block: clamp(5rem, 3rem + 6vw, 7.5rem);

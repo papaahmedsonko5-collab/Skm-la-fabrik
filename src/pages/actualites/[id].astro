@@ -78,7 +78,7 @@ const jsonLd = {
             {autres.map((n) => (
               <li>
                 <a href={`/actualites/${n.id}`}>
-                  <Image src={n.data.cover} style={`object-position: ${n.data.coverPosition}`} alt="" widths={[400, 640, 1280, 1600, 1920]} sizes="(min-width: 64rem) 30vw, 100vw" />
+                  <Image src={n.data.cover} style={`object-position: ${n.data.coverPosition}`} alt={n.data.coverAlt} widths={[400, 640, 1280, 1600, 1920]} sizes="(min-width: 64rem) 30vw, 100vw" />
                   <span class="type">
                     {n.data.type} · {n.data.period}
                   </span>

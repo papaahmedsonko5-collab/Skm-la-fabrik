@@ -90,6 +90,19 @@ export const blueprintStats: SourcedStats = {
   ],
 };
 
+/** Repères affichés en grand sous le haut de la page d'accueil. */
+export const homeReperes: SourcedStats = {
+  source: 'documents institutionnels de Sunu Kaddu et Impact Blueprint 2025-2026',
+  validated: false,
+  items: [
+    { value: '2014', label: 'naissance de Sunu Kaddu', detail: 'et du studio Key I Am à Rufisque' },
+    { value: 'Meilleur album', label: 'Galsen Hip Hop Awards', detail: 'pour Xaatim ak Kallama de PPS the Writah' },
+    { value: '+200', label: 'jeunes', detail: 'formés et accompagnés aux métiers créatifs et techniques' },
+    { value: '23', label: 'artistes', detail: 'réunis sur la compilation Sunu Tape' },
+    { value: '4', label: 'pays de scène', detail: 'États-Unis, France, Allemagne, Maroc' },
+  ],
+};
+
 export const rff2026Stats: SourcedStats = {
   source: 'Rapport d’impact officiel Rio Fresco Fest 2026',
   validated: false,
