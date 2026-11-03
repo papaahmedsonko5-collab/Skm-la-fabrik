@@ -68,7 +68,7 @@ const year = new Date().getFullYear();
 
     <div class="legal">
       <p>© {year} {site.legalName}. Tous droits réservés.</p>
-      <p class="credit">Site conçu et codé par Sultan Agency</p>
+      <p class="credit">Site conçu et codé par <a href="https://papaahmedsonko5-collab.github.io/-sultan-agency/" target="_blank" rel="noopener">Sultan Agency</a></p>
       <p class="legal-links"><a href="/mentions-legales">Mentions légales</a> <a href="/confidentialite">Confidentialité</a> <a href="/conditions-utilisation">Conditions d’utilisation</a></p>
     </div>
   </div>
@@ -177,6 +177,14 @@ const year = new Date().getFullYear();
   }
   .credit {
     opacity: 0.8;
+  }
+  .credit a {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+  .credit a:hover {
+    opacity: 1;
+    color: var(--c-or);
   }
   .legal-links {
     display: flex;
