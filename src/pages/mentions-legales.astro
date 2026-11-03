@@ -4,20 +4,20 @@ import ContactEmail from '@/components/ContactEmail.astro';
 import { site } from '@/data/site';
 ---
 
-<LegalPage title="Mentions légales" description="Éditeur, hébergeur et propriété intellectuelle du site de SKM La Fabrik." updated="2 novembre 2026">
+<LegalPage title="Mentions légales" description="Éditeur, hébergeur et propriété intellectuelle du site de SKM La Fabrik." updated="3 novembre 2026">
   <h2>Éditeur du site</h2>
   <p>
     {site.legalName}<br />
     {site.address.street}, {site.address.city}, {site.address.country}<br />
     E-mail : <ContactEmail />
   </p>
-  <p>Numéro d’enregistrement de l’association : <span class="a-completer">à compléter par la structure</span>.</p>
 
   <h2>Directeur de la publication</h2>
   <p>Paul Pissety Sagna, dit PPS the Writah, président de l’association Sunu Kaddu.</p>
 
   <h2>Hébergement</h2>
-  <p>Vercel Inc., 440 N Barranca Avenue #4133, Covina, CA 91723, États-Unis. Site : <a href="https://vercel.com" rel="noopener" target="_blank">vercel.com</a>.</p>
+  <p>Site : www.skmlafabrik.com, hébergé par Vercel Inc., 440 N Barranca Avenue #4133, Covina, CA 91723, États-Unis (<a href="https://vercel.com" rel="noopener" target="_blank">vercel.com</a>).</p>
+  <p>Base de données des demandes et des statistiques de visite : Supabase, serveurs situés en Irlande, Union européenne (<a href="https://supabase.com" rel="noopener" target="_blank">supabase.com</a>).</p>
 
   <h2>Propriété intellectuelle</h2>
   <p>
@@ -28,7 +28,7 @@ import { site } from '@/data/site';
   <p>Crédit photo de certaines images du Rio Fresco Fest : The_Meuss.</p>
 
   <h2>Données personnelles</h2>
-  <p>Le traitement des données transmises via le formulaire de contact est décrit dans la <a href="/confidentialite">politique de confidentialité</a>.</p>
+  <p>Le traitement des données transmises via les formulaires de contact et d’accréditation, ainsi que la mesure d’audience, sont décrits dans la <a href="/confidentialite">politique de confidentialité</a>.</p>
 
   <h2>Conditions d’utilisation</h2>
   <p>L’utilisation du site est régie par les <a href="/conditions-utilisation">conditions d’utilisation</a>.</p>

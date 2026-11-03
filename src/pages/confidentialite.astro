@@ -7,7 +7,7 @@ import { site } from '@/data/site';
 <LegalPage
   title="Politique de confidentialité"
   description="Quelles données le site de SKM La Fabrik collecte, pourquoi, combien de temps et comment exercer vos droits."
-  updated="2 novembre 2026"
+  updated="3 novembre 2026"
 >
   <p>
     Cette politique s’applique au site de {site.name}. Elle respecte la loi sénégalaise n° 2008-12 du 25 janvier 2008 sur la protection
@@ -18,24 +18,26 @@ import { site } from '@/data/site';
   <p>{site.legalName}, {site.address.street}, {site.address.city}, {site.address.country}. Contact : <ContactEmail />.</p>
 
   <h2>Données collectées</h2>
-  <p>Le site ne collecte des données personnelles que lorsque vous remplissez le formulaire de contact :</p>
+  <p>Le site ne collecte des données personnelles que lorsque vous remplissez le formulaire de contact ou de demande d’accréditation :</p>
   <ul>
     <li>obligatoires : nom et prénom, adresse e-mail, objet de la demande et message ;</li>
-    <li>facultatives : structure et numéro de téléphone.</li>
+    <li>pour une accréditation, en plus : votre profil (presse, photographe, vidéaste…), l’événement concerné et votre média ou structure ;</li>
+    <li>facultatives : structure, numéro de téléphone et, pour une accréditation, un lien vers vos publications.</li>
   </ul>
   <p>Aucune donnée n’est demandée au-delà de ce qui est nécessaire pour vous répondre.</p>
 
   <h2>Finalité et base légale</h2>
   <p>
-    Ces données servent uniquement à répondre à votre demande (partenariat, prestation, formation, production ou question générale). Le
+    Ces données servent uniquement à répondre à votre demande (partenariat, prestation, formation, production, accréditation à un événement ou question générale). Le
     traitement repose sur votre consentement, exprimé en cochant la case prévue avant l’envoi.
   </p>
 
   <h2>Destinataires</h2>
   <p>
-    Votre demande est transmise par e-mail à l’équipe de SKM La Fabrik. L’envoi est assuré par le service Resend, et le site est hébergé
-    par Vercel ; ces prestataires, situés aux États-Unis, n’utilisent pas vos données pour leur propre compte. Vos données ne sont jamais
-    vendues ni cédées.
+    Votre demande est lue uniquement par l’équipe de SKM La Fabrik, dans son espace d’administration protégé par mot de passe et code de
+    sécurité. Elle est enregistrée dans une base de données hébergée par Supabase en Irlande (Union européenne). Le site est hébergé par
+    Vercel, et un avis par e-mail peut être envoyé à l’équipe par le service Resend ; ces deux prestataires sont situés aux États-Unis.
+    Aucun de ces prestataires n’utilise vos données pour son propre compte. Vos données ne sont jamais vendues ni cédées.
   </p>
 
   <h2>Durée de conservation</h2>
@@ -51,7 +53,8 @@ import { site } from '@/data/site';
   </p>
   <p>
     Le site utilise aussi la mesure d’audience de Vercel (Web Analytics), qui fonctionne de la même façon, sans cookie et de manière
-    agrégée. Aucun cookie publicitaire ou de suivi n’est utilisé, c’est pourquoi aucun bandeau de consentement n’est affiché.
+    agrégée. Aucun cookie publicitaire ou de suivi n’est utilisé, c’est pourquoi aucun bandeau de consentement n’est affiché. Seul
+    l’espace d’administration, réservé à l’équipe, utilise des cookies strictement nécessaires à la connexion.
   </p>
   <p>
     Les vidéos YouTube ne sont chargées qu’après votre clic sur le bouton de lecture, depuis le domaine youtube-nocookie.com. YouTube
@@ -60,7 +63,7 @@ import { site } from '@/data/site';
 
   <h2>Sécurité</h2>
   <p>
-    Le site est servi exclusivement en HTTPS. Le formulaire est protégé contre les envois automatisés et répétés, et les clés d’accès aux
+    Le site est servi exclusivement en HTTPS. Les formulaires sont protégés contre les envois automatisés et répétés, et les clés d’accès aux
     services d’envoi ne sont jamais exposées dans le navigateur.
   </p>
 
