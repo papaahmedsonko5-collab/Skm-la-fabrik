@@ -6,6 +6,8 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
 import Carousel from '@/components/Carousel.astro';
 import Gallery from '@/components/Gallery.astro';
 import { galerie } from '@/lib/galerie';
+import { videos } from '@/lib/videos';
+import VideoEmbed from '@/components/VideoEmbed.astro';
 import { sortNews } from '@/lib/content';
 
 const news = sortNews(await getCollection('actualites', ({ data }) => !data.draft));
@@ -29,6 +31,7 @@ const [une, ...autres] = news;
         <nav class="ancres" aria-label="Sections de la page">
           <a href="#journal">Actualités <span aria-hidden="true">↓</span></a>
           <a href="#galerie">Galerie photo <span aria-hidden="true">↓</span></a>
+          {videos.length > 0 && <a href="#videos">Vidéos <span aria-hidden="true">↓</span></a>}
         </nav>
       </div>
     </div>
@@ -108,6 +111,35 @@ const [une, ...autres] = news;
       <Gallery items={galerie} label="Galerie photo de SKM La Fabrik" filtres />
     </div>
   </section>
+
+  {
+    videos.length > 0 && (
+      <section id="videos" class="section" aria-labelledby="t-videos">
+        <div class="wrap">
+          <div class="galerie-tete">
+            <p class="index">
+              <span>{autres.length > 0 ? '04' : '03'}</span> Vidéos
+            </p>
+            <h2 id="t-videos" class="titre titre-h2">En images</h2>
+            <p class="aide-videos">Les vidéos sont hébergées par YouTube et ne se chargent qu’après votre clic.</p>
+          </div>
+          <ul class="videos">
+            {videos.map((v) => (
+              <li>
+                <VideoEmbed
+                  {...(v.type === 'playlist' ? { playlist: v.id } : { video: v.id })}
+                  title={v.titre}
+                  poster={v.poster}
+                  compact
+                />
+                <p class="video-cat">{v.categorie}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+    )
+  }
 </BaseLayout>
 
 <style>
@@ -327,6 +359,27 @@ const [une, ...autres] = news;
     color: var(--c-encre-douce);
   }
 
+  .videos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
+    gap: 1.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .video-cat {
+    margin: 0.6rem 0 0;
+    color: var(--c-or);
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .aide-videos {
+    margin: 0.5rem 0 0;
+    font-size: 0.9375rem;
+    opacity: 0.75;
+  }
   .galerie-tete {
     margin-bottom: clamp(2rem, 1.5rem + 2vw, 3rem);
   }

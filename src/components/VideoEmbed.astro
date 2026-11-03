@@ -14,8 +14,10 @@ interface Props {
   video?: string;
   title: string;
   poster: ImageMetadata;
+  /** Petite carte (grille de vidéos) : sans la mention sous le bouton. */
+  compact?: boolean;
 }
-const { playlist, video, title, poster } = Astro.props;
+const { playlist, video, title, poster, compact = false } = Astro.props;
 
 if (!playlist && !video) throw new Error('VideoEmbed : indiquez `playlist` ou `video`.');
 
@@ -27,7 +29,7 @@ const watch = playlist
   : `https://www.youtube.com/watch?v=${encodeURIComponent(video ?? '')}`;
 ---
 
-<div class="video" data-video data-embed={embed} data-title={title}>
+<div class:list={['video', { compact }]} data-video data-embed={embed} data-title={title}>
   <Image src={poster} alt="" widths={[480, 800, 1200, 1280, 1600, 1920]} sizes="(min-width: 64rem) 60vw, 100vw" class="poster" />
   <a class="play" href={watch} target="_blank" rel="noopener" data-play>
     <span class="icon" aria-hidden="true">
@@ -35,7 +37,7 @@ const watch = playlist
     </span>
     <span class="label">Lire : {title}</span>
   </a>
-  <p class="note">La vidéo est hébergée par YouTube et ne se charge qu’après votre clic.</p>
+  {!compact && <p class="note">La vidéo est hébergée par YouTube et ne se charge qu’après votre clic.</p>}
 </div>
 
 <script>
@@ -105,6 +107,18 @@ const watch = playlist
   .label {
     max-width: 22rem;
     text-shadow: 0 1px 8px rgb(0 0 0 / 0.6);
+  }
+  .compact .play {
+    bottom: 1rem;
+    left: 1rem;
+    gap: 0.7rem;
+  }
+  .compact .icon {
+    width: 3rem;
+    height: 3rem;
+  }
+  .compact .label {
+    font-size: 0.9375rem;
   }
   .note {
     position: absolute;

@@ -1,0 +1,228 @@
+---
+import AdminLayout from '@/layouts/AdminLayout.astro';
+import { categoriesPhotos, field, flashFrom, isCategoriePhoto, lireLienYoutube, type VideoGalerie } from '@/lib/admin/data';
+
+export const prerender = false;
+
+const supabase = Astro.locals.supabase!;
+let erreur: string | null = null;
+let saisie = { lien: '', titre: '' };
+
+async function lister(): Promise<VideoGalerie[]> {
+  const { data } = await supabase.from('videos').select('id, titre, youtube_id, type, categorie, position, visible').order('position').order('created_at');
+  return (data ?? []) as VideoGalerie[];
+}
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const action = field(form, 'action', 20);
+  const id = field(form, 'id', 60);
+
+  if (action === 'ajouter') {
+    saisie = { lien: field(form, 'lien', 500), titre: field(form, 'titre', 160) };
+    const categorie = field(form, 'categorie', 40);
+    const yt = lireLienYoutube(saisie.lien);
+    if (!yt) erreur = 'Lien non reconnu. Collez le lien d’une vidéo ou d’une playlist YouTube.';
+    else if (saisie.titre.length < 2) erreur = 'Donnez un titre à la vidéo.';
+    else if (!isCategoriePhoto(categorie)) erreur = 'Choisissez une catégorie.';
+    else {
+      const { data: last } = await supabase.from('videos').select('position').order('position', { ascending: false }).limit(1);
+      const position = ((last?.[0]?.position as number | undefined) ?? 0) + 1;
+      const { error } = await supabase.from('videos').insert({ titre: saisie.titre, youtube_id: yt.id, type: yt.type, categorie, position });
+      if (error) erreur = error.code === '23505' ? 'Cette vidéo est déjà dans la liste.' : 'L’enregistrement a échoué.';
+      else return Astro.redirect('/admin/videos?ok=video', 303);
+    }
+  } else if (id) {
+    const videos = await lister();
+    const i = videos.findIndex((v) => v.id === id);
+    const video = videos[i];
+    if (!video) return Astro.redirect('/admin/videos?erreur=introuvable', 303);
+
+    if (action !== 'supprimer') {
+      // Titre et catégorie saisis sont gardés, quel que soit le bouton utilisé.
+      const titre = field(form, 'titre', 160);
+      const categorie = field(form, 'categorie', 40);
+      const { error } = await supabase
+        .from('videos')
+        .update({ titre: titre.length >= 2 ? titre : video.titre, categorie: isCategoriePhoto(categorie) ? categorie : video.categorie })
+        .eq('id', id);
+      if (error) erreur = 'L’enregistrement a échoué.';
+    }
+    if (erreur) {
+      /* on affiche l'erreur */
+    } else if (action === 'monter' || action === 'descendre') {
+      const j = action === 'monter' ? i - 1 : i + 1;
+      if (videos[j]) {
+        const ordre = videos.map((v) => v.id);
+        ordre[i] = videos[j]!.id;
+        ordre[j] = video.id;
+        for (const [pos, vid] of ordre.entries()) {
+          if (videos.find((v) => v.id === vid)!.position !== pos + 1) await supabase.from('videos').update({ position: pos + 1 }).eq('id', vid);
+        }
+      }
+    } else if (action === 'visibilite') {
+      const { error } = await supabase.from('videos').update({ visible: !video.visible }).eq('id', id);
+      if (error) erreur = 'La modification a échoué.';
+    } else if (action === 'supprimer') {
+      const { error } = await supabase.from('videos').delete().eq('id', id);
+      if (error) erreur = 'La suppression a échoué.';
+      else return Astro.redirect('/admin/videos?ok=supprime', 303);
+    }
+    if (!erreur) return Astro.redirect(`/admin/videos?ok=enregistre#video-${id}`, 303);
+  }
+}
+
+const videos = await lister();
+const visibles = videos.filter((v) => v.visible).length;
+const flash = erreur ? { type: 'erreur' as const, text: erreur } : flashFrom(Astro.url);
+const lienYoutube = (v: VideoGalerie) =>
+  v.type === 'playlist' ? `https://www.youtube.com/playlist?list=${v.youtube_id}` : `https://www.youtube.com/watch?v=${v.youtube_id}`;
+---
+
+<AdminLayout title="Vidéos" flash={flash}>
+  <p class="intro aide">
+    Les vidéos YouTube de la page Actualités. {videos.length} vidéo(s), dont {visibles} affichée(s) sur le site. Les changements apparaissent
+    après « Publier le site ».
+  </p>
+
+  <form method="post" class="carte champs ajout">
+    <h2>Ajouter une vidéo</h2>
+    <input type="hidden" name="action" value="ajouter" />
+    <label>
+      Lien YouTube
+      <span class="aide">Le lien d’une vidéo (youtube.com/watch?v=…, youtu.be/…, Shorts) ou d’une playlist (…?list=…).</span>
+      <input type="url" name="lien" value={saisie.lien} placeholder="https://www.youtube.com/watch?v=…" required />
+    </label>
+    <label>
+      Titre
+      <input type="text" name="titre" value={saisie.titre} maxlength="160" required />
+    </label>
+    <label>
+      Catégorie
+      <select name="categorie" required>
+        {categoriesPhotos.map((c) => <option value={c}>{c}</option>)}
+      </select>
+    </label>
+    <div class="actions-bas">
+      <button class="bouton or" type="submit">Ajouter la vidéo</button>
+    </div>
+  </form>
+
+  {
+    videos.length === 0 ? (
+      <p class="carte vide">Aucune vidéo pour l’instant. Tant que la liste est vide, la section Vidéos n’apparaît pas sur le site.</p>
+    ) : (
+      <ul class="grille">
+        {videos.map((v, i) => (
+          <li id={`video-${v.id}`} class:list={['carte', 'video', { masquee: !v.visible }]}>
+            <a class="image" href={lienYoutube(v)} target="_blank" rel="noopener">
+              {v.type === 'video' ? (
+                <img src={`https://i.ytimg.com/vi/${v.youtube_id}/hqdefault.jpg`} alt="" loading="lazy" referrerpolicy="no-referrer" />
+              ) : (
+                <span class="playlist">Playlist YouTube</span>
+              )}
+              {!v.visible && <span class="pastille brouillon">Masquée</span>}
+            </a>
+            <form method="post" class="champs">
+              <input type="hidden" name="id" value={v.id} />
+              <label>
+                Titre
+                <input type="text" name="titre" value={v.titre} maxlength="160" required />
+              </label>
+              <label>
+                Catégorie
+                <select name="categorie">
+                  {categoriesPhotos.map((c) => (
+                    <option value={c} selected={c === v.categorie}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <div class="boutons">
+                <button class="bouton or" type="submit" name="action" value="enregistrer">
+                  Enregistrer
+                </button>
+                <button class="bouton contour" type="submit" name="action" value="monter" disabled={i === 0} aria-label="Monter la vidéo">
+                  ↑
+                </button>
+                <button
+                  class="bouton contour"
+                  type="submit"
+                  name="action"
+                  value="descendre"
+                  disabled={i === videos.length - 1}
+                  aria-label="Descendre la vidéo"
+                >
+                  ↓
+                </button>
+                <button class="bouton contour" type="submit" name="action" value="visibilite">
+                  {v.visible ? 'Masquer' : 'Afficher'}
+                </button>
+                <button class="bouton danger" type="submit" name="action" value="supprimer" data-confirm="Retirer cette vidéo de la liste ?">
+                  Supprimer
+                </button>
+              </div>
+            </form>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</AdminLayout>
+
+<style>
+  .intro {
+    margin: 0;
+  }
+  .ajout h2 {
+    margin: 0;
+    font-size: 1.15rem;
+  }
+  .grille {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+    gap: 1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .video {
+    display: grid;
+    gap: 1rem;
+    align-content: start;
+  }
+  .video.masquee .image {
+    opacity: 0.45;
+  }
+  .image {
+    position: relative;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    border-radius: 0.75rem;
+    background: var(--c-noir);
+    color: var(--c-or);
+    aspect-ratio: 16 / 9;
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .image .pastille {
+    position: absolute;
+    top: 0.6rem;
+    left: 0.6rem;
+  }
+  .boutons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .boutons .bouton {
+    padding-inline: 0.9rem;
+  }
+</style>

@@ -41,7 +41,8 @@ const csp = [
   "default-src 'self'",
   `script-src 'self' ${[...hashes].sort().join(' ')}`.trim(),
   "style-src 'self' 'unsafe-inline'",
-  `img-src 'self' data: blob: ${supabaseOrigin}`.trim(),
+  // i.ytimg.com : vignettes des vidéos dans l'admin uniquement (le site public les sert lui-même).
+  `img-src 'self' data: blob: https://i.ytimg.com ${supabaseOrigin}`.trim(),
   "font-src 'self'",
   "connect-src 'self'",
   'frame-src https://www.youtube-nocookie.com',

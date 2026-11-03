@@ -88,6 +88,44 @@ export interface PhotoGalerie {
   large: boolean;
 }
 
+export interface VideoGalerie {
+  id: string;
+  titre: string;
+  youtube_id: string;
+  type: 'video' | 'playlist';
+  categorie: CategoriePhoto;
+  position: number;
+  visible: boolean;
+}
+
+/**
+ * Lit un lien YouTube (vidéo, Shorts, youtu.be ou playlist) et renvoie son
+ * identifiant. Refuse tout autre site.
+ */
+export function lireLienYoutube(lien: string): { type: 'video' | 'playlist'; id: string } | null {
+  let u: URL;
+  try {
+    u = new URL(lien.trim());
+  } catch {
+    return null;
+  }
+  const hote = u.hostname.replace(/^(www\.|m\.|music\.)/, '');
+  const ok = (v: string | null | undefined, min: number) => (v && new RegExp(`^[A-Za-z0-9_-]{${min},64}$`).test(v) ? v : null);
+  if (hote === 'youtu.be') {
+    const id = ok(u.pathname.slice(1).split('/')[0], 11);
+    return id ? { type: 'video', id } : null;
+  }
+  if (hote !== 'youtube.com' && hote !== 'youtube-nocookie.com') return null;
+  const v = ok(u.searchParams.get('v'), 11);
+  if (v) return { type: 'video', id: v };
+  const m = u.pathname.match(/^\/(?:shorts|embed|live)\/([^/]+)/);
+  const chemin = ok(m?.[1], 11);
+  if (chemin && chemin !== 'videoseries') return { type: 'video', id: chemin };
+  const list = ok(u.searchParams.get('list'), 10);
+  if (list) return { type: 'playlist', id: list };
+  return null;
+}
+
 export interface Contenu {
   key: string;
   page: string;
@@ -165,6 +203,7 @@ export function flashFrom(url: URL): { type: 'ok' | 'erreur'; text: string } | n
     statut: 'Statut mis à jour.',
     importe: 'Contenu actuel du site importé. Vérifiez-le, puis publiez.',
     securite: 'Double authentification activée. Gardez l’application sur votre téléphone : elle sera demandée à chaque connexion.',
+    video: 'Vidéo ajoutée. Pensez à publier pour mettre le site à jour.',
     ajoute: 'Photos ajoutées. Ajoutez une description à chacune, puis publiez.',
   };
   if (ok && messages[ok]) return { type: 'ok', text: messages[ok] };

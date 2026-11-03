@@ -2,6 +2,7 @@
 // et le prépare pour la construction du site statique.
 //  - textes des pages  -> src/.cms/contenus.json
 //  - galerie photo     -> src/.cms/photos.json (+ photos dans src/.cms/medias)
+//  - vidéos YouTube    -> src/.cms/videos.json (+ vignettes dans src/.cms/medias/videos)
 //  - actualités/projets -> src/.cms/<collection>/<slug>.md (+ photos dans src/.cms/medias)
 // Sans configuration Supabase, ou tant qu'une collection est vide côté admin,
 // le site garde les fichiers du dépôt (src/content/...). Lecture seule, clé publiable.
@@ -72,6 +73,32 @@ async function main() {
   } else {
     console.log('[sync-cms] Galerie vide dans l’admin : galerie du dépôt conservée.');
   }
+
+  // Vidéos YouTube (page Actualités). La vignette est copiée sur le site au
+  // moment de la construction : le visiteur ne contacte YouTube qu'au clic.
+  const videos = await rest('videos?select=titre,youtube_id,type,categorie&visible=eq.true&order=position.asc,created_at.asc');
+  const listeVideos = [];
+  for (const v of videos) {
+    let poster = null;
+    if (v.type === 'video') {
+      for (const taille of ['maxresdefault', 'sddefault', 'hqdefault']) {
+        try {
+          const res = await fetch(`https://i.ytimg.com/vi/${encodeURIComponent(v.youtube_id)}/${taille}.jpg`, { signal: AbortSignal.timeout(20000) });
+          if (!res.ok || !(res.headers.get('content-type') ?? '').startsWith('image/')) continue;
+          const dest = join(ROOT, 'medias', 'videos', `${v.youtube_id}.jpg`);
+          await mkdir(dirname(dest), { recursive: true });
+          await writeFile(dest, Buffer.from(await res.arrayBuffer()));
+          poster = `medias/videos/${v.youtube_id}.jpg`;
+          break;
+        } catch {
+          /* vignette suivante, sinon photo par défaut */
+        }
+      }
+    }
+    listeVideos.push({ titre: v.titre, id: v.youtube_id, type: v.type, categorie: v.categorie, poster });
+  }
+  await writeFile(join(ROOT, 'videos.json'), JSON.stringify(listeVideos, null, 2) + '\n');
+  console.log(`[sync-cms] ${listeVideos.length} vidéo(s) depuis l'admin.`);
 
   // Actualités
   const actus = await rest('actualites?select=*&draft=eq.false&order=date.desc.nullslast');
