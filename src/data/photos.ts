@@ -56,8 +56,18 @@ import lieuClavier from '@/assets/photos/lieu/clavier.jpg';
 import lieuOrgue from '@/assets/photos/lieu/orgue.jpg';
 import lieuFormation from '@/assets/photos/lieu/salle-formation.jpg';
 import lieuBureau from '@/assets/photos/lieu/bureau.jpg';
+import lieuMur from '@/assets/photos/lieu/mur-citations.jpg';
+import lieuAffiches from '@/assets/photos/lieu/mur-affiches.jpg';
+import lieuKeyiam from '@/assets/photos/lieu/keyiam-studio.jpg';
+import lieuMicro from '@/assets/photos/lieu/cabine-micro.jpg';
+import lieuEnceinte from '@/assets/photos/lieu/enceinte.jpg';
 import lieuPorte from '@/assets/photos/lieu/porte-creatif.jpg';
 import lieuGraffiti from '@/assets/photos/lieu/couloir-graffiti.jpg';
+import lieuCartes from '@/assets/photos/lieu/cartes-postales.jpg';
+import lieuSunuTape from '@/assets/photos/lieu/affiche-sunu-tape.jpg';
+import lieuTag from '@/assets/photos/lieu/tag-skm.jpg';
+import lieuArtistes from '@/assets/photos/lieu/mur-artistes.jpg';
+import lieuTrophees from '@/assets/photos/lieu/etagere-trophees.jpg';
 
 export interface Photo {
   readonly src: ImageMetadata;
@@ -113,24 +123,34 @@ export const photos = {
   rff25Site: p(rff25Site, 'Le site du village culturel avant son aménagement, au pied des murs anciens'),
 } as const satisfies Record<string, Photo>;
 
-/** Les espaces de SKM La Fabrik (3ᵉ étage, Cité Senelec), photos de l'équipe, février 2026. */
+/** Les espaces de SKM La Fabrik (3ᵉ étage, Cité Senelec), photos de l'équipe. */
 const lieuStudio = {
-  cabine: p(lieuCabine, 'Le Studio Key I Am sous lumière bleue : poste de mixage, panneaux acoustiques et cabine d’enregistrement'),
-  poste: p(lieuPoste, 'Poste de production : écran au logo SKM La Fabrik, enceintes de monitoring, pads et clavier maître'),
-  interface: p(lieuInterface, 'Interface audio du studio devant l’écran au logo SKM La Fabrik'),
+  cabine: p(lieuCabine, 'Le Studio Key I Am sous lumière bleue : écrans au logo SKM La Fabrik, enceintes de monitoring et poste de mixage'),
+  poste: p(lieuPoste, 'Poste de production : écran au logo SKM La Fabrik, enceintes KRK, MPC, interface audio et clavier maître'),
+  micro: p(lieuMicro, 'Cabine d’enregistrement : micro avec filtre anti-pop entre des panneaux acoustiques'),
 };
 /** Trois vues du Studio Key I Am, pour la page Sunu Kaddu Music. */
-export const studioPhotos = [lieuStudio.cabine, lieuStudio.poste, lieuStudio.interface];
+export const studioPhotos = [lieuStudio.cabine, lieuStudio.poste, lieuStudio.micro];
 
 export const lieu = [
   { ...p(lieuCouloirStudio, 'Couloir de SKM La Fabrik, entrée du Studio Key I Am et affiche « Chaque pas raconte une histoire »'), large: true },
   { ...lieuStudio.cabine, large: true },
   lieuStudio.poste,
-  { ...p(lieuFormation, 'Salle de co-working et de formation, mur de citations peintes à la main'), large: true },
-  p(lieuPorte, 'Affiche « Nul n’entre ici s’il n’est créatif » sur une porte en bois au logo SKM La Fabrik'),
-  lieuStudio.interface,
-  p(lieuClavier, 'Clavier du studio sous lumière bleue'),
+  lieuStudio.micro,
+  { ...p(lieuMur, 'Mur de citations peint à la main dans la salle de co-working : Chinua Achebe, KRS One, Cheikh Anta Diop, mots en wolof'), large: true },
+  p(lieuFormation, 'Salle de co-working et de formation, chaises alignées sous le mur de citations'),
+  p(lieuPorte, 'Affiche « Nul n’entre ici s’il n’est créatif » sur une porte en bois'),
+  p(lieuKeyiam, 'Inscription « Keyiam Studio » peinte en bleu au-dessus de la porte du studio'),
+  p(lieuClavier, 'Clavier maître du studio sous lumière bleue'),
   p(lieuOrgue, 'Orgue électronique ancien devant un panneau acoustique'),
-  p(lieuGraffiti, 'Couloir aux murs graffés menant à l’accueil de SKM La Fabrik'),
-  p(lieuBureau, 'Bureau de l’équipe : trophées, attestations, affiches d’artistes et visuel « Arts & Community »'),
+  p(lieuEnceinte, 'Enceinte de monitoring surmontée d’un car rapide miniature'),
+  p(lieuInterface, 'Interface audio du studio devant l’écran au logo SKM La Fabrik'),
+  p(lieuGraffiti, 'Couloir aux murs graffés menant à l’accueil et à l’inscription SKM La Fabrik'),
+  p(lieuAffiches, 'Cadres photo de Sunu Kaddu Music et affiche « Heritage: Africa » dans le couloir'),
+  { ...p(lieuArtistes, 'Mur d’affiches d’artistes sénégalais dans le bureau : Ismael Lô, Khar Mbaye Madiaga, Bamba-J-Fall, Mar Seck'), large: true },
+  p(lieuTag, 'Inscription « SKM La Fabrik » tracée en bleu sur un mur blanc'),
+  p(lieuBureau, 'Bureau de l’équipe sous les affiches d’artistes et le visuel « Arts & Community »'),
+  p(lieuTrophees, 'Étagère du bureau : trophées, attestations encadrées et livres'),
+  p(lieuSunuTape, 'Affiche Sunu Tape et visuel « Arts & Community » accrochés au mur'),
+  p(lieuCartes, 'Cartes postales anciennes encadrées au mur de la Fabrik'),
 ];
