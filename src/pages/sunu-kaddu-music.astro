@@ -1,5 +1,5 @@
 ---
-import { Image } from 'astro:assets';
+import { Image, getImage } from 'astro:assets';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import Button from '@/components/Button.astro';
 import Carousel from '@/components/Carousel.astro';
@@ -9,6 +9,15 @@ import { photos, studioPhotos } from '@/data/photos';
 import { heritage, label, productions, scenes, sunuTapeArtists } from '@/data/music';
 import { offresArtistes, tarifsSource } from '@/data/offres';
 import { rff } from '@/data/rff';
+import afDc2dk from '@/assets/photos/affiches/dc2dk.jpg';
+import afFilm from '@/assets/photos/affiches/film-showcase-concert.jpg';
+import afJokko from '@/assets/photos/affiches/jokko-2-casablanca-2015.jpg';
+import afJustLive from '@/assets/photos/affiches/just-live-2021.jpg';
+import afOb10 from '@/assets/photos/affiches/onebeat-10-2022.jpg';
+import afObNy from '@/assets/photos/affiches/onebeat-new-york-2012.jpg';
+import afObX from '@/assets/photos/affiches/onebeat-x.jpg';
+import afSlam from '@/assets/photos/affiches/slamoualeykum-rufisquois.jpg';
+import afXShow from '@/assets/photos/affiches/the-x-show.jpg';
 
 const pad = (n: number) => String(n).padStart(2, '0');
 
@@ -18,6 +27,21 @@ const sommaire = [
   { num: '05', titre: 'Sunu Tape', meta: 'Compilation, 23 titres', href: '#t-tape' },
   { num: '06', titre: 'Le studio', meta: 'Les formules', href: '#studio' },
 ] as const;
+
+// Affiches de scènes de PPS the Writah : légendes reprises uniquement du texte imprimé sur chaque affiche.
+const affichesParcours = await Promise.all(
+  [
+    { src: afObNy, titre: 'New York is OneBeat', meta: 'Roulette et Autumn Bowl, Brooklyn · 5 et 6 octobre 2012', alt: 'Affiche OneBeat New York des 5 et 6 octobre 2012, présentant PPS, MC du Sénégal' },
+    { src: afJokko, titre: 'Jokko #2', meta: 'L’Boulevard, stade du C.O.C, Casablanca · 17 septembre 2015', alt: 'Affiche du concert Jokko #2 au festival L’Boulevard 2015 à Casablanca, avec H-Name, Gee Bayss, Francoman et PPS the Writah' },
+    { src: afJustLive, titre: 'Just Live, 10 ans de music', meta: 'Concert diffusé le 26 décembre 2021', alt: 'Affiche du concert Just Live, 10 ans de music de PPS the Writah, diffusé le 26 décembre 2021' },
+    { src: afOb10, titre: 'OneBeat 10', meta: 'Taos et Albuquerque · du 17 octobre au 7 novembre 2022', alt: 'Affiche OneBeat 10, les 10 ans du programme, du 17 octobre au 7 novembre 2022' },
+    { src: afObX, titre: 'OneBeat X', meta: 'Festival des 10 ans de OneBeat', alt: 'Affiche OneBeat X, festival des 10 ans réunissant 25 artistes de 19 pays' },
+    { src: afFilm, titre: 'Film Showcase and Concert', meta: 'Maison de la Culture Douta Seck · Xuman, Diaw Diop et PPS', alt: 'Affiche du Film Showcase and Concert à la Maison de la Culture Douta Seck, avec Xuman, Diaw Diop et PPS' },
+    { src: afSlam, titre: 'Slam’Oualeykum Rufisquois', meta: 'CC Maurice Gueye, Rufisque', alt: 'Affiche de Slam’Oualeykum Rufisquois au centre culturel Maurice Gueye, présenté par Sunu Kaddu' },
+    { src: afXShow, titre: 'The X Show', meta: 'EFI de Rufisque', alt: 'Affiche du X Show de PPS the Ghost Writah à l’EFI de Rufisque' },
+    { src: afDc2dk, titre: '#DC2DK', meta: 'Visuel du projet', alt: 'Visuel du projet #DC2DK' },
+  ].map(async (a) => ({ ...a, full: (await getImage({ src: a.src, width: a.src.width, format: 'webp', quality: 90 })).src })),
+);
 
 const loge = [photos.rff25Loge1, photos.rff25Loge2, photos.rff25Loge4, photos.rff25Loge5, photos.rff25Loge6, photos.rff25Loge7, photos.rff25Loge8];
 ---
@@ -164,6 +188,23 @@ const loge = [photos.rff25Loge1, photos.rff25Loge2, photos.rff25Loge4, photos.rf
           </p>
         </div>
       </div>
+      <div class="affiches" data-reveal>
+        <h3 class="titre titre-h3">Sur les affiches, d’ici et d’ailleurs</h3>
+        <ul class="affiches-grille">
+          {
+            affichesParcours.map((a) => (
+              <li>
+                <a class="affiche" href={a.full} target="_blank" rel="noopener">
+                  <Image src={a.src} alt={a.alt} widths={[360, 560, 900, 1260].filter((w) => w <= a.src.width)} sizes="(min-width: 64rem) 30vw, 50vw" quality={88} />
+                </a>
+                <p class="affiche-titre">{a.titre}</p>
+                <p class="affiche-meta">{a.meta}</p>
+              </li>
+            ))
+          }
+        </ul>
+        <p class="affiches-note">Touchez une affiche pour l’ouvrir en grand.</p>
+      </div>
     </div>
   </section>
 
@@ -273,6 +314,49 @@ const loge = [photos.rff25Loge1, photos.rff25Loge2, photos.rff25Loge4, photos.rf
 </BaseLayout>
 
 <style>
+  .affiches {
+    margin-top: clamp(3rem, 2rem + 4vw, 5rem);
+  }
+  .affiches h3 {
+    margin-bottom: 1.25rem;
+  }
+  .affiche {
+    display: block;
+    overflow: hidden;
+    border: 1px solid rgb(255 255 255 / 0.12);
+  }
+  .affiche :global(img) {
+    display: block;
+    width: 100%;
+    height: auto;
+    transition: transform 0.6s var(--ease);
+  }
+  .affiche:hover :global(img) {
+    transform: scale(1.02);
+  }
+  .affiches-grille {
+    columns: 3 9.5rem;
+    column-gap: 1rem;
+    margin: 1rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .affiches-grille li {
+    break-inside: avoid;
+    margin-bottom: 1.5rem;
+  }
+  .affiche-titre {
+    margin-top: 0.6rem;
+    font-weight: 600;
+  }
+  .affiche-meta {
+    font-size: 0.875rem;
+    opacity: 0.75;
+  }
+  .affiches-note {
+    font-size: 0.875rem;
+    opacity: 0.75;
+  }
   .studio-photos {
     display: grid;
     grid-template-columns: 1.4fr 1fr 1fr;
