@@ -2,7 +2,7 @@
 
 Site du Creative Hub SKM La Fabrik (Rufisque, Sénégal), de son label Sunu Kaddu Music et du Rio Fresco Fest.
 
-- Production : https://skm-la-fabrik.vercel.app
+- Production : https://skmlafabrik.com (l’ancienne adresse https://skm-la-fabrik.vercel.app redirige vers le domaine)
 - Pile : Astro 7 (pages statiques), adaptateur Vercel (une seule fonction serveur, pour le formulaire), TypeScript strict, ESLint, Vitest.
 
 ## Démarrer
@@ -44,7 +44,7 @@ Les actualités, les projets, les photos et les textes des pages se gèrent depu
 - **Accès** : un compte créé dans Supabase › Authentication › Users, puis ajouté à la table `public.admins`.
 - **Connexion cachée** : sans session, toute adresse `/admin` répond « page introuvable ». La page de connexion s’ouvre par le lien secret `/admin?cle=<ADMIN_ENTREE>`, puis reste accessible sur cet appareil pendant un an, délai renouvelé à chaque visite de l’admin.
 - **Double authentification** : obligatoire (application Google ou Microsoft Authenticator). La base elle-même refuse l’accès sans ce second facteur. Téléphone perdu : dans Supabase › Authentication › Users, ouvrir le compte et supprimer son facteur MFA ; il sera redemandé à la connexion suivante.
-- **Mot de passe oublié** : lien sous le formulaire de connexion. L’e-mail renvoie vers `/admin/retour`, qui ne marche que dans le navigateur qui a fait la demande ; le code de sécurité est demandé avant le nouveau mot de passe. À régler une fois dans Supabase › Authentication › URL Configuration : ajouter `https://skm-la-fabrik.vercel.app/admin/retour**` dans Redirect URLs (et l’adresse du futur domaine). Une fois connecté, « Mot de passe » dans le menu permet aussi de le changer.
+- **Mot de passe oublié** : lien sous le formulaire de connexion. L’e-mail renvoie vers `/admin/retour`, qui ne marche que dans le navigateur qui a fait la demande ; le code de sécurité est demandé avant le nouveau mot de passe. À régler une fois dans Supabase › Authentication › URL Configuration : Site URL `https://skmlafabrik.com`, et dans Redirect URLs `https://skmlafabrik.com/admin/retour**`. Une fois connecté, « Mot de passe » dans le menu permet aussi de le changer.
 - **Visites** : chaque page publique envoie un signal à `/api/visite` (sans cookie). La base garde la page, le site de provenance, le type d’appareil et un code visiteur recalculé chaque jour avec un sel effacé le lendemain : aucune adresse IP n’est stockée. Robots, navigateurs automatisés et pages `/admin` ne sont pas comptés ; les données sont effacées après 13 mois. Les statistiques sont dans Admin › Visites et s’affichent en direct, sans publier.
 - **Publier** : les modifications sont enregistrées tout de suite, mais le site public change après « Publier le site » (tableau de bord), qui relance la construction via le Deploy Hook Vercel.
 - **Construction** : `scripts/sync-cms.mjs` récupère le contenu publié dans `src/.cms/` (ignoré par Git). Tant qu’une collection est vide dans l’admin, les fichiers de `src/content/` restent utilisés.
@@ -62,7 +62,7 @@ Les actualités, les projets, les photos et les textes des pages se gèrent depu
 
 | Variable | Rôle |
 | --- | --- |
-| `SITE_URL` | URL publique (canonique, sitemap). Par défaut `https://skm-la-fabrik.vercel.app`. |
+| `SITE_URL` | URL publique (canonique, sitemap). Par défaut `https://skmlafabrik.com`. |
 | `RESEND_API_KEY` | Clé secrète Resend pour envoyer les demandes du formulaire. |
 | `CONTACT_TO_EMAIL` | Adresse qui reçoit les demandes. |
 | `CONTACT_FROM_EMAIL` | Expéditeur, sur un domaine vérifié dans Resend. |

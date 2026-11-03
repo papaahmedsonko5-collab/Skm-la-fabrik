@@ -22,7 +22,7 @@ export const prerender = false;
  */
 export const POST: APIRoute = async ({ locals, redirect }) => {
   const supabase = locals.supabase!;
-  const origine = import.meta.env.SITE ?? 'https://skm-la-fabrik.vercel.app';
+  const origine = import.meta.env.SITE ?? 'https://skmlafabrik.com';
 
   const [{ data: actusDb }, { data: projetsDb }, { count: nPhotos }] = await Promise.all([
     supabase.from('actualites').select('slug, cover_path'),

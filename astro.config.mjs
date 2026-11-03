@@ -3,7 +3,7 @@ import { defineConfig, envField } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 import vercel from '@astrojs/vercel';
 
-const site = process.env.SITE_URL ?? 'https://skm-la-fabrik.vercel.app';
+const site = process.env.SITE_URL ?? 'https://skmlafabrik.com';
 const supabaseHost = (() => {
   try {
     return process.env.PUBLIC_SUPABASE_URL ? new URL(process.env.PUBLIC_SUPABASE_URL).hostname : undefined;
