@@ -69,5 +69,12 @@ config.routes = config.routes ?? [];
 // Relancer le script remplace la règle existante au lieu de la dupliquer.
 config.routes = config.routes.filter((r) => !r.headers?.['Content-Security-Policy']);
 config.routes.unshift({ src: '/(.*)', headers: securityHeaders, continue: true });
+// Tâches planifiées (vercel.json › crons) : la sortie Vercel les attend dans config.json.
+try {
+  const { crons } = JSON.parse(await readFile('vercel.json', 'utf8'));
+  if (Array.isArray(crons) && crons.length > 0) config.crons = crons;
+} catch {
+  // Pas de vercel.json : aucune tâche planifiée.
+}
 await writeFile(CONFIG, JSON.stringify(config, null, 2));
 console.log(`[security-headers] ${Object.keys(securityHeaders).length} en-têtes ajoutés, ${hashes.size} script(s) en ligne autorisé(s) par empreinte.`);
