@@ -10,6 +10,8 @@ const RETOUR = '/admin/retour';
 const COOKIE_REINIT = 'skm_admin_reinit';
 const ETAPE_2 = new Set(['/admin/verification', '/admin/securite', '/admin/deconnexion']);
 const COOKIE_ENTREE = 'skm_admin_entree';
+/** L'appareil reste reconnu un an, et le délai repart à chaque visite de l'admin. */
+const DUREE_APPAREIL = 60 * 60 * 24 * 365;
 
 async function empreinte(valeur: string): Promise<string> {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`skm-admin:${valeur}`));
@@ -71,6 +73,9 @@ export const onRequest = defineMiddleware(async (context, next) => {
     return introuvable();
   }
 
+  const memoriser = (valeur: string) =>
+    context.cookies.set(COOKIE_ENTREE, valeur, { path: '/admin', httpOnly: true, secure: true, sameSite: 'strict', maxAge: DUREE_APPAREIL });
+
   const supabase = supabaseForRequest(context.request, context.cookies);
   context.locals.supabase = supabase;
 
@@ -83,13 +88,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
     const { error } = await supabase.auth.exchangeCodeForSession(code, flowId ? { flowId } : undefined);
     if (error) return introuvable();
     if (ADMIN_ENTREE) {
-      context.cookies.set(COOKIE_ENTREE, await empreinte(ADMIN_ENTREE), {
-        path: '/admin',
-        httpOnly: true,
-        secure: true,
-        sameSite: 'strict',
-        maxAge: 60 * 60 * 24 * 30,
-      });
+      memoriser(await empreinte(ADMIN_ENTREE));
     }
     // Le nouveau mot de passe sera demandé après le code de sécurité.
     context.cookies.set(COOKIE_REINIT, '1', { path: '/admin', httpOnly: true, secure: true, sameSite: 'lax', maxAge: 60 * 30 });
@@ -103,12 +102,13 @@ export const onRequest = defineMiddleware(async (context, next) => {
       const attendu = await empreinte(ADMIN_ENTREE);
       const cle = context.url.searchParams.get('cle');
       if (pathname === '/admin' && cle && egal(await empreinte(cle), attendu)) {
-        // Mémorise l'appareil 30 jours : la connexion y reste accessible.
-        context.cookies.set(COOKIE_ENTREE, attendu, { path: '/admin', httpOnly: true, secure: true, sameSite: 'strict', maxAge: 60 * 60 * 24 * 30 });
+        // Mémorise l'appareil : la connexion y reste accessible.
+        memoriser(attendu);
         return finish(context.redirect(ETAPE_1, 303));
       }
       const memorise = context.cookies.get(COOKIE_ENTREE)?.value ?? '';
       if (!egal(memorise, attendu)) return introuvable();
+      memoriser(attendu);
     }
     if (ETAPE_1_PAGES.has(pathname)) return finish(await next());
     if (pathname.startsWith('/api/admin/')) return introuvable();
@@ -133,6 +133,8 @@ export const onRequest = defineMiddleware(async (context, next) => {
   }
 
   if (ETAPE_1_PAGES.has(pathname) || pathname === RETOUR || pathname === '/admin/configuration') return finish(context.redirect('/admin', 303));
+  // Connecté avec les deux facteurs : l'appareil est reconnu pour la suite.
+  if (ADMIN_ENTREE) memoriser(await empreinte(ADMIN_ENTREE));
   context.locals.admin = { id: user.id, email: user.email ?? '' };
   return finish(await next());
 });
