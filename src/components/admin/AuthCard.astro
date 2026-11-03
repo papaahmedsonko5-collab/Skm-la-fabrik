@@ -1,7 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import logo from '@/assets/brand/logo-skm-la-fabrik.png';
-import { photos } from '@/data/photos';
+import pps from '@/assets/photos/pps-flamme-dakar-2026.jpg';
 
 export interface Props {
   title: string;
@@ -15,13 +15,19 @@ const { title, intro, flash = null, etape = 1 } = Astro.props;
 
 <div class="auth-carte">
   <div class="auth-visuel">
-    <Image src={photos.rffFoule.src} alt="" widths={[640, 960, 1280]} sizes="(min-width: 56rem) 32rem, 100vw" loading="eager" />
+    <Image
+      src={pps}
+      alt="PPS tenant la flamme de Dakar 2026"
+      widths={[640, 960, 1280]}
+      sizes="(min-width: 56rem) 32rem, 100vw"
+      loading="eager"
+    />
     <div class="auth-voile"></div>
     <div class="auth-marque">
       <Image src={logo} alt="SKM La Fabrik" width={110} />
     </div>
     <div class="auth-texte">
-      <p class="auth-titre">Espace admin</p>
+      <p class="auth-titre"><span>Bienvenue</span> PPS THE LEGEND</p>
       <p>Demandes, actualités, projets, photos et textes du site.</p>
       <ol class="auth-etapes" aria-label="Étapes de connexion">
         <li aria-current={etape === 1 ? 'step' : undefined}>Mot de passe</li>
@@ -69,16 +75,20 @@ const { title, intro, flash = null, etape = 1 } = Astro.props;
     width: 100%;
     height: 100%;
     object-fit: cover;
+    object-position: 50% 35%;
   }
+  /* Haut à droite assombri pour le logo, bas sombre pour le texte : le visage et la flamme restent dégagés. */
   .auth-voile {
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, rgb(10 10 10 / 0.55) 0%, rgb(10 10 10 / 0.15) 40%, rgb(10 10 10 / 0.92) 100%);
+    background:
+      radial-gradient(circle at 100% 0%, rgb(10 10 10 / 0.6) 0, rgb(10 10 10 / 0) 14rem),
+      linear-gradient(180deg, rgb(10 10 10 / 0) 55%, rgb(10 10 10 / 0.88) 88%, rgb(10 10 10 / 0.95) 100%);
   }
   .auth-marque {
     position: absolute;
     top: 1.5rem;
-    left: 1.5rem;
+    right: 1.5rem;
   }
   .auth-texte {
     position: absolute;
@@ -98,6 +108,13 @@ const { title, intro, flash = null, etape = 1 } = Astro.props;
     font-size: clamp(2rem, 1.5rem + 2vw, 3rem);
     line-height: 1;
     text-transform: uppercase;
+  }
+  .auth-titre span {
+    display: block;
+    margin-bottom: 0.3rem;
+    color: var(--c-papier);
+    font-size: 0.45em;
+    letter-spacing: 0.08em;
   }
   .auth-etapes {
     display: flex;
@@ -158,7 +175,10 @@ const { title, intro, flash = null, etape = 1 } = Astro.props;
       min-height: 0;
     }
     .auth-visuel {
-      min-height: 15rem;
+      min-height: 24rem;
+    }
+    .auth-visuel > :global(img) {
+      object-position: 50% 30%;
     }
     .auth-marque :global(img) {
       width: 80px;
