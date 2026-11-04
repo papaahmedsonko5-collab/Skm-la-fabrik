@@ -146,6 +146,7 @@ async function main() {
       const gallery = [];
       for (const g of p.gallery ?? []) gallery.push({ src: await download(g.path), alt: g.alt ?? '' });
       const fallback = p.cover_path ? null : await repoCover(p.slug);
+      if (fallback) console.log(`[sync-cms] ${p.slug} : visuel du dépôt utilisé (aucune photo de couverture dans l’admin).`);
       const fm = {
         title: p.title,
         category: p.category,
