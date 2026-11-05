@@ -1,6 +1,7 @@
 import { defineMiddleware } from 'astro:middleware';
 import { ADMIN_ENTREE } from 'astro:env/server';
 import { supabaseConfigured, supabaseForRequest } from '@/lib/admin/supabase';
+import { memeOrigine } from '@/lib/corps';
 
 /** Pages de connexion (étape 1 : mot de passe ; étape 2 : code de l'application). */
 const ETAPE_1 = '/admin/connexion';
@@ -63,7 +64,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
   // Formulaires de l'admin : refuse les envois venant d'un autre site (CSRF).
   if (context.request.method !== 'GET' && context.request.method !== 'HEAD') {
     const origin = context.request.headers.get('origin');
-    if (!origin || new URL(origin).host !== context.url.host) {
+    if (!origin || !memeOrigine(origin, context.url.host)) {
       return finish(new Response('Origine non autorisée.', { status: 403 }));
     }
   }
