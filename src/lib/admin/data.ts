@@ -3,6 +3,8 @@
  * Toutes les requêtes passent par le client lié à la session (RLS).
  */
 import { contactObjects, type ContactObject } from '@/lib/contact';
+import { lireImage, MESSAGE_REFUS } from '@/lib/images';
+import { televerser, type ClientStockage } from './medias';
 
 export const statuts = ['nouvelle', 'en_cours', 'traitee', 'archivee'] as const;
 export type Statut = (typeof statuts)[number];
@@ -172,23 +174,26 @@ export function listField(form: FormData, name: string): string[] {
     .filter(Boolean);
 }
 
-const IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/avif']);
-const MAX_IMAGE = 15 * 1024 * 1024;
-
-/** Envoie une photo dans le stockage « medias » et renvoie son chemin. */
+/**
+ * Envoie une photo dans le stockage « medias » et renvoie son chemin.
+ * Le contenu réel est vérifié (signature binaire, fichier complet, 15 Mo au
+ * maximum) : le type annoncé par le navigateur n'est pas pris en compte.
+ */
 export async function uploadImage(
   supabase: import('./supabase').AdminClient,
   file: FormDataEntryValue | null,
   folder: 'actualites' | 'projets' | 'galerie',
 ): Promise<{ path: string } | { error: string } | null> {
   if (!(file instanceof File) || file.size === 0) return null;
-  if (!IMAGE_TYPES.has(file.type)) return { error: 'Format de photo non accepté (JPEG, PNG, WebP ou AVIF).' };
-  if (file.size > MAX_IMAGE) return { error: 'Photo trop lourde (15 Mo au maximum).' };
-  const ext = file.type === 'image/png' ? 'png' : file.type === 'image/webp' ? 'webp' : file.type === 'image/avif' ? 'avif' : 'jpg';
+  const image = await lireImage(file);
+  if (!image.ok) return { error: MESSAGE_REFUS[image.raison] };
   const base = slugify(file.name.replace(/\.\w+$/, '')) || 'photo';
-  const path = `${folder}/${Date.now().toString(36)}-${base}.${ext}`;
-  const { error } = await supabase.storage.from('medias').upload(path, file, { contentType: file.type, upsert: false, cacheControl: '31536000' });
-  if (error) return { error: 'L’envoi de la photo a échoué.' };
+  const path = `${folder}/${Date.now().toString(36)}-${base}.${image.ext}`;
+  const envoi = await televerser(supabase as unknown as ClientStockage, path, image, false);
+  if (!envoi.ok) {
+    console.error('[admin] Envoi de photo refusé par le stockage', envoi.detail);
+    return { error: 'L’envoi de la photo a échoué.' };
+  }
   return { path };
 }
 
@@ -212,7 +217,19 @@ export function flashFrom(url: URL): { type: 'ok' | 'erreur'; text: string } | n
     hook: 'Le bouton Publier n’est pas encore configuré (DEPLOY_HOOK_URL manquant dans Vercel).',
     introuvable: 'Élément introuvable.',
     photos: 'Certaines photos n’ont pas pu être copiées. Les fiches concernées restent en brouillon : relancez « Récupérer les photos ».',
+    import_lecture: 'L’import n’a pas démarré : le contenu actuel de l’admin n’a pas pu être lu. Rien n’a été modifié. Réessayez dans un instant.',
   };
+  if (err === 'import_partiel') {
+    const n = (cle: string) => (/^\d{1,4}$/.test(url.searchParams.get(cle) ?? '') ? Number(url.searchParams.get(cle)) : 0);
+    const liste = (url.searchParams.get('liste') ?? '').replace(/[^a-z0-9/._,-]/gi, '').split(',').filter(Boolean).slice(0, 10);
+    return {
+      type: 'erreur',
+      text:
+        `Import incomplet : ${n('reussis')} élément(s) importé(s), ${n('echecs')} en échec.` +
+        (liste.length ? ` En échec : ${liste.join(', ')}.` : '') +
+        ' Les fiches concernées restent en brouillon ou sans photo : relancez l’import.',
+    };
+  }
   if (err) return { type: 'erreur', text: erreurs[err] ?? 'Une erreur est survenue.' };
   return null;
 }

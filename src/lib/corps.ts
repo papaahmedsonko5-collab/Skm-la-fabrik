@@ -7,22 +7,40 @@
  * dépassée : un corps trop gros n'est jamais chargé entièrement en mémoire.
  */
 export type LectureCorps =
-  | { ok: true; octets: Uint8Array }
+  | { ok: true; octets: Uint8Array<ArrayBuffer> }
   | { ok: false; raison: 'trop_gros' | 'illisible' };
 
 export async function lireCorps(request: Request, max: number): Promise<LectureCorps> {
-  const declare = request.headers.get('content-length');
+  if (request.bodyUsed) return { ok: false, raison: 'illisible' };
+  return lireFlux(request.body, request.headers.get('content-length'), max);
+}
+
+/**
+ * Lit un flux d'octets (corps de requête, réponse HTTP, fichier) sans jamais
+ * dépasser `max` octets en mémoire. `declare` est la longueur annoncée
+ * (Content-Length), ou null si elle est inconnue. Avec `exacte: false`, la
+ * longueur annoncée sert seulement à refuser tôt un contenu trop gros : c'est le
+ * cas d'une réponse HTTP compressée, dont Content-Length compte les octets compressés.
+ */
+export async function lireFlux(
+  flux: ReadableStream<Uint8Array> | null,
+  declare: string | null,
+  max: number,
+  { exacte = true }: { exacte?: boolean } = {},
+): Promise<LectureCorps> {
   let attendu: number | null = null;
   if (declare !== null) {
     // Seul un entier décimal positif est une longueur valable.
     if (!/^\d{1,15}$/.test(declare.trim())) return { ok: false, raison: 'illisible' };
     attendu = Number(declare.trim());
-    if (attendu > max) return { ok: false, raison: 'trop_gros' };
+    if (attendu > max) {
+      await flux?.cancel().catch(() => undefined);
+      return { ok: false, raison: 'trop_gros' };
+    }
   }
-  if (request.bodyUsed) return { ok: false, raison: 'illisible' };
-  if (!request.body) return { ok: true, octets: new Uint8Array(0) };
+  if (!flux) return { ok: true, octets: new Uint8Array(0) };
 
-  const lecteur = request.body.getReader();
+  const lecteur = flux.getReader();
   const morceaux: Uint8Array[] = [];
   let total = 0;
   try {
@@ -43,7 +61,7 @@ export async function lireCorps(request: Request, max: number): Promise<LectureC
     lecteur.releaseLock();
   }
   // Longueur déclarée différente de ce qui a été reçu : corps tronqué ou falsifié.
-  if (attendu !== null && attendu !== total) return { ok: false, raison: 'illisible' };
+  if (exacte && attendu !== null && attendu !== total) return { ok: false, raison: 'illisible' };
 
   const octets = new Uint8Array(total);
   let position = 0;
