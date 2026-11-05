@@ -71,6 +71,8 @@ Les actualités, les projets, les photos et les textes des pages se gèrent depu
 | `PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Clé publiable Supabase (publique, limitée par RLS). |
 | `DEPLOY_HOOK_URL` | Deploy Hook Vercel du bouton « Publier le site » (secret). |
 | `ADMIN_ENTREE` | Mot secret du lien de connexion admin (secret). |
+| `CRON_SECRET` | Secret utilisé pour authentifier les appels automatiques du Cron Vercel. |
+| `SUPABASE_SERVICE_ROLE_KEY` | Clé secrète Supabase réservée au serveur ; ne jamais l'exposer au navigateur. |
 
 Avec Supabase configuré, les demandes arrivent dans l’admin ; Resend ajoute alors une notification par e-mail. Sans Supabase ni Resend, le formulaire répond proprement qu’il est indisponible et invite à écrire par e-mail. Aucune clé ne doit être commitée : `.env` est ignoré par Git.
 
