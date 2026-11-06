@@ -65,12 +65,16 @@ function frontmatter(obj) {
 }
 
 async function main() {
+  // Heure de lecture du contenu (avant toute requête), affichée à titre indicatif
+  // dans le tableau de bord. Elle ne prouve pas qu'une publication a réussi.
+  const lecture = new Date().toISOString();
   await rm(ROOT, { recursive: true, force: true });
 
   // Textes des pages
   const contenus = await rest('contenus?select=key,value');
   const valeurs = Object.fromEntries(contenus.filter((c) => c.value && c.value.trim()).map((c) => [c.key, c.value]));
   await mkdir(ROOT, { recursive: true });
+  await writeFile(join(ROOT, 'build.json'), JSON.stringify({ lecture }) + '\n');
   await writeFile(CONTENUS, JSON.stringify(valeurs, null, 2) + '\n');
   console.log(`[sync-cms] ${Object.keys(valeurs).length} texte(s) personnalisé(s).`);
 

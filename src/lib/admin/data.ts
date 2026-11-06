@@ -2,6 +2,7 @@
  * Types et petites aides partagés par les pages de l'admin.
  * Toutes les requêtes passent par le client lié à la session (RLS).
  */
+import { formatHeure } from './publication';
 import { contactObjects, type ContactObject } from '@/lib/contact';
 import { lireImage, MESSAGE_REFUS } from '@/lib/images';
 import { televerser, type ClientStockage } from './medias';
@@ -230,6 +231,45 @@ export function flashFrom(url: URL): { type: 'ok' | 'erreur'; text: string } | n
         ' Les fiches concernées restent en brouillon ou sans photo : relancez l’import.',
     };
   }
+  const pub = messagePublication(err, url);
+  if (pub) return { type: 'erreur', text: pub };
   if (err) return { type: 'erreur', text: erreurs[err] ?? 'Une erreur est survenue.' };
   return null;
+}
+
+const LIBELLES_ISSUE: Record<string, string> = {
+  reservee: 'en cours',
+  lancee: 'lancée',
+  echec: 'échouée, rien n’a été lancé',
+  incertaine: 'sans confirmation de Vercel',
+  expiree: 'expirée',
+};
+
+/** Messages du bouton Publier. Paramètres de l'adresse contrôlés : heure ISO, statut connu, code HTTP à 3 chiffres. */
+function messagePublication(err: string | null, url: URL): string | null {
+  const jusqua = url.searchParams.get('jusqua') ?? '';
+  const heure = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,6})?Z$/.test(jusqua) && !Number.isNaN(Date.parse(jusqua)) ? formatHeure(jusqua) : null;
+  const statut = LIBELLES_ISSUE[url.searchParams.get('statut') ?? ''] ?? null;
+  const http = /^[1-5]\d{2}$/.test(url.searchParams.get('http') ?? '') ? url.searchParams.get('http') : null;
+  const dispo = heure ? ` Le bouton sera de nouveau disponible à ${heure}.` : '';
+  switch (err) {
+    case 'publication_occupee':
+      return `Une publication est déjà en cours ou attend encore une réponse de Vercel : rien n’a été relancé.${dispo}`;
+    case 'publication_trop_tot':
+      return `Une publication vient d’être lancée. Attendez une minute avant d’en lancer une autre.${dispo}`;
+    case 'publication_incertaine':
+      return `Vercel n’a pas confirmé la demande${http ? ` (réponse HTTP ${http})` : ''}. La publication a peut-être été lancée : vérifiez le site dans quelques minutes avant de republier.${dispo}`;
+    case 'publication_echec':
+      return 'Vercel n’a pas pu être joint : rien n’a été lancé. Vous pouvez réessayer.';
+    case 'publication_deja':
+      return `Cette demande a déjà été traitée${statut ? ` (${statut})` : ''}. Rechargez la page avant de publier à nouveau.`;
+    case 'publication_cle':
+      return 'Ce formulaire a déjà servi. Rechargez la page avant de publier.';
+    case 'publication_indisponible':
+      return 'La publication n’a pas pu démarrer (base de données indisponible ou réponse inattendue). Rien n’a été lancé. Réessayez plus tard.';
+    case 'publication_non_enregistree':
+      return `Le résultat de la publication${statut ? ` (${statut})` : ''}${http ? `, réponse HTTP ${http},` : ''} n’a pas pu être enregistré.${heure ? ` Le bouton reste bloqué jusqu’à ${heure}.` : ''}`;
+    default:
+      return null;
+  }
 }
