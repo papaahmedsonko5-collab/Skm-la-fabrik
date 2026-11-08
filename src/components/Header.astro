@@ -16,7 +16,7 @@ const path = Astro.url.pathname;
 <header class="header" data-tone={tone} data-overlay={overlay ? '' : undefined}>
   <div class="bar wrap">
     <a class="brand" href="/" aria-label="SKM La Fabrik, accueil">
-      <Image src={logo} alt="Logo SKM La Fabrik" width={64} height={64} loading="eager" fetchpriority="high" class="logo" />
+      <Image quality={90} src={logo} alt="Logo SKM La Fabrik" width={64} height={64} loading="eager" fetchpriority="high" class="logo" />
       <span class="brand-text" aria-hidden="true">Creative Hub<br />Rufisque · Sénégal</span>
     </a>
 

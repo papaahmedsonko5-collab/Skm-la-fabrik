@@ -1,0 +1,43 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Gallery from '@/components/Gallery.astro';
+import { toutesLesPhotos } from '@/lib/galerie-complete';
+
+const photos = await toutesLesPhotos();
+---
+
+<BaseLayout
+  title="Galerie photo"
+  description="Toutes les photos de SKM La Fabrik : Rio Fresco Fest, projets, actualités, studio et vie communautaire à Rufisque."
+>
+  <section class="theme-sombre intro" aria-labelledby="titre-page">
+    <div class="wrap">
+      <p class="surtitre">Médiathèque</p>
+      <h1 id="titre-page" class="titre intro-titre">Galerie photo</h1>
+      <p class="chapeau doux">{photos.length} photos du Rio Fresco Fest, de nos projets, de nos actualités et de la vie de SKM La Fabrik.</p>
+    </div>
+  </section>
+
+  <section class="theme-sombre galerie" aria-label="Toutes les photos">
+    <div class="wrap">
+      <Gallery items={photos} label="Toutes les photos de SKM La Fabrik" filtres />
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .intro {
+    padding-block: clamp(4rem, 3rem + 5vw, 8rem) clamp(2rem, 1.5rem + 2vw, 3.5rem);
+  }
+  .intro .surtitre {
+    margin-bottom: 1.25rem;
+  }
+  .intro-titre {
+    font-size: clamp(3.25rem, 1.8rem + 6vw, 8.5rem);
+    line-height: 0.88;
+    margin-bottom: 1.5rem;
+  }
+  .galerie {
+    padding-block: 0 clamp(4rem, 8vw, 6rem);
+  }
+</style>

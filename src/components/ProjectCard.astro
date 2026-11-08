@@ -16,7 +16,7 @@ const Tag = headingLevel;
     <div class="media">
       {
         cover ? (
-          <Image src={cover} alt={coverAlt ?? title} widths={[400, 640, 900, 1280, 1600, 1920]} sizes="(min-width: 64rem) 30vw, (min-width: 40rem) 45vw, 100vw" />
+          <Image quality={90} src={cover} alt={coverAlt ?? title} widths={[400, 640, 900, 1280, 1600, 1920, 2560]} sizes="(min-width: 64rem) 30vw, (min-width: 40rem) 45vw, 100vw" />
         ) : (
           <span class="typo" aria-hidden="true">{title}</span>
         )

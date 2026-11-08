@@ -43,9 +43,9 @@ const etapes = cycle.map((titre, i) => ({ titre, maillon: ecosysteme[i] }));
           <Image
             src={photos.communaute.src}
             alt={photos.communaute.alt}
-            widths={[480, 800, 987, 1280, 1600, 1920]}
+            widths={[480, 800, 987, 1280, 1600, 1920, 2560]}
             sizes="(min-width: 56rem) 45vw, 100vw"
-            quality={85}
+            quality={90}
             loading="eager"
             fetchpriority="high"
           />
@@ -125,7 +125,7 @@ const etapes = cycle.map((titre, i) => ({ titre, maillon: ecosysteme[i] }));
             return (
               <li class:list={['action', { inverse: i % 2 === 1 }]} data-reveal>
                 <figure class="action-photo">
-                  <Image src={ph.src} alt={ph.alt} widths={[400, 700, 1000, 1280, 1600, 1920]} sizes="(min-width: 56rem) 48vw, 100vw" />
+                  <Image quality={90} src={ph.src} alt={ph.alt} widths={[400, 700, 1000, 1280, 1600, 1920, 2560]} sizes="(min-width: 56rem) 48vw, 100vw" />
                   <span class="action-num titre" aria-hidden="true">
                     {pad(i + 1)}
                   </span>

@@ -49,9 +49,9 @@ const [une, ...autres] = news;
                   src={une.data.cover}
                   style={`object-position: ${une.data.coverPosition}`}
                   alt={une.data.coverAlt}
-                  widths={[640, 1000, 1280, 1400, 1600, 1800, 1920]}
+                  widths={[640, 1000, 1280, 1400, 1600, 1800, 1920, 2560]}
                   sizes="(min-width: 80rem) 80rem, 100vw"
-                  quality={85}
+                  quality={90}
                   loading="eager"
                   fetchpriority="high"
                 />
@@ -87,7 +87,7 @@ const [une, ...autres] = news;
             {autres.map((n) => (
               <article class="carte">
                 <a href={`/actualites/${n.id}`}>
-                  <Image src={n.data.cover} style={`object-position: ${n.data.coverPosition}`} alt={n.data.coverAlt} widths={[400, 640, 1280, 1600, 1920]} sizes="(min-width: 64rem) 30vw, 85vw" />
+                  <Image quality={90} src={n.data.cover} style={`object-position: ${n.data.coverPosition}`} alt={n.data.coverAlt} widths={[400, 640, 1280, 1600, 1920, 2560]} sizes="(min-width: 64rem) 30vw, 85vw" />
                   <p class="meta">
                     <span>{n.data.type}</span> {n.data.period}
                   </p>
@@ -109,6 +109,7 @@ const [une, ...autres] = news;
         <h2 id="t-galerie" class="titre titre-h2">Galerie photo</h2>
       </div>
       <Gallery items={galerie} label="Galerie photo de SKM La Fabrik" filtres />
+      <p class="tout-voir"><a href="/galerie">Voir toutes les photos du site <span aria-hidden="true">→</span></a></p>
     </div>
   </section>
 
@@ -379,6 +380,17 @@ const [une, ...autres] = news;
     margin: 0.5rem 0 0;
     font-size: 0.9375rem;
     opacity: 0.75;
+  }
+  .tout-voir {
+    margin-top: 2rem;
+  }
+  .tout-voir a {
+    font-size: var(--t-small);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border-bottom: 2px solid var(--c-or);
   }
   .galerie-tete {
     margin-bottom: clamp(2rem, 1.5rem + 2vw, 3rem);

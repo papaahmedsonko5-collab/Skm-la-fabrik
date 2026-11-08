@@ -54,7 +54,7 @@ const etapes = [
           alt={photos.p26Hero.alt}
           widths={[640, 960, 1280, 1600, 2160]}
           sizes="(min-width: 56rem) 85vw, 100vw"
-          quality={88}
+          quality={90}
           loading="eager"
           fetchpriority="high"
         />
@@ -106,7 +106,7 @@ const etapes = [
       </h2>
       <div class="manifeste-bas">
         <div class="manifeste-photo" data-reveal>
-          <Image src={photos.communaute.src} alt={photos.communaute.alt} widths={[480, 800, 987, 1280, 1600, 1920]} sizes="(min-width: 56rem) 40vw, 100vw" quality={85} />
+          <Image src={photos.communaute.src} alt={photos.communaute.alt} widths={[480, 800, 987, 1280, 1600, 1920, 2560]} sizes="(min-width: 56rem) 40vw, 100vw" quality={90} />
         </div>
         <div class="manifeste-carte" data-reveal>
           <blockquote>
@@ -137,7 +137,7 @@ const etapes = [
                 <span class="num">{p.num}</span>
                 <span class="titre nom">{p.title}</span>
                 <span class="desc">{p.short}</span>
-                <Image src={p.photo.src} alt={p.photo.alt} widths={[200, 320, 1280, 1600, 1920]} sizes="10rem" class="vignette" />
+                <Image quality={90} src={p.photo.src} alt={p.photo.alt} widths={[200, 320, 1280, 1600, 1920, 2560]} sizes="10rem" class="vignette" />
               </a>
             </li>
           ))
@@ -168,7 +168,7 @@ const etapes = [
           etapes.map((e, i) => (
             <li class="etape" data-reveal>
               <div class="etape-photo">
-                <Image src={e.photo.src} alt={e.photo.alt} widths={[360, 640, 1280, 1600, 1920]} sizes="(min-width: 64rem) 22vw, (min-width: 40rem) 45vw, 100vw" quality={85} />
+                <Image src={e.photo.src} alt={e.photo.alt} widths={[360, 640, 1280, 1600, 1920, 2560]} sizes="(min-width: 64rem) 22vw, (min-width: 40rem) 45vw, 100vw" quality={90} />
                 <span class="etape-num" aria-hidden="true">0{i + 1}</span>
               </div>
               <h3 class="titre titre-h3">{e.titre}</h3>
@@ -186,7 +186,7 @@ const etapes = [
   <section class="theme-nuit section rff" aria-labelledby="rff">
     <div class="wrap rff-grid">
       <div class="rff-texte" data-reveal>
-        <Image src={logoRff} alt="Rio Fresco Fest Rufisque" width={320} class="rff-logo" />
+        <Image quality={90} src={logoRff} alt="Rio Fresco Fest Rufisque" width={320} class="rff-logo" />
         <h2 id="rff" class="titre titre-h2">Héritages &amp; Horizons&nbsp;: bâtir ensemble l’avenir de Rufisque</h2>
         <p class="doux">
           Le projet phare de Sunu Kaddu&nbsp;: un festival annuel qui transforme Rufisque en village éphémère. Street food,
@@ -199,7 +199,7 @@ const etapes = [
         </div>
       </div>
       <div class="rff-visuel" data-reveal>
-        <Image src={photos.rffDigue.src} alt={photos.rffDigue.alt} widths={[480, 800, 1100, 1280, 1600, 1920]} sizes="(min-width: 64rem) 45vw, 100vw" />
+        <Image quality={90} src={photos.rffDigue.src} alt={photos.rffDigue.alt} widths={[480, 800, 1100, 1280, 1600, 1920, 2560]} sizes="(min-width: 64rem) 45vw, 100vw" />
         <div style="--stat-color: var(--c-orange)">
           <Stats data={rff2026Stats} size="moyen" />
         </div>
@@ -210,10 +210,10 @@ const etapes = [
   <section class="theme-papier section" aria-labelledby="label">
     <div class="wrap label">
       <div class="label-visuel" data-reveal>
-        <Image src={photos.studio.src} alt={photos.studio.alt} widths={[480, 800, 1280, 1600, 1920]} sizes="(min-width: 64rem) 42vw, 100vw" />
+        <Image quality={90} src={photos.studio.src} alt={photos.studio.alt} widths={[480, 800, 1280, 1600, 1920, 2560]} sizes="(min-width: 64rem) 42vw, 100vw" />
       </div>
       <div class="label-texte" data-reveal>
-        <div class="label-logo"><Image src={logoSk} alt="Sunu Kaddu" width={130} height={130} /></div>
+        <div class="label-logo"><Image quality={90} src={logoSk} alt="Sunu Kaddu" width={130} height={130} /></div>
         <p class="surtitre">Le label · Sunu Kaddu Music</p>
         <h2 id="label" class="titre titre-h2">« Notre Parole », en wolof.</h2>
         <p class="chapeau">
@@ -245,7 +245,7 @@ const etapes = [
             { tag: 'Réinsertion', title: 'Fort B', href: '/projets/fort-b', photo: photos.fortB, text: 'Des ateliers d’écriture et d’expression pour des mineurs incarcérés, vers un retour dans la société.' },
           ].map((a, i) => (
             <a class:list={['action', { decale: i === 1 }]} href={a.href} data-reveal>
-              <Image src={a.photo.src} alt={a.photo.alt} widths={[400, 640, 1280, 1600, 1920]} sizes="(min-width: 64rem) 30vw, 100vw" />
+              <Image quality={90} src={a.photo.src} alt={a.photo.alt} widths={[400, 640, 1280, 1600, 1920, 2560]} sizes="(min-width: 64rem) 30vw, 100vw" />
               <span class="surtitre">{a.tag}</span>
               <span class="titre titre-h3">{a.title}</span>
               <span class="doux">{a.text}</span>
@@ -268,7 +268,7 @@ const etapes = [
           news.map((n) => (
             <article class="news">
               <a href={`/actualites/${n.id}`}>
-                <Image src={n.data.cover} style={`object-position: ${n.data.coverPosition}`} alt={n.data.coverAlt} widths={[400, 640, 1280, 1600, 1920]} sizes="(min-width: 64rem) 32vw, 85vw" />
+                <Image quality={90} src={n.data.cover} style={`object-position: ${n.data.coverPosition}`} alt={n.data.coverAlt} widths={[400, 640, 1280, 1600, 1920, 2560]} sizes="(min-width: 64rem) 32vw, 85vw" />
                 <span class="news-meta">
                   {n.data.type} · {n.data.period}
                 </span>

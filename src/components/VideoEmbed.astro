@@ -30,7 +30,7 @@ const watch = playlist
 ---
 
 <div class:list={['video', { compact }]} data-video data-embed={embed} data-title={title}>
-  <Image src={poster} alt={`Image d’aperçu : ${title}`} widths={[480, 800, 1200, 1280, 1600, 1920]} sizes="(min-width: 64rem) 60vw, 100vw" class="poster" />
+  <Image quality={90} src={poster} alt={`Image d’aperçu : ${title}`} widths={[480, 800, 1200, 1280, 1600, 1920, 2560]} sizes="(min-width: 64rem) 60vw, 100vw" class="poster" />
   <a class="play" href={watch} target="_blank" rel="noopener" data-play>
     <span class="icon" aria-hidden="true">
       <svg viewBox="0 0 24 24" width="28" height="28" focusable="false"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"></path></svg>

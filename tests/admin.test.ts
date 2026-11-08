@@ -42,14 +42,21 @@ describe('photosEnAttente', () => {
     expect(r).toHaveLength(photosAAjouter.length);
   });
   it('ne remet rien sur une fiche modifiée depuis', () => {
-    expect(photosEnAttente([{ slug: 'handischool-day', cover_path: null, gallery: [], updated_at: '2026-11-03T10:00:00Z' }])).toHaveLength(0);
+    expect(photosEnAttente([{ slug: 'handischool-day', cover_path: null, gallery: [], updated_at: '2026-11-08T21:00:00Z' }])).toHaveLength(0);
+  });
+  it('propose les photos du 8 novembre sur une fiche déjà importée le 3', () => {
+    const r = photosEnAttente([{ slug: 'handischool-day', cover_path: null, gallery: [], updated_at: '2026-11-03T10:00:00Z' }]);
+    expect(r.length).toBe(9);
+    expect(r.every((ph) => ph.depuis === '2026-11-08T20:00:00Z')).toBe(true);
   });
   it('ignore les photos déjà copiées et une couverture existante', () => {
     const r = photosEnAttente([
       {
         slug: 'concours-art-scolaire-2024',
         cover_path: 'projets/autre.jpg',
-        gallery: [{ path: cheminImport('nio-far-exposition-2024.jpg'), alt: '' }],
+        gallery: photosAAjouter
+          .filter((ph) => ph.slug === 'concours-art-scolaire-2024' && ph.role === 'galerie')
+          .map((ph) => ({ path: cheminImport(ph.fichier), alt: '' })),
         updated_at: avant,
       },
     ]);

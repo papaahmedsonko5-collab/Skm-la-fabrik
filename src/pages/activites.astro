@@ -43,7 +43,7 @@ const scenes = poles.map((p, i) => {
             poles.map((p) => (
               <li>
                 <a href={`#${p.id}`}>
-                  <Image src={p.photo.src} alt={p.photo.alt} widths={[240, 400, 1280, 1600, 1920]} sizes="(min-width: 56rem) 18vw, 5rem" class="sommaire-photo" />
+                  <Image quality={90} src={p.photo.src} alt={p.photo.alt} widths={[240, 400, 1280, 1600, 1920, 2560]} sizes="(min-width: 56rem) 18vw, 5rem" class="sommaire-photo" />
                   <span class="sommaire-num">{p.num}</span>
                   <span class="sommaire-titre">{p.title}</span>
                   <span class="sommaire-fleche" aria-hidden="true">
@@ -75,7 +75,7 @@ const scenes = poles.map((p, i) => {
           </header>
           <div class="pole-grid">
             <figure class="pole-photo" data-reveal>
-              <Image src={p.photo.src} alt={p.photo.alt} widths={[480, 800, 1100, 1280, 1600, 1920]} sizes="(min-width: 56rem) 50vw, 100vw" quality={85} />
+              <Image src={p.photo.src} alt={p.photo.alt} widths={[480, 800, 1100, 1280, 1600, 1920, 2560]} sizes="(min-width: 56rem) 50vw, 100vw" quality={90} />
             </figure>
             <div class="pole-texte" data-reveal>
               <p class="chapeau">{p.text}</p>

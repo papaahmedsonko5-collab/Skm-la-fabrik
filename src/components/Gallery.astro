@@ -21,7 +21,7 @@ const { items, label, filtres = false } = Astro.props;
 const categories = [...new Set(items.map((it) => it.categorie).filter((c): c is string => Boolean(c)))];
 const avecFiltre = filtres && categories.length > 1;
 
-const full = await Promise.all(items.map((it) => getImage({ src: it.src, width: Math.min(1920, it.src.width), format: 'webp', quality: 88 })));
+const full = await Promise.all(items.map((it) => getImage({ src: it.src, width: Math.min(2560, it.src.width), format: 'webp', quality: 92 })));
 ---
 
 <div class="gallery" data-gallery>
@@ -44,7 +44,7 @@ const full = await Promise.all(items.map((it) => getImage({ src: it.src, width: 
       items.map((it, i) => (
         <li class:list={{ large: it.large }} data-categorie={it.categorie ?? ''}>
           <button type="button" data-open={i} data-full={full[i]?.src} data-alt={it.alt} aria-label={`Agrandir : ${it.alt}`}>
-            <Image src={it.src} alt={it.alt} widths={[360, 560, 900, 1280, 1600]} sizes={it.large ? '(min-width: 64rem) 45vw, (min-width: 30rem) 90vw, 100vw' : '(min-width: 64rem) 25vw, (min-width: 30rem) 45vw, 100vw'} quality={82} />
+            <Image src={it.src} alt={it.alt} widths={[360, 560, 900, 1280, 1600]} sizes={it.large ? '(min-width: 64rem) 45vw, (min-width: 30rem) 90vw, 100vw' : '(min-width: 64rem) 25vw, (min-width: 30rem) 45vw, 100vw'} quality={90} />
           </button>
         </li>
       ))

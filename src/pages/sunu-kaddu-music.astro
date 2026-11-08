@@ -40,7 +40,7 @@ const affichesParcours = await Promise.all(
     { src: afSlam, titre: 'Slam’Oualeykum Rufisquois', meta: 'CC Maurice Gueye, Rufisque', alt: 'Affiche de Slam’Oualeykum Rufisquois au centre culturel Maurice Gueye, présenté par Sunu Kaddu' },
     { src: afXShow, titre: 'The X Show', meta: 'EFI de Rufisque', alt: 'Affiche du X Show de PPS the Ghost Writah à l’EFI de Rufisque' },
     { src: afDc2dk, titre: '#DC2DK', meta: 'Visuel du projet', alt: 'Visuel du projet #DC2DK' },
-  ].map(async (a) => ({ ...a, full: (await getImage({ src: a.src, width: a.src.width, format: 'webp', quality: 90 })).src })),
+  ].map(async (a) => ({ ...a, full: (await getImage({ src: a.src, width: a.src.width, format: 'webp', quality: 92 })).src })),
 );
 
 const loge = [photos.rff25Loge1, photos.rff25Loge2, photos.rff25Loge4, photos.rff25Loge5, photos.rff25Loge6, photos.rff25Loge7, photos.rff25Loge8];
@@ -57,9 +57,9 @@ const loge = [photos.rff25Loge1, photos.rff25Loge2, photos.rff25Loge4, photos.rf
       <Image
         src={photos.labelHero.src}
         alt={photos.labelHero.alt}
-        widths={[480, 838, 1280, 1600, 1920]}
+        widths={[480, 838, 1280, 1600, 1920, 2560]}
         sizes="(min-width: 64rem) 46vw, 100vw"
-        quality={85}
+        quality={90}
         loading="eager"
         fetchpriority="high"
       />
@@ -102,10 +102,10 @@ const loge = [photos.rff25Loge1, photos.rff25Loge2, photos.rff25Loge4, photos.rf
       </h2>
       <div class="vision-bas">
         <figure class="vision-photo" data-reveal>
-          <Image src={photos.studio.src} alt={photos.studio.alt} widths={[480, 800, 1280, 1600, 1920]} sizes="(min-width: 56rem) 52vw, 100vw" quality={85} />
+          <Image src={photos.studio.src} alt={photos.studio.alt} widths={[480, 800, 1280, 1600, 1920, 2560]} sizes="(min-width: 56rem) 52vw, 100vw" quality={90} />
         </figure>
         <div class="vision-carte" data-reveal>
-          <Image src={logoSk} alt="Logo Sunu Kaddu" width={96} height={96} class="vision-logo" />
+          <Image quality={90} src={logoSk} alt="Logo Sunu Kaddu" width={96} height={96} class="vision-logo" />
           <p>{label.vision}</p>
         </div>
       </div>
@@ -195,7 +195,7 @@ const loge = [photos.rff25Loge1, photos.rff25Loge2, photos.rff25Loge4, photos.rf
             affichesParcours.map((a) => (
               <li>
                 <a class="affiche" href={a.full} target="_blank" rel="noopener">
-                  <Image src={a.src} alt={a.alt} widths={[360, 560, 900, 1260].filter((w) => w <= a.src.width)} sizes="(min-width: 64rem) 30vw, 50vw" quality={88} />
+                  <Image src={a.src} alt={a.alt} widths={[360, 560, 900, 1260].filter((w) => w <= a.src.width)} sizes="(min-width: 64rem) 30vw, 50vw" quality={90} />
                 </a>
                 <p class="affiche-titre">{a.titre}</p>
                 <p class="affiche-meta">{a.meta}</p>
@@ -229,7 +229,7 @@ const loge = [photos.rff25Loge1, photos.rff25Loge2, photos.rff25Loge4, photos.rf
           {
             loge.map((ph) => (
               <figure class="loge-photo">
-                <Image src={ph.src} alt={ph.alt} widths={[320, 560, 1280, 1600, 1920]} sizes="(min-width: 64rem) 22vw, 60vw" />
+                <Image quality={90} src={ph.src} alt={ph.alt} widths={[320, 560, 1280, 1600, 1920, 2560]} sizes="(min-width: 64rem) 22vw, 60vw" />
               </figure>
             ))
           }
@@ -273,7 +273,7 @@ const loge = [photos.rff25Loge1, photos.rff25Loge2, photos.rff25Loge4, photos.rf
         {
           studioPhotos.map((ph) => (
             <li>
-              <Image src={ph.src} alt={ph.alt} widths={[400, 640, 960]} sizes="(min-width: 56rem) 30vw, 100vw" quality={85} />
+              <Image src={ph.src} alt={ph.alt} widths={[400, 640, 960]} sizes="(min-width: 56rem) 30vw, 100vw" quality={90} />
             </li>
           ))
         }

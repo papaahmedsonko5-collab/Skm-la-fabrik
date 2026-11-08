@@ -65,9 +65,9 @@ const affiches2026 = await Promise.all(
     { src: afficheSamedi, alt: 'Affiche du samedi 13 juin : Loge des Poètes, parade, street art et méga concert' },
     { src: afficheLoge, alt: 'Affiche du concert Loge des Poètes du samedi 13 juin, avec la liste des artistes' },
     { src: afficheDimanche, alt: 'Affiche du dimanche 14 juin : tournois, conférence sur l’érosion côtière et veillée de clôture' },
-  ].map(async (a) => ({ ...a, full: (await getImage({ src: a.src, width: a.src.width, format: 'webp', quality: 88 })).src })),
+  ].map(async (a) => ({ ...a, full: (await getImage({ src: a.src, width: a.src.width, format: 'webp', quality: 92 })).src })),
 );
-const bandeauFull = (await getImage({ src: afficheBandeau, width: afficheBandeau.width, format: 'webp', quality: 88 })).src;
+const bandeauFull = (await getImage({ src: afficheBandeau, width: afficheBandeau.width, format: 'webp', quality: 92 })).src;
 
 const gallery2025 = [
   { ...photos.rff25Aerien, large: true },
@@ -109,9 +109,9 @@ const jsonLd = eventJsonLd(
   jsonLd={jsonLd}
 >
   <section class="hero theme-nuit" aria-labelledby="titre-page">
-    <Image class="hero-bg" src={photos.rffFoule.src} alt={photos.rffFoule.alt} widths={[640, 960, 1221]} sizes="100vw" quality={88} loading="eager" fetchpriority="high" />
+    <Image class="hero-bg" src={photos.rffFoule.src} alt={photos.rffFoule.alt} widths={[640, 960, 1221]} sizes="100vw" quality={90} loading="eager" fetchpriority="high" />
     <div class="wrap hero-inner">
-      <Image class="hero-logo" src={logoRff} alt="Rio Fresco Fest, Rufisque" width={220} loading="eager" />
+      <Image quality={90} class="hero-logo" src={logoRff} alt="Rio Fresco Fest, Rufisque" width={220} loading="eager" />
       <p class="surtitre">{rff.organizer} présente · Édition 2026</p>
       <h1 id="titre-page" class="titre titre-display">{e.title}</h1>
       <p class="chapeau">{e.subtitle}.</p>
@@ -179,14 +179,14 @@ const jsonLd = eventJsonLd(
       <div class="affiches" aria-labelledby="t-affiches">
         <h3 id="t-affiches" class="titre titre-h3">Les affiches de l’édition</h3>
         <a class="affiche affiche-bandeau" href={bandeauFull} target="_blank" rel="noopener">
-          <Image src={afficheBandeau} alt="Programme complet du Rio Fresco Fest 2026, du 10 au 14 juin au Boulodrome de Rufisque" widths={[640, 1100, 1600, 2400]} sizes="(min-width: 90rem) 84rem, 100vw" quality={85} />
+          <Image src={afficheBandeau} alt="Programme complet du Rio Fresco Fest 2026, du 10 au 14 juin au Boulodrome de Rufisque" widths={[640, 1100, 1600, 2400]} sizes="(min-width: 90rem) 84rem, 100vw" quality={90} />
         </a>
         <ul class="affiches-grille">
           {
             affiches2026.map((a) => (
               <li>
                 <a class="affiche" href={a.full} target="_blank" rel="noopener">
-                  <Image src={a.src} alt={a.alt} widths={[360, 560, 900, 1200]} sizes="(min-width: 64rem) 20vw, (min-width: 40rem) 45vw, 100vw" quality={85} />
+                  <Image src={a.src} alt={a.alt} widths={[360, 560, 900, 1200]} sizes="(min-width: 64rem) 20vw, (min-width: 40rem) 45vw, 100vw" quality={90} />
                 </a>
               </li>
             ))
@@ -222,7 +222,7 @@ const jsonLd = eventJsonLd(
   <section class="edition-2025 theme-nuit section" aria-labelledby="t-2025">
     <div class="wrap">
       <div class="e25-tete" data-reveal>
-        <Image class="e25-logo" src={logoRff2025} alt="Logo du Rio Fresco Fest 2025" width={220} />
+        <Image quality={90} class="e25-logo" src={logoRff2025} alt="Logo du Rio Fresco Fest 2025" width={220} />
         <p class="surtitre">Première édition · {edition2025.dates}</p>
         <h2 id="t-2025" class="titre titre-h2">2025, sur la digue</h2>
         <p class="chapeau doux">{edition2025.concept}</p>
@@ -230,7 +230,7 @@ const jsonLd = eventJsonLd(
       </div>
       <div class="e25-grid">
         <figure class="e25-affiche" data-reveal>
-          <Image src={photos.rff25Affiche.src} alt={photos.rff25Affiche.alt} widths={[480, 800, 1200, 1280, 1600, 1920]} sizes="(min-width: 56rem) 38vw, 100vw" quality={85} />
+          <Image src={photos.rff25Affiche.src} alt={photos.rff25Affiche.alt} widths={[480, 800, 1200, 1280, 1600, 1920, 2560]} sizes="(min-width: 56rem) 38vw, 100vw" quality={90} />
           <figcaption>Affiche officielle de l’édition 2025</figcaption>
         </figure>
         <div class="e25-programme">
@@ -275,7 +275,7 @@ const jsonLd = eventJsonLd(
           {
             loge2025.map((ph) => (
               <figure class="loge">
-                <Image src={ph.src} alt={ph.alt} widths={[300, 560, 1280, 1600, 1920]} sizes="(min-width: 64rem) 22vw, 60vw" />
+                <Image quality={90} src={ph.src} alt={ph.alt} widths={[300, 560, 1280, 1600, 1920, 2560]} sizes="(min-width: 64rem) 22vw, 60vw" />
               </figure>
             ))
           }
