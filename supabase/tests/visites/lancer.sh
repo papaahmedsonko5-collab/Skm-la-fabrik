@@ -76,11 +76,32 @@ remplir $E1; ms=$(course $E1 $E2)
 check "visiteur B servi sans attendre le verrou de A (< 1 s)" "$ms" '^[0-9]{1,3}$'
 check "visiteur B compté" "$(vues $E2)" '^1$'
 
-echo "== G4 effacement des 13 mois retiré de la fonction"
-own "insert into public.visites (jour, chemin, provenance, appareil, visiteur)
-     values ((now() at time zone 'Africa/Dakar')::date - interval '14 months', '/vieux', '', 'mobile', repeat('c', 64))" >/dev/null
+echo "== G4 nettoyage de secours : une fois par jour, par l'appel qui crée le sel"
+vieux() { own "insert into public.visites (jour, chemin, provenance, appareil, visiteur)
+               values ((now() at time zone 'Africa/Dakar')::date - interval '$1', '/vieux-$2', '', 'mobile', repeat('c', 64))" >/dev/null; }
+nb() { own "select count(*) from public.visites where chemin = '/vieux-$1'"; }
+# Le sel du jour existe déjà : aucun effacement pendant la journée.
+vieux '14 months' a
 anon "$(appel $E2)" >/dev/null
-check "la vieille visite reste (l'entretien quotidien s'en charge)" "$(own "select count(*) from public.visites where chemin = '/vieux'")" '^1$'
+check "sel déjà créé : la vieille visite reste (pas d'effacement à chaque visite)" "$(nb a)" '^1$'
+# Nouveau jour simulé : le sel est retiré, le prochain appel le recrée et nettoie.
+vieux '13 months' limite
+vieux '13 months 1 day' b
+own "delete from public.visites_sels" >/dev/null
+anon "$(appel $E2)" >/dev/null
+check "premier appel du jour : visites de plus de 13 mois effacées" "$(nb a)$(nb b)" '^00$'
+check "limite exacte : une visite d'il y a 13 mois jour pour jour est gardée" "$(nb limite)" '^1$'
+check "les visites récentes ne sont pas touchées" "$(own "select count(*) > 0 from public.visites where chemin = '/x'")" '^t$'
+# Deux premiers appels simultanés : un seul crée le sel, un seul nettoie, aucun ne échoue.
+vieux '20 months' c
+own "delete from public.visites_sels" >/dev/null
+r1=$T/r1; r2=$T/r2
+$P -d $DB -Atc "set role anon" -c "begin" -c "$(appel $E1)" -c "select pg_sleep(1)" -c "commit" >$r1 2>&1 & sleep 0.3
+anon "$(appel $E2)" >$r2 2>&1; wait
+check "deux premiers appels simultanés : aucune erreur" "$(cat $r1 $r2)" '^$'
+check "deux premiers appels simultanés : un seul sel" "$(own "select count(*) from public.visites_sels")" '^1$'
+check "deux premiers appels simultanés : vieille visite effacée" "$(nb c)" '^0$'
+own "delete from public.visites where chemin like '/vieux-%'" >/dev/null
 
 echo "== G5 contrôles et droits inchangés"
 check "empreinte invalide refusée" "$(anon "select public.enregistrer_visite('/x', '', 'mobile', 'zz');")" 'empreinte invalide'
@@ -91,10 +112,10 @@ check "security definer et search_path vide" "$(own "select prosecdef || ' ' || 
 
 echo "== G6 migration inverse puis réapplication"
 appliquer "$INVERSE"
-check "inverse : fonction d'origine (13 mois, sans verrou)" "$(own "select (prosrc like '%13 months%') || ' ' || (prosrc like '%advisory%') from pg_proc where proname = 'enregistrer_visite'")" '^true false$'
+check "inverse : fonction d'origine (13 mois à chaque visite, sans verrou)" "$(own "select (prosrc like '%13 months%') || ' ' || (prosrc like '%advisory%') from pg_proc where proname = 'enregistrer_visite'")" '^true false$'
 check "inverse : droits conservés" "$(own "select has_function_privilege('anon', 'public.enregistrer_visite(text,text,text,text)', 'execute')")" '^t$'
 appliquer "$MIGRATION"
-check "réapplication : verrou présent, 13 mois absent" "$(own "select (prosrc like '%13 months%') || ' ' || (prosrc like '%pg_advisory_xact_lock%') from pg_proc where proname = 'enregistrer_visite'")" '^false true$'
+check "réapplication : verrou et nettoyage conditionné au sel du jour" "$(own "select (prosrc like '%v_sel_cree = 1%') || ' ' || (prosrc like '%pg_advisory_xact_lock%') from pg_proc where proname = 'enregistrer_visite'")" '^true true$'
 remplir $E1; course $E1 $E1 >/dev/null
 check "réapplication : limite exacte" "$(vues $E1)" '^300$'
 

@@ -138,9 +138,13 @@ describe('migration : limite de visites sans course (étape G)', () => {
     expect(sql).not.toMatch(/pg_advisory_lock\(/);
   });
 
-  it('ne fait plus l’effacement des 13 mois (laissé à entretien_quotidien)', () => {
-    expect(sql).not.toMatch(/delete from public\.visites\s+where/);
-    expect(sql).not.toContain('13 months');
+  it('efface les visites de plus de 13 mois une seule fois par jour (création du sel), avec la limite de l’entretien', () => {
+    expect(sql).toContain('get diagnostics v_sel_cree = row_count;');
+    expect(sql).toMatch(/if v_sel_cree = 1 then\s+delete from public\.visites where jour < v_jour - interval '13 months';\s+end if;/);
+    expect(sql.match(/delete from public\.visites\s+where/g)).toHaveLength(1);
+    const entretien = sans(readFileSync(join(DIR, '20261103060000_entretien.sql'), 'utf8'));
+    expect(entretien).toContain("delete from public.visites where jour < (now() at time zone 'africa/dakar')::date - interval '13 months';");
+    expect(sql).toContain("v_jour date := (now() at time zone 'africa/dakar')::date;");
   });
 
   it('garde le sel du jour et la limite de 300', () => {

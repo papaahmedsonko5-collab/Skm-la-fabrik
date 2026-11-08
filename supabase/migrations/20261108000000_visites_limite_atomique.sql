@@ -4,8 +4,12 @@
 -- transactionnel propre au visiteur (pg_advisory_xact_lock) fait passer ces
 -- appels l'un après l'autre ; il se libère seul à la fin de l'appel et ne
 -- bloque jamais les autres visiteurs.
--- L'effacement des visites de plus de 13 mois est retiré d'ici : la tâche
--- quotidienne entretien_quotidien() le fait déjà.
+-- Effacement des visites de plus de 13 mois : il n'est plus fait à chaque visite,
+-- mais une seule fois par jour, par l'appel qui crée le sel du jour (un seul appel
+-- peut le créer, grâce à la clé primaire de visites_sels). C'est un nettoyage de
+-- secours : il garantit la durée annoncée même si la tâche planifiée Vercel
+-- (entretien_quotidien) ne passe pas. Même limite exacte que l'entretien,
+-- donc rien de plus ne peut être effacé.
 -- Inchangés : signature, sel du jour, contrôles, droits (create or replace
 -- conserve les droits existants : anon et authenticated).
 
@@ -21,6 +25,7 @@ declare
   v_jour date := (now() at time zone 'Africa/Dakar')::date;
   v_sel text;
   v_visiteur text;
+  v_sel_cree integer;
 begin
   if p_empreinte is null or p_empreinte !~ '^[0-9a-f]{64}$' then
     raise exception 'empreinte invalide' using errcode = '22023';
@@ -30,6 +35,11 @@ begin
   insert into public.visites_sels (jour, sel)
   values (v_jour, replace(gen_random_uuid()::text || gen_random_uuid()::text, '-', ''))
   on conflict (jour) do nothing;
+  get diagnostics v_sel_cree = row_count;
+  -- Premier appel du jour : nettoyage de secours, une fois par jour.
+  if v_sel_cree = 1 then
+    delete from public.visites where jour < v_jour - interval '13 months';
+  end if;
   select sel into v_sel from public.visites_sels where jour = v_jour;
 
   v_visiteur := encode(sha256(convert_to(v_sel || p_empreinte, 'UTF8')), 'hex');
