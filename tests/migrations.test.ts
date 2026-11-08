@@ -117,3 +117,47 @@ describe('migration : réservation des publications (étape E)', () => {
     expect(simu).toBe(depot);
   });
 });
+
+describe('migration : limite de visites sans course (étape G)', () => {
+  const sans = (s: string) => s.replace(/--[^\n]*/g, '').toLowerCase();
+  const sql = sans(readFileSync(join(DIR, '20261108000000_visites_limite_atomique.sql'), 'utf8'));
+  const origine = sans(readFileSync(join(DIR, '20261103040000_visites.sql'), 'utf8'));
+  const inverse = sans(readFileSync('supabase/rollback/20261108000000_visites_limite_atomique.down.sql', 'utf8'));
+  const fonction = (s: string) => s.match(/create or replace function public\.enregistrer_visite\([\s\S]*?\$\$;/)?.[0] ?? '';
+
+  it('garde la signature, security definer et un search_path vide', () => {
+    expect(sql).toMatch(/public\.enregistrer_visite\(\s*p_chemin text, p_provenance text, p_appareil text, p_empreinte text\s*\)\s*returns void/);
+    expect(sql).toContain('security definer');
+    expect(sql).toContain("set search_path = ''");
+  });
+
+  it('prend le verrou du visiteur avant de compter ses vues', () => {
+    const verrou = sql.indexOf('perform pg_advisory_xact_lock(7301, hashtext(v_visiteur));');
+    expect(verrou).toBeGreaterThan(sql.indexOf('v_visiteur := encode('));
+    expect(verrou).toBeLessThan(sql.indexOf('select count(*) from public.visites'));
+    expect(sql).not.toMatch(/pg_advisory_lock\(/);
+  });
+
+  it('ne fait plus l’effacement des 13 mois (laissé à entretien_quotidien)', () => {
+    expect(sql).not.toMatch(/delete from public\.visites\s+where/);
+    expect(sql).not.toContain('13 months');
+  });
+
+  it('garde le sel du jour et la limite de 300', () => {
+    expect(sql).toContain('delete from public.visites_sels where jour < v_jour;');
+    expect(sql).toContain('on conflict (jour) do nothing;');
+    expect(sql).toContain('>= 300 then');
+  });
+
+  it('ne touche pas aux droits (anon et authenticated conservés par create or replace)', () => {
+    expect(sql).not.toMatch(/\b(grant|revoke)\b/);
+    expect(instructions('enregistrer_visite').filter((s) => s.startsWith('grant'))).toEqual([
+      'grant execute on function public.enregistrer_visite(text, text, text, text) to anon, authenticated',
+    ]);
+  });
+
+  it('l’inverse remet exactement la fonction d’origine', () => {
+    expect(fonction(inverse)).not.toBe('');
+    expect(fonction(inverse)).toBe(fonction(origine));
+  });
+});
