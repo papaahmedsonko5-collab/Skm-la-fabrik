@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import { PUBLIC_SUPABASE_PUBLISHABLE_KEY, PUBLIC_SUPABASE_URL } from 'astro:env/server';
 import { createClient } from '@supabase/supabase-js';
+import { lireCorps, memeOrigine, texteDepuis } from '@/lib/corps';
 import { clientKey, createRateLimiter } from '@/lib/rate-limit';
 import { appareilDe, cheminValide, empreinte, estRobot, provenanceDe } from '@/lib/visites';
 
@@ -8,6 +9,7 @@ export const prerender = false;
 
 /** 120 pages vues par adresse IP et par tranche de 10 minutes, au-delà on ignore. */
 const limiter = createRateLimiter(120, 10 * 60 * 1000);
+const MAX_BODY = 2000;
 
 const rien = () => new Response(null, { status: 204, headers: { 'cache-control': 'no-store' } });
 
@@ -18,8 +20,7 @@ const rien = () => new Response(null, { status: 204, headers: { 'cache-control':
 export const POST: APIRoute = async ({ request }) => {
   const hote = new URL(request.url).host;
   const origin = request.headers.get('origin');
-  if (!origin || new URL(origin).host !== hote) return rien();
-  if (Number(request.headers.get('content-length') ?? 0) > 2000) return rien();
+  if (!origin || !memeOrigine(origin, hote)) return rien();
   if (!PUBLIC_SUPABASE_URL || !PUBLIC_SUPABASE_PUBLISHABLE_KEY) return rien();
 
   const userAgent = request.headers.get('user-agent') ?? '';
@@ -28,9 +29,15 @@ export const POST: APIRoute = async ({ request }) => {
   const ip = clientKey(request.headers);
   if (!limiter.hit(ip).allowed) return rien();
 
+  // Lecture bornée à MAX_BODY octets, quel que soit l'en-tête Content-Length.
+  const lu = await lireCorps(request, MAX_BODY);
+  const texte = lu.ok ? texteDepuis(lu.octets) : null;
+  if (texte === null) return rien();
   let corps: { chemin?: unknown; provenance?: unknown };
   try {
-    corps = JSON.parse(await request.text());
+    const brut: unknown = JSON.parse(texte);
+    if (!brut || typeof brut !== 'object' || Array.isArray(brut)) return rien();
+    corps = brut as { chemin?: unknown; provenance?: unknown };
   } catch {
     return rien();
   }

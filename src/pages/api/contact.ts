@@ -3,6 +3,7 @@ import { CONTACT_FROM_EMAIL, CONTACT_TO_EMAIL, PUBLIC_SUPABASE_PUBLISHABLE_KEY, 
 import { createClient } from '@supabase/supabase-js';
 import { site } from '@/data/site';
 import { buildEmail, validateContact, type ContactInput } from '@/lib/contact';
+import { formulaireDepuis, lireCorps, memeOrigine } from '@/lib/corps';
 import { clientKey, createRateLimiter } from '@/lib/rate-limit';
 
 export const prerender = false;
@@ -40,12 +41,14 @@ export const POST: APIRoute = async ({ request }) => {
   const wantsJson = (request.headers.get('accept') ?? '').includes('application/json');
 
   const origin = request.headers.get('origin');
-  if (origin && new URL(origin).host !== new URL(request.url).host) {
+  if (origin && !memeOrigine(origin, new URL(request.url).host)) {
     return json(403, { ok: false, message: 'Origine non autorisée.' });
   }
 
-  const length = Number(request.headers.get('content-length') ?? 0);
-  if (length > MAX_BODY) {
+  // Lecture bornée : le corps n'est jamais chargé au-delà de MAX_BODY octets,
+  // que Content-Length soit présent, absent ou faux.
+  const corps = await lireCorps(request, MAX_BODY);
+  if (!corps.ok && corps.raison === 'trop_gros') {
     return wantsJson ? json(413, { ok: false, message: 'Votre message est trop volumineux.' }) : redirect(request, 'erreur');
   }
 
@@ -56,10 +59,8 @@ export const POST: APIRoute = async ({ request }) => {
       : redirect(request, 'limite');
   }
 
-  let form: FormData;
-  try {
-    form = await request.formData();
-  } catch {
+  const form = corps.ok ? await formulaireDepuis(corps.octets, request.headers.get('content-type')) : null;
+  if (!form) {
     return wantsJson ? json(400, { ok: false, message: 'Le formulaire n’a pas pu être lu.' }) : redirect(request, 'erreur');
   }
 

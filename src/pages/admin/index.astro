@@ -2,6 +2,8 @@
 import AdminLayout from '@/layouts/AdminLayout.astro';
 import { photosEnAttente } from '@/lib/admin/photos-a-ajouter';
 import { flashFrom, formatDateHeure, objetLabel, statutLabels, type Demande } from '@/lib/admin/data';
+import { etatPublication, type LignePublication } from '@/lib/admin/publication';
+import { lectureBuild } from '@/lib/admin/lecture-build';
 
 export const prerender = false;
 
@@ -14,7 +16,7 @@ const [demandesRes, nouvellesRes, actusRes, projetsRes, photosRes, recentRes, pu
   supabase.from('projets').select('id, slug, draft, cover_path, gallery, updated_at'),
   supabase.from('photos').select('id', { count: 'exact', head: true }),
   supabase.from('demandes').select('id, created_at, nom, objet, statut').order('created_at', { ascending: false }).limit(6),
-  supabase.from('publications').select('created_at, user_email, ok').order('created_at', { ascending: false }).limit(1),
+  supabase.from('publications').select('created_at, ok, statut, actif, bloque_jusqua').order('id', { ascending: false }).limit(5),
   supabase
     .from('demandes')
     .select('created_at, objet')
@@ -26,7 +28,11 @@ const nouvelles = nouvellesRes.count ?? 0;
 const actus = actusRes.data ?? [];
 const projets = projetsRes.data ?? [];
 const recentes = (recentRes.data ?? []) as Pick<Demande, 'id' | 'created_at' | 'nom' | 'objet' | 'statut'>[];
-const derniere = pubRes.data?.[0];
+// État de la dernière publication ; une lecture refusée n'affiche rien plutôt qu'un état faux.
+const etatPub = pubRes.error ? null : etatPublication((pubRes.data ?? []) as LignePublication[], lectureBuild, new Date());
+if (pubRes.error) console.error('[admin] Lecture des publications refusée', pubRes.error.code);
+// Clé d'idempotence : une par affichage du tableau de bord (voir api/admin/publier).
+const clePublication = crypto.randomUUID();
 // Fiches importées dont les photos n'ont pas été copiées (elles restent en brouillon).
 const sansPhotos =
   actus.filter((a) => !a.cover_path).length +
@@ -61,6 +67,7 @@ const flash = flashFrom(Astro.url);
 
 <AdminLayout title="Tableau de bord" flash={flash}>
   <form slot="actions" method="post" action="/api/admin/publier">
+    <input type="hidden" name="cle" value={clePublication} />
     <button class="bouton or" type="submit" data-confirm="Mettre le site en ligne avec les dernières modifications ?">Publier le site</button>
   </form>
 
@@ -96,8 +103,9 @@ const flash = flashFrom(Astro.url);
       </a>
       <div class="tuile or">
         <span class="tuile-lib">Dernière publication</span>
-        <span class="tuile-date">{derniere ? formatDateHeure(derniere.created_at as string) : 'Aucune depuis l’admin'}</span>
-        {derniere && !derniere.ok && <span class="aide">La dernière tentative a échoué.</span>}
+        <span class="tuile-date">{etatPub ? formatDateHeure(etatPub.date) : 'Aucune depuis l’admin'}</span>
+        {etatPub?.aide && <span class="aide">{etatPub.aide}</span>}
+        {etatPub?.constat && <span class="aide">{etatPub.constat}</span>}
       </div>
     </div>
   </section>

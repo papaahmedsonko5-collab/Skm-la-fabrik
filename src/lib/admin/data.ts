@@ -2,7 +2,10 @@
  * Types et petites aides partagés par les pages de l'admin.
  * Toutes les requêtes passent par le client lié à la session (RLS).
  */
+import { formatHeure } from './publication';
 import { contactObjects, type ContactObject } from '@/lib/contact';
+import { lireImage, MESSAGE_REFUS } from '@/lib/images';
+import { televerser, type ClientStockage } from './medias';
 
 export const statuts = ['nouvelle', 'en_cours', 'traitee', 'archivee'] as const;
 export type Statut = (typeof statuts)[number];
@@ -172,23 +175,26 @@ export function listField(form: FormData, name: string): string[] {
     .filter(Boolean);
 }
 
-const IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/avif']);
-const MAX_IMAGE = 15 * 1024 * 1024;
-
-/** Envoie une photo dans le stockage « medias » et renvoie son chemin. */
+/**
+ * Envoie une photo dans le stockage « medias » et renvoie son chemin.
+ * Le contenu réel est vérifié (signature binaire, fichier complet, 15 Mo au
+ * maximum) : le type annoncé par le navigateur n'est pas pris en compte.
+ */
 export async function uploadImage(
   supabase: import('./supabase').AdminClient,
   file: FormDataEntryValue | null,
   folder: 'actualites' | 'projets' | 'galerie',
 ): Promise<{ path: string } | { error: string } | null> {
   if (!(file instanceof File) || file.size === 0) return null;
-  if (!IMAGE_TYPES.has(file.type)) return { error: 'Format de photo non accepté (JPEG, PNG, WebP ou AVIF).' };
-  if (file.size > MAX_IMAGE) return { error: 'Photo trop lourde (15 Mo au maximum).' };
-  const ext = file.type === 'image/png' ? 'png' : file.type === 'image/webp' ? 'webp' : file.type === 'image/avif' ? 'avif' : 'jpg';
+  const image = await lireImage(file);
+  if (!image.ok) return { error: MESSAGE_REFUS[image.raison] };
   const base = slugify(file.name.replace(/\.\w+$/, '')) || 'photo';
-  const path = `${folder}/${Date.now().toString(36)}-${base}.${ext}`;
-  const { error } = await supabase.storage.from('medias').upload(path, file, { contentType: file.type, upsert: false, cacheControl: '31536000' });
-  if (error) return { error: 'L’envoi de la photo a échoué.' };
+  const path = `${folder}/${Date.now().toString(36)}-${base}.${image.ext}`;
+  const envoi = await televerser(supabase as unknown as ClientStockage, path, image, false);
+  if (!envoi.ok) {
+    console.error('[admin] Envoi de photo refusé par le stockage', envoi.detail);
+    return { error: 'L’envoi de la photo a échoué.' };
+  }
   return { path };
 }
 
@@ -212,7 +218,58 @@ export function flashFrom(url: URL): { type: 'ok' | 'erreur'; text: string } | n
     hook: 'Le bouton Publier n’est pas encore configuré (DEPLOY_HOOK_URL manquant dans Vercel).',
     introuvable: 'Élément introuvable.',
     photos: 'Certaines photos n’ont pas pu être copiées. Les fiches concernées restent en brouillon : relancez « Récupérer les photos ».',
+    import_lecture: 'L’import n’a pas démarré : le contenu actuel de l’admin n’a pas pu être lu. Rien n’a été modifié. Réessayez dans un instant.',
   };
+  if (err === 'import_partiel') {
+    const n = (cle: string) => (/^\d{1,4}$/.test(url.searchParams.get(cle) ?? '') ? Number(url.searchParams.get(cle)) : 0);
+    const liste = (url.searchParams.get('liste') ?? '').replace(/[^a-z0-9/._,-]/gi, '').split(',').filter(Boolean).slice(0, 10);
+    return {
+      type: 'erreur',
+      text:
+        `Import incomplet : ${n('reussis')} élément(s) importé(s), ${n('echecs')} en échec.` +
+        (liste.length ? ` En échec : ${liste.join(', ')}.` : '') +
+        ' Les fiches concernées restent en brouillon ou sans photo : relancez l’import.',
+    };
+  }
+  const pub = messagePublication(err, url);
+  if (pub) return { type: 'erreur', text: pub };
   if (err) return { type: 'erreur', text: erreurs[err] ?? 'Une erreur est survenue.' };
   return null;
+}
+
+const LIBELLES_ISSUE: Record<string, string> = {
+  reservee: 'en cours',
+  lancee: 'lancée',
+  echec: 'échouée, rien n’a été lancé',
+  incertaine: 'sans confirmation de Vercel',
+  expiree: 'expirée',
+};
+
+/** Messages du bouton Publier. Paramètres de l'adresse contrôlés : heure ISO, statut connu, code HTTP à 3 chiffres. */
+function messagePublication(err: string | null, url: URL): string | null {
+  const jusqua = url.searchParams.get('jusqua') ?? '';
+  const heure = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,6})?Z$/.test(jusqua) && !Number.isNaN(Date.parse(jusqua)) ? formatHeure(jusqua) : null;
+  const statut = LIBELLES_ISSUE[url.searchParams.get('statut') ?? ''] ?? null;
+  const http = /^[1-5]\d{2}$/.test(url.searchParams.get('http') ?? '') ? url.searchParams.get('http') : null;
+  const dispo = heure ? ` Le bouton sera de nouveau disponible à ${heure}.` : '';
+  switch (err) {
+    case 'publication_occupee':
+      return `Une publication est déjà en cours ou attend encore une réponse de Vercel : rien n’a été relancé.${dispo}`;
+    case 'publication_trop_tot':
+      return `Une publication vient d’être lancée. Attendez une minute avant d’en lancer une autre.${dispo}`;
+    case 'publication_incertaine':
+      return `Vercel n’a pas confirmé la demande${http ? ` (réponse HTTP ${http})` : ''}. La publication a peut-être été lancée : vérifiez le site dans quelques minutes avant de republier.${dispo}`;
+    case 'publication_echec':
+      return 'Vercel n’a pas pu être joint : rien n’a été lancé. Vous pouvez réessayer.';
+    case 'publication_deja':
+      return `Cette demande a déjà été traitée${statut ? ` (${statut})` : ''}. Rechargez la page avant de publier à nouveau.`;
+    case 'publication_cle':
+      return 'Ce formulaire a déjà servi. Rechargez la page avant de publier.';
+    case 'publication_indisponible':
+      return 'La publication n’a pas pu démarrer (base de données indisponible ou réponse inattendue). Rien n’a été lancé. Réessayez plus tard.';
+    case 'publication_non_enregistree':
+      return `Le résultat de la publication${statut ? ` (${statut})` : ''}${http ? `, réponse HTTP ${http},` : ''} n’a pas pu être enregistré.${heure ? ` Le bouton reste bloqué jusqu’à ${heure}.` : ''}`;
+    default:
+      return null;
+  }
 }
