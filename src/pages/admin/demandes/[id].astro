@@ -48,7 +48,7 @@ const phoneDigits = d.telephone.replace(/\D/g, '');
       </div>
       <p class="message">{d.message}</p>
       <div class="actions-bas">
-        <a class="bouton or" href={`mailto:${d.email}?subject=${sujet}`}>Répondre par e-mail</a>
+        <a class="bouton or" href={`mailto:${encodeURIComponent(d.email)}?subject=${sujet}`}>Répondre par e-mail</a>
         {
           phoneDigits.length >= 8 && (
             <a class="bouton contour" href={whatsappLink(phoneDigits.startsWith('221') ? phoneDigits : `221${phoneDigits}`, `Bonjour ${d.nom}, c’est SKM La Fabrik.`)} target="_blank" rel="noopener">
@@ -64,7 +64,7 @@ const phoneDigits = d.telephone.replace(/\D/g, '');
       <dl class="infos">
         <div><dt>Nom</dt><dd>{d.nom}</dd></div>
         {d.organisation && <div><dt>Structure</dt><dd>{d.organisation}</dd></div>}
-        <div><dt>E-mail</dt><dd><a class="lien" href={`mailto:${d.email}`}>{d.email}</a></dd></div>
+        <div><dt>E-mail</dt><dd><a class="lien" href={`mailto:${encodeURIComponent(d.email)}`}>{d.email}</a></dd></div>
         {d.telephone && <div><dt>Téléphone</dt><dd><a class="lien" href={`tel:${d.telephone.replace(/\s/g, '')}`}>{d.telephone}</a></dd></div>}
         <div><dt>Type</dt><dd>{objetLabel(d.objet)}{d.detail && ` · ${d.detail}`}</dd></div>
       </dl>

@@ -88,6 +88,9 @@ const PHONE_RE = /^[+()\d\s.-]{6,30}$/;
 const text = (v: FormDataEntryValue | null): string =>
   typeof v === 'string' ? v.split(String.fromCharCode(0)).join('').replace(/\r\n?/g, '\n').trim() : '';
 
+/** Champ d'une seule ligne : les retours à la ligne deviennent des espaces (objet du mail, en-têtes). */
+const line = (v: FormDataEntryValue | null): string => text(v).replace(/\s*\n\s*/g, ' ');
+
 /**
  * Valide les champs du formulaire. Le champ piège `site_web` doit rester vide
  * (les robots le remplissent) ; `startedAt` écarte les envois en moins de 3 s.
@@ -111,11 +114,11 @@ export function validateContact(form: FormData, now: number = Date.now()): Valid
   const detail = text(form.get('detail'));
   if (!allowed.includes(detail)) errors.detail = 'Choisissez une option dans la liste.';
 
-  const name = text(form.get('name'));
+  const name = line(form.get('name'));
   if (name.length < 2) errors.name = 'Indiquez votre nom.';
   else if (name.length > LIMITS.name) errors.name = 'Ce nom est trop long.';
 
-  const organization = text(form.get('organization'));
+  const organization = line(form.get('organization'));
   if (organization.length > LIMITS.organization) errors.organization = 'Ce nom de structure est trop long.';
 
   const email = text(form.get('email')).toLowerCase();
@@ -128,7 +131,7 @@ export function validateContact(form: FormData, now: number = Date.now()): Valid
   // les publications est facultatif. Ils sont ajoutés en tête du message.
   let entete = '';
   if (objet === 'accreditation') {
-    const evenement = text(form.get('evenement'));
+    const evenement = line(form.get('evenement'));
     if (evenement.length < 2) errors.evenement = 'Indiquez l’événement concerné.';
     else if (evenement.length > LIMITS.evenement) errors.evenement = 'Ce nom d’événement est trop long.';
     if (organization.length < 2 && !errors.organization) errors.organization = 'Indiquez votre média ou votre structure.';

@@ -128,9 +128,13 @@ const fmt = (n: number) => n.toLocaleString('fr-FR');
               {stats.pages.map((p) => (
                 <tr>
                   <td>
-                    <a href={p.chemin} target="_blank" rel="noopener">
-                      {libellePage(p.chemin)}
-                    </a>
+                    {/^\/(?!\/)[^\s<>"'\\]*$/.test(p.chemin) ? (
+                      <a href={p.chemin} target="_blank" rel="noopener">
+                        {libellePage(p.chemin)}
+                      </a>
+                    ) : (
+                      <span>{libellePage(p.chemin)}</span>
+                    )}
                   </td>
                   <td>{fmt(p.vues)}</td>
                   <td>{fmt(p.visiteurs)}</td>

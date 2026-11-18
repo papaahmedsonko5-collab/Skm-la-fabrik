@@ -1,6 +1,8 @@
 ---
 import AdminLayout from '@/layouts/AdminLayout.astro';
 import AuthCard from '@/components/admin/AuthCard.astro';
+import { clientKey } from '@/lib/rate-limit';
+import { essaisMotDePasse, messageAttente } from '@/lib/admin/limites';
 
 export const prerender = false;
 
@@ -10,13 +12,18 @@ if (Astro.url.searchParams.get('statut') === 'mot-de-passe') flash = { type: 'ok
 if (Astro.url.searchParams.get('statut') === 'deconnecte') flash = { type: 'ok', text: 'Vous êtes déconnecté.' };
 
 if (Astro.request.method === 'POST' && Astro.locals.supabase) {
-  const form = await Astro.request.formData();
-  const email = String(form.get('email') ?? '').trim();
-  const password = String(form.get('password') ?? '');
-  const { error } = await Astro.locals.supabase.auth.signInWithPassword({ email, password });
-  // Étape 2 : code de l'application d'authentification (ou sa mise en place).
-  if (!error) return Astro.redirect('/admin/verification', 303);
-  flash = { type: 'erreur', text: 'E-mail ou mot de passe incorrect.' };
+  const essai = essaisMotDePasse.hit(clientKey(Astro.request.headers));
+  if (!essai.allowed) {
+    flash = { type: 'erreur', text: messageAttente(essai.retryAfter) };
+  } else {
+    const form = await Astro.request.formData();
+    const email = String(form.get('email') ?? '').trim();
+    const password = String(form.get('password') ?? '');
+    const { error } = await Astro.locals.supabase.auth.signInWithPassword({ email, password });
+    // Étape 2 : code de l'application d'authentification (ou sa mise en place).
+    if (!error) return Astro.redirect('/admin/verification', 303);
+    flash = { type: 'erreur', text: 'E-mail ou mot de passe incorrect.' };
+  }
 }
 ---
 

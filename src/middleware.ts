@@ -2,6 +2,7 @@ import { defineMiddleware } from 'astro:middleware';
 import { ADMIN_ENTREE } from 'astro:env/server';
 import { supabaseConfigured, supabaseForRequest } from '@/lib/admin/supabase';
 import { memeOrigine } from '@/lib/corps';
+import { egal } from '@/lib/egal';
 
 /** Pages de connexion (étape 1 : mot de passe ; étape 2 : code de l'application). */
 const ETAPE_1 = '/admin/connexion';
@@ -17,14 +18,6 @@ const DUREE_APPAREIL = 60 * 60 * 24 * 365;
 async function empreinte(valeur: string): Promise<string> {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`skm-admin:${valeur}`));
   return Array.from(new Uint8Array(buf), (b) => b.toString(16).padStart(2, '0')).join('');
-}
-
-/** Comparaison à durée constante, pour ne rien révéler du lien secret. */
-function egal(a: string, b: string): boolean {
-  if (a.length !== b.length) return false;
-  let diff = 0;
-  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
-  return diff === 0;
 }
 
 /**

@@ -61,7 +61,7 @@ const structured = [organizationJsonLd(Astro.site), ...(jsonLd ? (Array.isArray(
     <script is:inline>
       document.documentElement.classList.add('js');
     </script>
-    <script type="application/ld+json" set:html={JSON.stringify(structured)} />
+    <script type="application/ld+json" set:html={JSON.stringify(structured).replace(/</g, '\\u003c')} />
     <script
       type="speculationrules"
       is:inline
