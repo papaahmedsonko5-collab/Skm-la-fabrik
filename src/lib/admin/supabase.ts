@@ -2,6 +2,9 @@ import { createServerClient, parseCookieHeader } from '@supabase/ssr';
 import type { AstroCookies } from 'astro';
 import { PUBLIC_SUPABASE_PUBLISHABLE_KEY, PUBLIC_SUPABASE_URL } from 'astro:env/server';
 
+/** Le navigateur oublie la session de l'admin au bout de 7 jours (au lieu de plus d'un an). */
+const SESSION_MAX = 60 * 60 * 24 * 7;
+
 export const supabaseConfigured = Boolean(PUBLIC_SUPABASE_URL && PUBLIC_SUPABASE_PUBLISHABLE_KEY);
 
 /**
@@ -19,7 +22,8 @@ export function supabaseForRequest(request: Request, cookies: AstroCookies) {
       },
       setAll(list) {
         for (const { name, value, options } of list) {
-          cookies.set(name, value, { ...options, path: '/', httpOnly: true, secure: true, sameSite: 'lax' });
+          const maxAge = options.maxAge === 0 ? 0 : Math.min(options.maxAge ?? SESSION_MAX, SESSION_MAX);
+          cookies.set(name, value, { ...options, maxAge, path: '/', httpOnly: true, secure: true, sameSite: 'lax' });
         }
       },
     },

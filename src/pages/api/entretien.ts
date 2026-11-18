@@ -5,6 +5,7 @@ import {
   SUPABASE_SERVICE_ROLE_KEY,
 } from 'astro:env/server';
 import { createClient } from '@supabase/supabase-js';
+import { egal } from '@/lib/egal';
 
 export const prerender = false;
 
@@ -24,7 +25,7 @@ export const GET: APIRoute = async ({ request }) => {
   }
 
   // Seul Vercel Cron, muni du secret, peut déclencher l'entretien.
-  if (request.headers.get('authorization') !== `Bearer ${CRON_SECRET}`) {
+  if (!egal(request.headers.get('authorization') ?? '', `Bearer ${CRON_SECRET}`)) {
     return new Response(
       JSON.stringify({ ok: false, message: 'Non autorisé.' }),
       { status: 401, headers },

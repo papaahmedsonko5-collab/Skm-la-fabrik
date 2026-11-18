@@ -1,6 +1,8 @@
 ---
 import AdminLayout from '@/layouts/AdminLayout.astro';
 import AuthCard from '@/components/admin/AuthCard.astro';
+import { clientKey } from '@/lib/rate-limit';
+import { essaisCode, messageAttente } from '@/lib/admin/limites';
 
 export const prerender = false;
 
@@ -17,7 +19,9 @@ let flash: { type: 'ok' | 'erreur'; text: string } | null = null;
 if (Astro.request.method === 'POST') {
   const form = await Astro.request.formData();
   const code = String(form.get('code') ?? '').replace(/\s+/g, '');
-  if (!/^\d{6}$/.test(code)) flash = { type: 'erreur', text: 'Le code contient 6 chiffres.' };
+  const essai = essaisCode.hit(clientKey(Astro.request.headers));
+  if (!essai.allowed) flash = { type: 'erreur', text: messageAttente(essai.retryAfter) };
+  else if (!/^\d{6}$/.test(code)) flash = { type: 'erreur', text: 'Le code contient 6 chiffres.' };
   else {
     const { error } = await supabase.auth.mfa.challengeAndVerify({ factorId: totp.id, code });
     if (!error) return Astro.redirect(Astro.cookies.has('skm_admin_reinit') ? '/admin/mot-de-passe' : '/admin', 303);

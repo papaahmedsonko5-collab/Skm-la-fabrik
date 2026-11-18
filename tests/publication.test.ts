@@ -12,7 +12,7 @@ import {
 } from '../src/lib/admin/publication';
 import { flashFrom } from '../src/lib/admin/data';
 
-const HOOK = 'https://api.vercel.com/v1/integrations/deploy/prj_SECRETPROJET/SECRETHOOK';
+const HOOK = 'https://api.vercel.com/v1/integrations/deploy/prj_TEST/HOOK_TEST';
 const CLE = '0b6f3c1e-9d2a-4c8b-a1e5-7f3d2c1b0a99';
 const JETON = '5e7a1c2b-3d4f-4a6b-8c9d-0e1f2a3b4c5d';
 const BLOQUE = '2026-11-06T16:10:00.000Z';
